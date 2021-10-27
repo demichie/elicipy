@@ -201,11 +201,6 @@ for i in np.arange(n_seed):
     print(Cal_var[:,:,i])
 
 
-#su_obj = openpyxl.load_workbook(filename) 
-
-# Read the active sheet:
-#sheet = su_obj.active
-
 if target:
 
        
@@ -689,65 +684,23 @@ for j in np.arange(n_seed):
     xt = plt.xticks()[0]  
     xmin, xmax = min(xt), max(xt)
 
+    if ( realization[j] > 999 ):
+        txt = '%5.2e' % realization[j]
+    else: 
+        txt = '%6.2f' % realization[j]
+            
     if analysis: 
 
         b = np.amin([np.amin(Cal_var[:,0,j]),q05[h],realization[j]])
         c = np.amin([np.amax(Cal_var[:,0,j]),q95[h],realization[j]])  
-    
-#        if ( q50[h] > 999 ):
-#            txt = '%5.2e' % q50[h] 
-#        else: 
-#            txt = '%6.2f' % q50[h] 
-#    
-#        axs0[j].annotate(txt, (q50[h], n_experts+1+0.15))
-#    
-#        if ( q05[h] > 999 ):
-#            txt = '%5.2e' % q05[h] 
-#        else: 
-#            txt = '%6.2f' % q05[h] 
-#    
-#        axs0[j].annotate(txt, (q05[h], n_experts+1-0.25))
-#    
-#        if ( q95[h] > 999 ):
-#            txt = '%5.2e' % q95[h] 
-#        else: 
-#            txt = '%6.2f' % q95[h] 
-#    
-#        axs0[j].annotate(txt, (q95[h], n_experts+1-0.25))
-
-#        if ( q50_EW[h] > 999 ):
-#            txt = '%5.2e' % q50_EW[h] 
-#        else: 
-#            txt = '%6.2f' % q50_EW[h] 
-#    
-#        axs0[j].annotate(txt, (q50_EW[h], n_experts+2+0.15))
-#    
-#        if ( q05_EW[h] > 999 ):
-#            txt = '%5.2e' % q05_EW[h] 
-#        else: 
-#            txt = '%6.2f' % q05_EW[h] 
-#    
-#        axs0[j].annotate(txt, (q05_EW[h], n_experts+2-0.25))
-#    
-#        if ( q95_EW[h] > 999 ):
-#            txt = '%5.2e' % q95_EW[h] 
-#        else: 
-#            txt = '%6.2f' % q95_EW[h] 
-#    
-#        axs0[j].annotate(txt, (q95_EW[h], n_experts+2-0.25))
-
-        if ( realization[j] > 999 ):
-            txt = '%5.2e' % realization[j]
-        else: 
-            txt = '%6.2f' % realization[j]
-    
         axs0[j].annotate(txt, (realization[j], n_experts+3+0.15))
         
     else:
     
         b = np.amin([np.amin(Cal_var[:,0,j]),realization[j]])
         c = np.amin([np.amax(Cal_var[:,0,j]),realization[j]])  
-
+        axs0[j].annotate(txt, (realization[j], n_experts+1+0.15))
+        
     
     ytick = []             
     for i in y:
@@ -781,9 +734,9 @@ for j in np.arange(n_seed):
         axs0[j].set_xscale('log')
     
     if analysis:    
-        axs0[j].set_ylim(0.5,n_experts+3.5)
+        axs0[j].set_ylim(0.5,n_experts+4.0)
     else:
-        axs0[j].set_ylim(0.5,n_experts+1.5)
+        axs0[j].set_ylim(0.5,n_experts+2.0)
 
 
     axs0[j].grid()
@@ -854,9 +807,6 @@ for j in np.arange(n_TQ):
     xt = plt.xticks()[0]  
     xmin, xmax = min(xt), max(xt) 
 
-    #b = np.amin([np.amin(Cal_var[:,0,j]),q05[h],realization[j]])
-    #c = np.amin([np.amax(Cal_var[:,0,j]),q95[h],realization[j]])
-
     if analysis:
 
         b = np.amin([np.amin(TQs[:,0,j]),q05[h]])
@@ -867,49 +817,7 @@ for j in np.arange(n_TQ):
         b = np.amin(TQs[:,0,j])
         c = np.amax(TQs[:,0,j])
 
-#    if analysis:
-#    
-#        if ( q50[h] > 999 ):
-#            txt = '%5.2e' % q50[h] 
-#        else: 
-#            txt = '%6.2f' % q50[h] 
-#    
-#        axs[j].annotate(txt, (q50[h], n_experts+1+0.15))
-#        
-#        if ( q05[h] > 999 ):
-#            txt = '%5.2e' % q05[h] 
-#        else: 
-#            txt = '%6.2f' % q05[h] 
-#    
-#        axs[j].annotate(txt, (q05[h], n_experts+1-0.25))
-#    
-#        if ( q95[h] > 999 ):
-#            txt = '%5.2e' % q95[h] 
-#        else: 
-#            txt = '%6.2f' % q95[h] 
-#    
-#        axs[j].annotate(txt, (q95[h], n_experts+1-0.25))
 
-#        if ( q50_EW[h] > 999 ):
-#            txt = '%5.2e' % q50_EW[h] 
-#        else: 
-#            txt = '%6.2f' % q50_EW[h] 
-#    
-#        axs[j].annotate(txt, (q50_EW[h], n_experts+2+0.15))
-#        
-#        if ( q05_EW[h] > 999 ):
-#            txt = '%5.2e' % q05_EW[h] 
-#        else: 
-#            txt = '%6.2f' % q05_EW[h] 
-#    
-#        axs[j].annotate(txt, (q05_EW[h], n_experts+2-0.25))
-#    
-#        if ( q95_EW[h] > 999 ):
-#            txt = '%5.2e' % q95_EW[h] 
-#        else: 
-#            txt = '%6.2f' % q95_EW[h] 
-#    
-#        axs[j].annotate(txt, (q95_EW[h], n_experts+2-0.25))
              
     ytick = []             
     for i in y:
@@ -972,6 +880,7 @@ for j in np.arange(n_TQ):
 
 
 prs.save("elicitation_old.pptx") # saving file
+
 
 """
 
