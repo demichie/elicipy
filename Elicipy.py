@@ -31,7 +31,7 @@ import copy
 
 import datetime
 
-analysis = False
+analysis = True
 target = True
 log = 0
 
@@ -457,7 +457,7 @@ if analysis:
 
     print("")
     print('W')
-    print(W)
+    print(W[:,-1])
     print("")
     print('Weq')
     print(Weqok)
