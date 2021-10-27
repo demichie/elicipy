@@ -532,54 +532,45 @@ for j in np.arange(n_seed+n_TQ):
             wg = np.ones_like(C_stack.T) / n_sample
         
             axs_h[j].hist(C_stack.T,weights=wg,rwidth=0.5, color = ['orange','springgreen'])
-        
-        
-            #axs_h[j].hist(C,rwidth=0.9,weights=np.ones(len(C)) / len(C), color = 'orange')
-            #axs_h[j].hist(C_EW,rwidth=0.9,weights=np.ones(len(C_EW)) / len(C_EW), color = 'springgreen') 
+                
             axs_h[j].set_xlabel(tg_unitok[j-n_seed])
             plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
         
         
             xt = plt.xticks()[0]
-            xmin, xmax = min(xt), max(xt)  
-            lnspc = np.linspace(xmin, xmax,1000)
-        
+            
             axs_h2[j] = axs_h[j].twinx()
-        
+                    
             gkde = stats.gaussian_kde(C)
-            kdepdf = gkde.evaluate(lnspc)
             gkde_EW = stats.gaussian_kde(C_EW)
-            kdepdf_EW = gkde_EW.evaluate(lnspc)
+           
             if sc_all[j] == "uni%":
-               gkde_norm = gkde.integrate_box_1d(0, 100)
-               kdepdf_norm = kdepdf/gkde_norm
-               gkde_EW_norm = gkde_EW.integrate_box_1d(0, 100)
-               kdepdf_EW_norm = kdepdf_EW/gkde_EW_norm
-               axs_h2[j].plot(lnspc, kdepdf_norm, 'r--')
-               axs_h2[j].plot(lnspc, kdepdf_EW_norm, 'g--')
+            
+                xmin = 0.0
+                xmax = 100.0
+                              
             elif sc_all[j] == "uni":
-               #maximum = 2*np.amax(C_stack)
-               gkde_norm = gkde.integrate_box_1d(0, np.inf)
-               kdepdf_norm = kdepdf/gkde_norm
-               gkde_EW_norm = gkde_EW.integrate_box_1d(0, np.inf)
-               kdepdf_EW_norm = kdepdf_EW/gkde_EW_norm
-               #axs_h2[j].set_xlim(0,maximum)
-               axs_h2[j].plot(lnspc, kdepdf_norm, 'r--')
-               axs_h2[j].plot(lnspc, kdepdf_EW_norm, 'g--')
-            else:
-               axs_h2[j].plot(lnspc, kdepdf, 'r--')
-               axs_h2[j].plot(lnspc, kdepdf_EW, 'g--')
+            
+                xmin = 0.0
+                xmax = np.amax(C_stack)
+                              
+            else: 
 
-            if sc_all[j] == "uni%":
-                axs_h[j].set_xlim(0,100)
-                axs_h2[j].set_xlim(0,100)
-            elif sc_all[j] == "uni":
-                axs_h[j].set_xlim(0,np.amax(C_stack))
-                axs_h2[j].set_xlim(0,np.amax(C_stack))
-            else:
-                axs_h[j].set_xlim(np.amin(C_stack),np.amax(C_stack))
-                axs_h2[j].set_xlim(np.amin(C_stack),np.amax(C_stack))
-
+                xmin = np.ain(C_stack)
+                xmax = np.amax(C_stack)
+                            
+            gkde_norm = gkde.integrate_box_1d(xmin,xmax)
+            gkde_EW_norm = gkde_EW.integrate_box_1d(xmin,xmax)
+            
+            lnspc = np.linspace(xmin, xmax,1000)
+            kdepdf = gkde.evaluate(lnspc) / gkde_norm
+            kdepdf_EW = gkde_EW.evaluate(lnspc) / gkde_EW_norm
+            axs_h2[j].plot(lnspc, kdepdf, 'r--')
+            axs_h2[j].plot(lnspc, kdepdf_EW, 'g--')
+            
+            axs_h[j].set_xlim(xmin,xmax)
+            axs_h2[j].set_xlim(xmin,xmax)    
+                        
             axs_h2[j].set_ylabel('PDF', color='b')
 
             axs_h2[j].set_ylim(bottom=0)
