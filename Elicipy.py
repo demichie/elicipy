@@ -31,7 +31,7 @@ import copy
 
 import datetime
 
-analysis = True
+analysis = False
 target = True
 log = 0
 
@@ -495,12 +495,12 @@ for j in np.arange(n_seed+n_TQ):
 
     if analysis:
 
-        if sc_all[j] is "uni%":
+        if sc_all[j] == "uni%":
 
             quan05,quan50,qmean,quan95,C = createDATA1(DAT,j,W[:,4].flatten(),n_sample,'red',10,60,False,'',0,0,[0,100],1)
             quan05_EW,quan50_EW,qmean_EW,quan95_EW,C_EW = createDATA1(DAT,j,Weqok,n_sample,'green',10,60,False,'',0,0,[0,100],1)
 
-        elif sc_all[j] is "uni":
+        elif sc_all[j] == "uni":
 
             quan05,quan50,qmean,quan95,C = createDATA1(DAT,j,W[:,4].flatten(),n_sample,'red',10,60,False,'',0,0,[0,np.inf],1)
             quan05_EW,quan50_EW,qmean_EW,quan95_EW,C_EW = createDATA1(DAT,j,Weqok,n_sample,'green',10,60,False,'',0,0,[0,np.inf],1)
@@ -751,6 +751,12 @@ for j in np.arange(n_seed):
             txt = '%6.2f' % realization[j]
     
         axs0[j].annotate(txt, (realization[j], n_experts+3+0.15))
+        
+    else:
+    
+        b = np.amin([np.amin(Cal_var[:,0,j]),realization[j]])
+        c = np.amin([np.amax(Cal_var[:,0,j]),realization[j]])  
+
     
     ytick = []             
     for i in y:
