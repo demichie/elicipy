@@ -34,9 +34,10 @@ import datetime
 analysis = True
 target = True
 log = 0
-n_sample = 50000
-n_bins = 20
-
+n_sample = 10000
+n_bins = 10
+# hist_type = 'bar'
+hist_type = 'step'
 
 path = './OUTPUT'
 
@@ -101,18 +102,6 @@ def copy_slide_from_external_prs(src, idx, newPrs):
         os.remove(k)
 
 
-prs=Presentation()
-prs.slide_width = Inches(16)
-prs.slide_height = Inches(9)
-
-lyt=prs.slide_layouts[0] # choosing a slide layout
-slide=prs.slides.add_slide(lyt) # adding a slide
-title=slide.shapes.title # assigning a title
-subtitle=slide.placeholders[1] # placeholder for subtitle
-title.text="Expert elicitation" # title
-Current_Date_Formatted = datetime.datetime.today().strftime ('%d-%b-%Y')
-
-subtitle.text = Current_Date_Formatted # subtitle
 
 required = {'easygui','tkinter'}
 installed = {pkg.key for pkg in pkg_resources.working_set}
@@ -249,6 +238,7 @@ if target:
 
         index = NS_seed.index(difflib.get_close_matches(TQ_name, NS_seed)[0])
         sorted_idx.append(index)
+        print(TQ_name,NS_seed[index])
     
     print('Sorted list of experts to match the order of seeds:',sorted_idx)    
 
@@ -434,35 +424,6 @@ if analysis:
 
     W_gt0 = [round((x*100), 1) for x in W_gt0_01]
 
-    slide = prs.slides.add_slide(prs.slide_layouts[5])
-    title_shape = slide.shapes.title
-    title_shape.text = "Experts' weights"
-    title_para = slide.shapes.title.text_frame.paragraphs[0]
-    title_para.font.name = "Helvetica"
-    # ---add table weights to slide---
-    x, y, cx, cy = Inches(2), Inches(2), Inches(8), Inches(4)
-    #x, y, cx, cy = Inches(2), Inches(2), MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT, Inches(4)
-    shape = slide.shapes.add_table(2, len(W_gt0)+1, x, y, cx, MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
-    #shape = slide.shapes.add_table(2, len(W_gt0)+1, x, y, cx, cy)
-    table = shape.table
-
-    cell = table.cell(0, 0)
-    cell.text = 'Expert ID'
-
-    cell = table.cell(1, 0)
-    cell.text = 'Expert weight'
-
-    for j in np.arange(len(W_gt0)):
-        cell = table.cell(0, j+1)
-        cell.text = 'Exp'+str(expin[j])
-
-        cell = table.cell(1, j+1)
-        cell.text = '%6.2f' % W_gt0[j]
-
-    for cell in iter_cells(table):
-        for paragraph in cell.text_frame.paragraphs:
-            for run in paragraph.runs:
-                run.font.size = Pt(12)
 
     print("")
     print('W')
@@ -538,8 +499,14 @@ for j in np.arange(n_seed+n_TQ):
             axs_h[j] = figs_h[j].add_subplot(111)
             C_stack = np.stack((C,C_EW), axis=0)
             wg = np.ones_like(C_stack.T) / n_sample
+            
+            if hist_type == 'step':
         
-            axs_h[j].hist(C_stack.T,bins=n_bins,weights=wg,rwidth=0.5, color = ['orange','springgreen'])
+                axs_h[j].hist(C_stack.T,bins=n_bins,weights=wg,histtype='step', fill=False,rwidth=0.95, color = ['orange','springgreen'])
+                
+            elif hist_type == 'bar':
+
+                axs_h[j].hist(C_stack.T,bins=n_bins,weights=wg,histtype='bar',rwidth=0.95, ec="k",color = ['orange','springgreen'])
                 
             axs_h[j].set_xlabel(tg_unitok[j-n_seed])
             plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
@@ -590,70 +557,12 @@ for j in np.arange(n_seed+n_TQ):
         
             figname = path+'/hist_'+str(j-n_seed+1).zfill(2)+'.png'
             figs_h[j].savefig(figname, dpi=200)
-        
-            blank_slide_layout = prs.slide_layouts[6]
-            title_slide_layout = prs.slide_layouts[5]
-            slide = prs.slides.add_slide(title_slide_layout)
-            left=Inches(2)
-            top=Inches(1.5)
-        
-            title_shape = slide.shapes.title
-            title_shape.text = TQ_question[j-n_seed]
-            title_para = slide.shapes.title.text_frame.paragraphs[0]
-            title_para.font.name = "Helvetica"
-    
-    
-            img=slide.shapes.add_picture('./'+figname,left,top,width=Inches(10))
-            shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),Inches(16),Inches(0.3))
-            shape.shadow.inherit = False
-            fill=shape.fill
-            fill.solid()
-            fill.fore_color.rgb=RGBColor(0,0,255)
-            shape.text= "Expert elicitation " + datetime.datetime.today().strftime ('%d-%b-%Y')
-            shape_para = shape.text_frame.paragraphs[0]
-            shape_para.font.name = "Helvetica"
+             
             plt.close()
+            
 
 
-if analysis:
-    slide = prs.slides.add_slide(prs.slide_layouts[5])
-    title_shape = slide.shapes.title
-    title_shape.text = "Percentiles of target questions"
-    title_para = slide.shapes.title.text_frame.paragraphs[0]
-    title_para.font.name = "Helvetica"
-    # ---add table to slide---
-    x, y, cx, cy = Inches(2), Inches(2), Inches(12), Inches(4)
-    shape = slide.shapes.add_table(n_TQ+1, 4, x, y, cx, MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
-    table = shape.table
-
-    cell = table.cell(0, 1)
-    cell.text = 'Q05'
-
-    cell = table.cell(0, 2)
-    cell.text = 'Q50'
-
-    cell = table.cell(0, 3)
-    cell.text = 'Q95'
-
-    for j in np.arange(n_TQ):
-
-        cell = table.cell(j+1, 0)
-        cell.text = 'Target Question '+str(j+1)
     
-        cell = table.cell(j+1, 1)
-        cell.text = '%6.2f' % q05[n_seed+j]
-
-        cell = table.cell(j+1, 2)
-        cell.text = '%6.2f' % q50[n_seed+j]
-
-        cell = table.cell(j+1, 3)
-        cell.text = '%6.2f' % q95[n_seed+j]
-
-    for cell in iter_cells(table):
-        for paragraph in cell.text_frame.paragraphs:
-            for run in paragraph.runs:
-                run.font.size = Pt(14)
-
 h = 0
 figs0={}
 axs0={}
@@ -759,32 +668,12 @@ for j in np.arange(n_seed):
 
     figname = path+'/seed_'+str(j+1).zfill(2)+'.png'
     figs0[j].savefig(figname,dpi=200)
-
-    title_slide_layout = prs.slide_layouts[5]
-    left=Inches(2)
-    top=Inches(1.5)
-        
-    slide = prs.slides.add_slide(title_slide_layout)
     
-    title_shape = slide.shapes.title
-    title_shape.text = seed_question[j]
-    title_para = slide.shapes.title.text_frame.paragraphs[0]
-
-    title_para.font.name = "Helvetica"
-    
-    img=slide.shapes.add_picture('./'+figname,left,top,width=Inches(10))
-    
-    shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),Inches(16),Inches(0.3))
-    shape.shadow.inherit = False
-    fill=shape.fill
-    fill.solid()
-    fill.fore_color.rgb=RGBColor(0,0,255)
-    shape.text= "Expert elicitation " + datetime.datetime.today().strftime ('%d-%b-%Y')
-    shape_para = shape.text_frame.paragraphs[0]
-    shape_para.font.name = "Helvetica"
     plt.close()
     
     h = h+1
+
+
 
 
 figs={}
@@ -867,6 +756,93 @@ for j in np.arange(n_TQ):
     figname = path+'/target_'+str(j+1).zfill(2)+'.png'
     figs[j].savefig(figname,dpi=200)
 
+    plt.close()
+    
+    
+    h = h+1
+
+
+prs=Presentation()
+prs.slide_width = Inches(16)
+prs.slide_height = Inches(9)
+
+lyt=prs.slide_layouts[0] # choosing a slide layout
+slide=prs.slides.add_slide(lyt) # adding a slide
+title=slide.shapes.title # assigning a title
+subtitle=slide.placeholders[1] # placeholder for subtitle
+title.text="Expert elicitation" # title
+Current_Date_Formatted = datetime.datetime.today().strftime ('%d-%b-%Y')
+
+subtitle.text = Current_Date_Formatted # subtitle
+
+
+
+if analysis:
+
+    slide = prs.slides.add_slide(prs.slide_layouts[5])
+    title_shape = slide.shapes.title
+    title_shape.text = "Experts' weights"
+    title_para = slide.shapes.title.text_frame.paragraphs[0]
+    title_para.font.name = "Helvetica"
+    # ---add table weights to slide---
+    x, y, cx, cy = Inches(2), Inches(2), Inches(8), Inches(4)
+    #x, y, cx, cy = Inches(2), Inches(2), MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT, Inches(4)
+    shape = slide.shapes.add_table(2, len(W_gt0)+1, x, y, cx, MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+    #shape = slide.shapes.add_table(2, len(W_gt0)+1, x, y, cx, cy)
+    table = shape.table
+
+    cell = table.cell(0, 0)
+    cell.text = 'Expert ID'
+
+    cell = table.cell(1, 0)
+    cell.text = 'Expert weight'
+
+    for j in np.arange(len(W_gt0)):
+        cell = table.cell(0, j+1)
+        cell.text = 'Exp'+str(expin[j])
+
+        cell = table.cell(1, j+1)
+        cell.text = '%6.2f' % W_gt0[j]
+
+    for cell in iter_cells(table):
+        for paragraph in cell.text_frame.paragraphs:
+            for run in paragraph.runs:
+                run.font.size = Pt(12)
+
+
+
+for j in np.arange(n_seed):
+
+    figname = path+'/seed_'+str(j+1).zfill(2)+'.png'
+    
+    title_slide_layout = prs.slide_layouts[5]
+    left=Inches(2)
+    top=Inches(1.5)
+        
+    slide = prs.slides.add_slide(title_slide_layout)
+    
+    title_shape = slide.shapes.title
+    title_shape.text = seed_question[j]
+    title_para = slide.shapes.title.text_frame.paragraphs[0]
+
+    title_para.font.name = "Helvetica"
+    
+    img=slide.shapes.add_picture('./'+figname,left,top,width=Inches(10))
+    
+    shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),Inches(16),Inches(0.3))
+    shape.shadow.inherit = False
+    fill=shape.fill
+    fill.solid()
+    fill.fore_color.rgb=RGBColor(0,0,255)
+    shape.text= "Expert elicitation " + datetime.datetime.today().strftime ('%d-%b-%Y')
+    shape_para = shape.text_frame.paragraphs[0]
+    shape_para.font.name = "Helvetica"
+
+
+for j in np.arange(n_TQ):
+
+    figname = path+'/target_'+str(j+1).zfill(2)+'.png'
+    
     blank_slide_layout = prs.slide_layouts[6]
     slide = prs.slides.add_slide(title_slide_layout)
     
@@ -886,12 +862,83 @@ for j in np.arange(n_TQ):
     shape.text= "Expert elicitation " + datetime.datetime.today().strftime ('%d-%b-%Y')
     shape_para = shape.text_frame.paragraphs[0]
     shape_para.font.name = "Helvetica"
-    plt.close()
+
+if analysis:
+
+    slide = prs.slides.add_slide(prs.slide_layouts[5])
+    title_shape = slide.shapes.title
+    title_shape.text = "Percentiles of target questions"
+    title_para = slide.shapes.title.text_frame.paragraphs[0]
+    title_para.font.name = "Helvetica"
+    # ---add table to slide---
+    x, y, cx, cy = Inches(2), Inches(2), Inches(12), Inches(4)
+    shape = slide.shapes.add_table(n_TQ+1, 4, x, y, cx, MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+    table = shape.table
+
+    cell = table.cell(0, 1)
+    cell.text = 'Q05'
+    
+    cell = table.cell(0, 2)
+    cell.text = 'Q50'
+    
+    cell = table.cell(0, 3)
+    cell.text = 'Q95'
+    
+    for j in np.arange(n_TQ):
+    
+        cell = table.cell(j+1, 0)
+        cell.text = 'Target Question '+str(j+1)
+        
+        cell = table.cell(j+1, 1)
+        cell.text = '%6.2f' % q05[n_seed+j]
+    
+        cell = table.cell(j+1, 2)
+        cell.text = '%6.2f' % q50[n_seed+j]
+    
+        cell = table.cell(j+1, 3)
+        cell.text = '%6.2f' % q95[n_seed+j]
+    
+    for cell in iter_cells(table):
+        for paragraph in cell.text_frame.paragraphs:
+            for run in paragraph.runs:
+                run.font.size = Pt(14)
+                
+                
+for j in np.arange(n_seed+n_TQ):
+
+    if analysis:
+    
+        if ( j>=n_seed):
+
+            figname = path+'/hist_'+str(j-n_seed+1).zfill(2)+'.png'
+                    
+            blank_slide_layout = prs.slide_layouts[6]
+            title_slide_layout = prs.slide_layouts[5]
+            slide = prs.slides.add_slide(title_slide_layout)
+            left=Inches(2)
+            top=Inches(1.5)
+        
+            title_shape = slide.shapes.title
+            title_shape.text = TQ_question[j-n_seed]
+            title_para = slide.shapes.title.text_frame.paragraphs[0]
+            title_para.font.name = "Helvetica"
     
     
-    h = h+1
+            img=slide.shapes.add_picture('./'+figname,left,top,width=Inches(10))
+            shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),Inches(16),Inches(0.3))
+            shape.shadow.inherit = False
+            fill=shape.fill
+            fill.solid()
+            fill.fore_color.rgb=RGBColor(0,0,255)
+            shape.text= "Expert elicitation " + datetime.datetime.today().strftime ('%d-%b-%Y')
+            shape_para = shape.text_frame.paragraphs[0]
+            shape_para.font.name = "Helvetica"
 
 
+
+
+
+    
 prs.save(path+"/elicitation_old.pptx") # saving file
 
 
