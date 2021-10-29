@@ -34,6 +34,20 @@ import datetime
 analysis = True
 target = True
 log = 0
+n_sample = 50000
+n_bins = 20
+
+
+path = './OUTPUT'
+
+# Check whether the specified path exists or not
+isExist = os.path.exists(path)
+
+if not isExist:
+  
+  # Create a new directory because it does not exist 
+  os.makedirs(path)
+  print("The new directory OUTPUT is created!")
 
 if os.path.isfile('scale_sd.txt') == True and os.path.isfile('scale_tg.txt') == True:
     sc_sda = np.loadtxt('scale_sd.txt', dtype='str')
@@ -480,7 +494,6 @@ axs_h2={}
 
 plt.rcParams.update({'font.size': 8})
 
-n_sample = 10000
 
 print("")
 if analysis:
@@ -526,7 +539,7 @@ for j in np.arange(n_seed+n_TQ):
             C_stack = np.stack((C,C_EW), axis=0)
             wg = np.ones_like(C_stack.T) / n_sample
         
-            axs_h[j].hist(C_stack.T,weights=wg,rwidth=0.5, color = ['orange','springgreen'])
+            axs_h[j].hist(C_stack.T,bins=n_bins,weights=wg,rwidth=0.5, color = ['orange','springgreen'])
                 
             axs_h[j].set_xlabel(tg_unitok[j-n_seed])
             plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
@@ -572,10 +585,10 @@ for j in np.arange(n_seed+n_TQ):
             plt.legend(['CM', 'EW'])
             plt.title('Target Question '+str(j-n_seed+1))
         
-            figname = 'hist_'+str(j-n_seed+1).zfill(2)+'.pdf'
+            figname = path+'/hist_'+str(j-n_seed+1).zfill(2)+'.pdf'
             figs_h[j].savefig(figname)
         
-            figname = 'hist_'+str(j-n_seed+1).zfill(2)+'.png'
+            figname = path+'/hist_'+str(j-n_seed+1).zfill(2)+'.png'
             figs_h[j].savefig(figname, dpi=200)
         
             blank_slide_layout = prs.slide_layouts[6]
@@ -741,10 +754,10 @@ for j in np.arange(n_seed):
 
     axs0[j].grid()
 
-    figname = 'seed_'+str(j+1).zfill(2)+'.pdf'
+    figname = path+'/seed_'+str(j+1).zfill(2)+'.pdf'
     figs0[j].savefig(figname)
 
-    figname = 'seed_'+str(j+1).zfill(2)+'.png'
+    figname = path+'/seed_'+str(j+1).zfill(2)+'.png'
     figs0[j].savefig(figname,dpi=200)
 
     title_slide_layout = prs.slide_layouts[5]
@@ -848,10 +861,10 @@ for j in np.arange(n_TQ):
     
     axs[j].grid(linewidth=0.4)
 
-    figname = 'target_'+str(j+1).zfill(2)+'.pdf'
+    figname = path+'/target_'+str(j+1).zfill(2)+'.pdf'
     figs[j].savefig(figname)
     
-    figname = 'target_'+str(j+1).zfill(2)+'.png'
+    figname = path+'/target_'+str(j+1).zfill(2)+'.png'
     figs[j].savefig(figname,dpi=200)
 
     blank_slide_layout = prs.slide_layouts[6]
@@ -879,7 +892,7 @@ for j in np.arange(n_TQ):
     h = h+1
 
 
-prs.save("elicitation_old.pptx") # saving file
+prs.save(path+"/elicitation_old.pptx") # saving file
 
 
 """
