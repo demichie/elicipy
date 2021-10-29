@@ -564,7 +564,7 @@ for j in np.arange(n_seed+n_TQ):
                               
             else: 
 
-                xmin = np.ain(C_stack)
+                xmin = np.amin(C_stack)
                 xmax = np.amax(C_stack)
                             
             gkde_norm = gkde.integrate_box_1d(xmin,xmax)
