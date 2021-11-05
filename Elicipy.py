@@ -6,6 +6,8 @@ matplotlib.use("TkAgg")
 import openpyxl
 from pathlib import Path
 
+from pdf2image import convert_from_path
+
 import sys
 import os
 import re
@@ -34,10 +36,10 @@ import datetime
 analysis = True
 target = True
 log = 0
-n_sample = 10000
+n_sample = 1000
 n_bins = 10
-# hist_type = 'bar'
-hist_type = 'step'
+hist_type = 'bar'
+#hist_type = 'step'
 
 path = './OUTPUT'
 
@@ -555,8 +557,9 @@ for j in np.arange(n_seed+n_TQ):
             figname = path+'/hist_'+str(j-n_seed+1).zfill(2)+'.pdf'
             figs_h[j].savefig(figname)
         
+            images = convert_from_path(figname)
             figname = path+'/hist_'+str(j-n_seed+1).zfill(2)+'.png'
-            figs_h[j].savefig(figname, dpi=200)
+            images[0].save(figname, 'PNG')
              
             plt.close()
             
@@ -666,8 +669,9 @@ for j in np.arange(n_seed):
     figname = path+'/seed_'+str(j+1).zfill(2)+'.pdf'
     figs0[j].savefig(figname)
 
+    images = convert_from_path(figname)
     figname = path+'/seed_'+str(j+1).zfill(2)+'.png'
-    figs0[j].savefig(figname,dpi=200)
+    images[0].save(figname, 'PNG')
     
     plt.close()
     
@@ -753,8 +757,9 @@ for j in np.arange(n_TQ):
     figname = path+'/target_'+str(j+1).zfill(2)+'.pdf'
     figs[j].savefig(figname)
     
+    images = convert_from_path(figname)
     figname = path+'/target_'+str(j+1).zfill(2)+'.png'
-    figs[j].savefig(figname,dpi=200)
+    images[0].save(figname, 'PNG')
 
     plt.close()
     
