@@ -1,2 +1,9 @@
 # elicipy
-Expert. elicitation Python code
+Expert elicitation Python code
+
+Authors:
+- Mattia de' Michieli Vitturi
+- Andrea Bevilacqua
+- Alessandro Tadini
+
+

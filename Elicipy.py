@@ -13,9 +13,7 @@ import difflib
 from scipy import stats
 from matplotlib.ticker import PercentFormatter
 from script_fromR import createDATA1
-from item_weights import item_weights
 from global_weights import global_weights
-from scipy.stats import chi2
 import numpy as np
 import pkg_resources
 import re
@@ -104,7 +102,7 @@ for name, surname in zip(firstname, surname):
 
     NS_SQ.append(name + surname)
 
-print('NS_SQ',NS_SQ)
+print('NS_SQ', NS_SQ)
 
 # create a 2D numpy array with the answers to the seed questions
 cols_as_np = df_SQ[df_SQ.columns[3:]].to_numpy()
@@ -193,7 +191,8 @@ for i in range(3, 3 + n_SQ * n_pctl, 3):
         0, len(string12), 0, len(string3))
 
     SQ_title.append(string12[match.a:match.a + match.size])
-    print('Seed question '+str(int(i/3-1)),string12[match.a:match.a + match.size])
+    print('Seed question ' + str(int(i / 3 - 1)),
+          string12[match.a:match.a + match.size])
 
 # print on screen the units
 print("Seed_units = ", SQ_units)
@@ -201,9 +200,7 @@ print("Seed_units = ", SQ_units)
 # print on screen the units
 print("Seed_scales = ", SQ_scale)
 
-
 for i in np.arange(n_SQ):
-
     """
     n_lin = 0
     n_log = 0
@@ -213,7 +210,6 @@ for i in np.arange(n_SQ):
     """
 
     for k in np.arange(n_experts):
-
         """
         if ( SQ_array[k,0,i] < SQ_array[k,1,i]) and ( SQ_array[k,2,i] > SQ_array[k,1,i] ):
 
@@ -271,18 +267,17 @@ if target:
 
         NS_TQ.append(name + surname)
 
-    print('NS_TQ',NS_TQ)
+    print('NS_TQ', NS_TQ)
 
     sorted_idx = []
 
     # loop to search for matches between experts in seed and target
     for TQ_name in NS_TQ:
-    
+
         index = NS_SQ.index(difflib.get_close_matches(TQ_name, NS_SQ)[0])
         sorted_idx.append(index)
-        
+
     print('Sorted list of experts to match the order of seeds:', sorted_idx)
-    
 
     # create a 2D numpy array with the answers to the seed questions
     cols_as_np = df_TQ[df_TQ.columns[3:]].to_numpy()
@@ -333,7 +328,7 @@ if target:
 
         match1_splitted = match1.split(';')
         tg = match1_splitted[0]
-        print('tg',tg)
+        print('tg', tg)
         TQ_units.append(tg)
 
         # if the scale is defined, append it to the list
@@ -480,16 +475,8 @@ if analysis:
 
     if optimization == 'no':
 
-        if weight_type == 'global':
-
-            W = global_weights(SQ_array, TQ_array, realization, alpha, back_measure,
-                               k, cal_power)
-
-        elif weight_type == 'item':
-
-            [unorm_w, W_itm,
-             W_itm_tq] = item_weights(SQ_array, TQ_array, realization, alpha,
-                                      back_measure, k, cal_power)
+        W = global_weights(SQ_array, TQ_array, realization, alpha,
+                           back_measure, k, cal_power)
 
     Weq = np.ones(n_experts)
     Weqok = [x / n_experts for x in Weq]
@@ -521,7 +508,8 @@ DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
 DAT[:, 0] = np.repeat(np.arange(1, n_experts + 1), n_SQ + n_TQ)
 DAT[:, 1] = np.tile(np.arange(1, n_SQ + n_TQ + 1), n_experts)
 
-DAT[:, 2:] = np.append(SQ_array, TQ_array, axis=2).transpose(0, 2, 1).reshape(-1, 3)
+DAT[:, 2:] = np.append(SQ_array, TQ_array, axis=2).transpose(0, 2,
+                                                             1).reshape(-1, 3)
 
 q05 = []
 q50 = []
@@ -658,11 +646,13 @@ for j in np.arange(n_SQ + n_TQ):
             plt.legend(['CM', 'EW'])
             plt.title('Target Question ' + str(j - n_SQ + 1))
 
-            figname = path + '/' + elicitation_name + '_hist_' + str(j - n_SQ + 1).zfill(2) + '.pdf'
+            figname = path + '/' + elicitation_name + \
+                '_hist_' + str(j - n_SQ + 1).zfill(2) + '.pdf'
             figs_h[j].savefig(figname)
 
             images = convert_from_path(figname)
-            figname = path + '/' + elicitation_name + '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
+            figname = path + '/' + elicitation_name + \
+                '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
             images[0].save(figname, 'PNG')
 
             plt.close()
@@ -771,11 +761,13 @@ for j in np.arange(n_SQ):
 
     axs0[j].grid()
 
-    figname = path + '/' + elicitation_name + '_seed_' + str(j + 1).zfill(2) + '.pdf'
+    figname = path + '/' + elicitation_name + \
+        '_seed_' + str(j + 1).zfill(2) + '.pdf'
     figs0[j].savefig(figname)
 
     images = convert_from_path(figname)
-    figname = path + '/' + elicitation_name + '_seed_' + str(j + 1).zfill(2) + '.png'
+    figname = path + '/' + elicitation_name + \
+        '_seed_' + str(j + 1).zfill(2) + '.png'
     images[0].save(figname, 'PNG')
 
     plt.close()
@@ -858,11 +850,13 @@ for j in np.arange(n_TQ):
 
     axs[j].grid(linewidth=0.4)
 
-    figname = path + '/' + elicitation_name + '_target_' + str(j + 1).zfill(2) + '.pdf'
+    figname = path + '/' + elicitation_name + \
+        '_target_' + str(j + 1).zfill(2) + '.pdf'
     figs[j].savefig(figname)
 
     images = convert_from_path(figname)
-    figname = path + '/' + elicitation_name + '_target_' + str(j + 1).zfill(2) + '.png'
+    figname = path + '/' + elicitation_name + \
+        '_target_' + str(j + 1).zfill(2) + '.png'
     images[0].save(figname, 'PNG')
 
     plt.close()
@@ -918,7 +912,8 @@ if analysis:
 
 for j in np.arange(n_SQ):
 
-    figname = path + '/' + elicitation_name + '_seed_' + str(j + 1).zfill(2) + '.png'
+    figname = path + '/' + elicitation_name + \
+        '_seed_' + str(j + 1).zfill(2) + '.png'
 
     title_slide_layout = prs.slide_layouts[5]
     left = Inches(2)
@@ -930,7 +925,7 @@ for j in np.arange(n_SQ):
     title_shape.text = SQ_title[j]
     title_shape.width = Inches(15)
     title_shape.height = Inches(2)
-    
+
     title_para = slide.shapes.title.text_frame.paragraphs[0]
 
     title_para.font.name = "Helvetica"
@@ -950,7 +945,8 @@ for j in np.arange(n_SQ):
 
 for j in np.arange(n_TQ):
 
-    figname = path + '/' + elicitation_name + '_target_' + str(j + 1).zfill(2) + '.png'
+    figname = path + '/' + elicitation_name + \
+        '_target_' + str(j + 1).zfill(2) + '.png'
 
     blank_slide_layout = prs.slide_layouts[6]
     slide = prs.slides.add_slide(title_slide_layout)
@@ -1022,7 +1018,8 @@ for j in np.arange(n_SQ + n_TQ):
 
         if (j >= n_SQ):
 
-            figname = path + '/' + elicitation_name + '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
+            figname = path + '/' + elicitation_name + \
+                '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
 
             blank_slide_layout = prs.slide_layouts[6]
             title_slide_layout = prs.slide_layouts[5]
@@ -1050,4 +1047,4 @@ for j in np.arange(n_SQ + n_TQ):
             shape_para = shape.text_frame.paragraphs[0]
             shape_para.font.name = "Helvetica"
 
-prs.save(path + "/"+elicitation_name+".pptx")  # saving file
+prs.save(path + "/" + elicitation_name + ".pptx")  # saving file
