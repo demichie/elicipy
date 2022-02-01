@@ -527,7 +527,7 @@ plt.rcParams.update({'font.size': 8})
 
 print("")
 if analysis:
-    print("j,quan05,quan50,qmean,quan95")
+    print(" j   quan05    quan50     qmean    quan95")
 
 for j in np.arange(n_SQ + n_TQ):
 
@@ -563,8 +563,10 @@ for j in np.arange(n_SQ + n_TQ):
                 DAT, j, Weqok, n_sample, 'green', 10, 60, True, '', 0, 0,
                 [-np.inf, np.inf], 1)
 
-        print(j, quan05, quan50, qmean, quan95)
-        print(j, quan05_EW, quan50_EW, qmean_EW, quan95_EW)
+        # print(j, quan05, quan50, qmean, quan95)
+        # print(j, quan05_EW, quan50_EW, qmean_EW, quan95_EW)
+        print("%2i %9.2f %9.2f %9.2f %9.2f"% (j, quan05, quan50, qmean, quan95))
+        print("%2i %9.2f %9.2f %9.2f %9.2f"% (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
 
         q05.append(quan05)
         q50.append(quan50)
