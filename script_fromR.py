@@ -21,6 +21,10 @@ def createDATA1(DAT,j,W,N,col,dd,angle,add,name,logSCALE,dens, dominion, logPlot
     mid = DAT[np.arange(n)*nn+j,3]
     incM = DAT[np.arange(n)*nn+j,4]
     
+    # print('incm',incm)
+    # print('mid',mid)
+    # print('incM',incM)
+    
 
     quan05,quan50,qmean,quan95,C = createSamplesUCA2(incm,mid,incM,W,N,col,dd,angle,add,name,logSCALE,dens,dominion,logPlot)
 
@@ -107,20 +111,27 @@ def createSamplesUCA2(incm,mid,incM,W,N,col,dd,angle,add,name,logSCALE,dens,domi
     R = rB-rA
     rA = rA-R/10
     rB = rB+R/10
+    
+    # print('rA,rB',rA,rB)
                 
     # write(c(rA,rB),paste0(name,'RANGE.asc'),ncolumns=1)
     
     sV = sampleDISCR(W,N)
     
+    # print('sV',sV)
+    
     # write(sV,paste0(name,'_expertsSamples.asc'),ncolumns=1)
     
     DDD = dominion
+    
+    # print('DDD',DDD)
     
     for j in np.arange(N):
     
         s = int(sV[j])-1
         
         C[j]=max_entropy(incm[s],mid[s],incM[s],rA,rB)
+        
         
         while((C[j]<DDD[0]) or (C[j]>DDD[1])):
         
