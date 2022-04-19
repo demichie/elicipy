@@ -14,6 +14,7 @@ from scipy import stats
 from matplotlib.ticker import PercentFormatter
 from script_fromR import createDATA1
 from global_weights import global_weights
+from script_fromR import generate_ERF
 import numpy as np
 import pkg_resources
 import re
@@ -39,6 +40,8 @@ hist_type = 'bar'
 #hist_type = 'step'
 
 DEF_scale = 'uni'
+
+ERF_flag = True
 
 path = './OUTPUT'
 
@@ -474,8 +477,14 @@ N_max_it = 5  # maximum number of seed items to be removed at a time when
 if analysis:
 
     if optimization == 'no':
+    
+        if ERF_flag:
+        
+            W = generate_ERF(realization,SQ_array)
 
-        W = global_weights(SQ_array, TQ_array, realization, alpha,
+        else:
+
+            W = global_weights(SQ_array, TQ_array, realization, alpha,
                            back_measure, k, cal_power)
 
     Weq = np.ones(n_experts)
@@ -537,21 +546,21 @@ for j in np.arange(n_SQ + n_TQ):
 
             quan05, quan50, qmean, quan95, C = createDATA1(
                 DAT, j, W[:, 4].flatten(), n_sample, 'red', 10, 60, False, '',
-                0, 0, [0, 100], 1)
+                0, 0, [0, 100], 1, ERF_flag )
 
             quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
                 DAT, j, Weqok, n_sample, 'green', 10, 60, False, '', 0, 0,
-                [0, 100], 1)
+                [0, 100], 1, ERF_flag )
 
         elif ALL_scale[j] == "uni":
 
             quan05, quan50, qmean, quan95, C = createDATA1(
                 DAT, j, W[:, 4].flatten(), n_sample, 'red', 10, 60, False, '',
-                0, 0, [0, np.inf], 1)
+                0, 0, [0, np.inf], 1, ERF_flag )
 
             quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
                 DAT, j, Weqok, n_sample, 'green', 10, 60, False, '', 0, 0,
-                [0, np.inf], 1)
+                [0, np.inf], 1, ERF_flag )
 
         else:
 
