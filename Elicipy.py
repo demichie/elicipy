@@ -15,6 +15,7 @@ from matplotlib.ticker import PercentFormatter
 from script_fromR import createDATA1
 from global_weights import global_weights
 from script_fromR import generate_ERF
+from merge_csv import merge_csv
 import numpy as np
 import pkg_resources
 import re
@@ -26,26 +27,19 @@ import openpyxl
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+from ElicipyDict import *
 
 matplotlib.use("TkAgg")
 
-elicitation_name = 'test'
+def iter_cells(table):
+    for row in table.rows:
+        for cell in row.cells:
+            yield cell
 
-analysis = True
-target = True
-log = 0
-n_sample = 1000
-n_bins = 10
-hist_type = 'bar'
-#hist_type = 'step'
 
-DEF_scale = 'uni'
+merge_csv(input_dir)
 
-ERF_flag = True
-
-path = './OUTPUT'
-
-# Check whether the specified path exists or not
+# Check whether the specified output path exists or not
 isExist = os.path.exists(path)
 
 if not isExist:
@@ -54,39 +48,7 @@ if not isExist:
     os.makedirs(path)
     print("The new directory OUTPUT is created!")
 
-if os.path.isfile('scale_sd.txt') == True and os.path.isfile(
-        'scale_tg.txt') == True:
-    SQ_scalea = np.loadtxt('scale_sd.txt', dtype='str')
-    SQ_scale = SQ_scalea.tolist()
-    TQ_scalea = np.loadtxt('scale_tg.txt', dtype='str', delimiter=',')
-    TQ_scale = TQ_scalea.tolist()
-    ALL_scale = SQ_scale + TQ_scale
-
-
-def iter_cells(table):
-    for row in table.rows:
-        for cell in row.cells:
-            yield cell
-
-
-required = {'easygui', 'tkinter'}
-installed = {pkg.key for pkg in pkg_resources.working_set}
-
-print("Select your *.csv file for seed")
-
-if ('easygui' in installed):
-    import easygui
-    filename = easygui.fileopenbox(msg='select your *.csv file',
-                                   filetypes=['*.csv'])
-
-elif ('tkinter' in installed):
-    from tkinter import *
-    root = Tk()
-    root.filename = filedialog.askopenfilename(title='select your *.csv file',
-                                               filetypes=[("csv files",
-                                                           "*.csv")])
-    filename = root.filename
-    root.destroy()
+filename = './'+input_dir+'/seed.csv'
 
 # Read a comma-separated values (csv) file into DataFrame df_SQ
 df_SQ = pd.read_csv(filename)
@@ -126,76 +88,42 @@ SQ_array = np.swapaxes(SQ_array, 1, 2)
 # (sometimes the expert give the percentiles in the wrong order)
 SQ_array = np.sort(SQ_array, axis=1)
 
-# list with the "title" of the seed questions
-SQ_title = []
-
-# list with the units of the seed questions
+df_quest = pd.read_csv('./'+input_dir+'/'+csv_file,header=0)
+    
+# list with the "title" of the target questions
+SQ_question = []
+SQ_minVals = []
+SQ_maxVals = []
+# list with the units of the target questions
 SQ_units = []
-
-# scale for seed question:
-# - uni
-# - log
-
+# scale for target question:
 SQ_scale = []
+   
+SQ_realization = []
+    
+for i in df_quest.itertuples():
+    
+    idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question = i[0:9]
+        
+    if ( question == 'seed'):
 
-for i in range(3, 3 + n_SQ * n_pctl, 3):
+        SQ_question.append(shortQ)
+        SQ_units.append(unit)
+        SQ_scale.append(scale)
+        
+        SQ_realization.append(realization)
+            
+        if minVal.is_integer():
+            
+            minVal = int(minVal)
+                    
+        if maxVal.is_integer():
+            
+            maxVal = int(maxVal)
 
-    # the units must be written in the field with the question title,
-    # between square brackets, and separated with a ";" from the scale
-    string1 = df_SQ.columns[i]
-    match1 = string1[string1.index("[") + 1:string1.index("]")]
+        SQ_minVals.append(minVal)
+        SQ_maxVals.append(maxVal)
 
-    match1_splitted = match1.split(';')
-    su = match1_splitted[0]
-    SQ_units.append(su)
-
-    # if the scale is defined, append it to the list
-    if len(match1_splitted) == 2:
-
-        sc = match1_splitted[0]
-
-        # scale must be "uni" or "log"
-        if sc == 'uni':
-
-            # when "uni", it can be "uni%" or simply "uni"
-            if su == '%':
-
-                SQ_scale.append('uni%')
-
-            else:
-
-                SQ_scale.append('uni')
-
-        elif sc == 'log':
-
-            SQ_scale.append('log')
-
-        else:
-
-            # when different from "uni" or "log", append empy string
-            SQ_scale.append(DEF_scale)
-
-    else:
-
-        # if it is not defined, append empty sting
-        SQ_scale.append(DEF_scale)
-
-    # for each seed question, we ask for three percentiles, so we have
-    # three columns in the csv files, with three column names.
-    # We take the longest common string among these names and we
-    # assign the string to the title "SQ_title".
-    string1 = df_SQ.columns[i].split("[")[0]
-    string2 = df_SQ.columns[i + 1].split("[")[0]
-    string3 = df_SQ.columns[i + 2].split("[")[0]
-    match12 = SequenceMatcher(None, string1, string2).find_longest_match(
-        0, len(string1), 0, len(string2))
-    string12 = string1[match12.a:match12.a + match12.size]
-    match = SequenceMatcher(None, string12, string3).find_longest_match(
-        0, len(string12), 0, len(string3))
-
-    SQ_title.append(string12[match.a:match.a + match.size])
-    print('Seed question ' + str(int(i / 3 - 1)),
-          string12[match.a:match.a + match.size])
 
 # print on screen the units
 print("Seed_units = ", SQ_units)
@@ -204,21 +132,8 @@ print("Seed_units = ", SQ_units)
 print("Seed_scales = ", SQ_scale)
 
 for i in np.arange(n_SQ):
-    """
-    n_lin = 0
-    n_log = 0
-
-    check_lin = []
-    check_log = []
-    """
 
     for k in np.arange(n_experts):
-        """
-        if ( SQ_array[k,0,i] < SQ_array[k,1,i]) and ( SQ_array[k,2,i] > SQ_array[k,1,i] ):
-
-            check_lin.append((SQ_array[k,2,i]-SQ_array[k,1,i])/(SQ_array[k,1,i]-SQ_array[k,0,i])) 
-            check_log.append((np.log(SQ_array[k,2,i])-np.log(SQ_array[k,1,i]))/(np.log(SQ_array[k,1,i])-np.log(SQ_array[k,0,i]))) 
-        """
 
         # if 5% and 50% percentiles are equal, reduce 5%
         if SQ_array[k, 0, i] == SQ_array[k, 1, i]:
@@ -237,21 +152,7 @@ for i in np.arange(n_SQ):
 
 if target:
 
-    print("")
-    print("Select your *.csv file for target")
-
-    if ('easygui' in installed):
-        import easygui
-        filename = easygui.fileopenbox(msg='select your *.csv file',
-                                       filetypes=['*.csv'])
-
-    elif ('tkinter' in installed):
-        from tkinter import *
-        root = Tk()
-        root.filename = filedialog.askopenfilename(
-            title='select your *.csv file', filetypes=[("csv files", "*.csv")])
-        filename = root.filename
-        root.destroy()
+    filename = './'+input_dir+'/target.csv'
 
     # Read a comma-separated values (csv) file into DataFrame df_TQ
     df_TQ = pd.read_csv(filename)
@@ -313,73 +214,34 @@ if target:
 
     # list with the "title" of the target questions
     TQ_question = []
-
+    TQ_minVals = []
+    TQ_maxVals = []
     # list with the units of the target questions
     TQ_units = []
-
     # scale for target question:
-    # - uni
-    # - log
     TQ_scale = []
+    
+    for i in df_quest.itertuples():
+    
+        idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question = i[0:9]
+        
+        if ( question == 'target'):
 
-    for i in range(3, 3 + n_TQ * n_pctl, 3):
+            TQ_question.append(shortQ)
+            TQ_units.append(unit)
+            TQ_scale.append(scale)
+            
+            if minVal.is_integer():
+            
+                minVal = int(minVal)
+                    
+            if maxVal.is_integer():
+            
+                maxVal = int(maxVal)
 
-        # the units must be written in the field with the question title,
-        # between square brackets, and separated with a ";" from the scale
-        string1 = df_TQ.columns[i]
-        match1 = string1[string1.index("[") + 1:string1.index("]")]
+            TQ_minVals.append(minVal)
+            TQ_maxVals.append(maxVal)
 
-        match1_splitted = match1.split(';')
-        tg = match1_splitted[0]
-        print('tg', tg)
-        TQ_units.append(tg)
-
-        # if the scale is defined, append it to the list
-        if len(match1_splitted) == 2:
-
-            sc = match1_splitted[0]
-
-            # scale must be "uni" or "log"
-            if sc == 'uni':
-
-                # when "uni", it can be "uni%" or simply "uni"
-                if su == '%':
-
-                    TQ_scale.append('uni%')
-
-                else:
-
-                    TQ_scale.append('uni')
-
-            elif sc == 'log':
-
-                TQ_scale.append('log')
-
-            else:
-
-                # when different from "uni" or "log", append empy string
-                TQ_scale.append(DEF_scale)
-
-        else:
-
-            # if it is not defined, append empty sting
-            TQ_scale.append(DEF_scale)
-
-        # for each seed question, we ask for three percentiles, so we have
-        # three columns in the csv files, with three column names.
-        # We take the longest common string among these names and we
-        # assign the string to the title "TQ_question".
-        string1 = df_TQ.columns[i].split("[")[0]
-        string2 = df_TQ.columns[i + 1].split("[")[0]
-        string3 = df_TQ.columns[i + 2].split("[")[0]
-        match12 = SequenceMatcher(None, string1, string2).find_longest_match(
-            0, len(string1), 0, len(string2))
-        string12 = string1[match12.a:match12.a + match12.size]
-        match = SequenceMatcher(None, string12, string3).find_longest_match(
-            0, len(string12), 0, len(string3))
-
-        TQ_question.append(string12[match.a:match.a + match.size])
-        print('match', string12[match.a:match.a + match.size])
 
     # print on screen the units
     print("Target units = ", TQ_units)
@@ -409,36 +271,6 @@ else:
     TQ_array = np.zeros((n_experts, n_pctl, n_TQ))
     ALL_scale = SQ_scale
 
-print("")
-print("Select your *.xlsx file for realization")
-
-if ('easygui' in installed):
-    import easygui
-    filename = easygui.fileopenbox(msg='select your *.xlsx file',
-                                   filetypes=['*.xlsx'])
-
-elif ('tkinter' in installed):
-    from tkinter import *
-    root = Tk()
-    root.filename = filedialog.askopenfilename(title='select your *.xlsx file',
-                                               filetypes=[("xlsx files",
-                                                           "*.xlsx")])
-    filename = root.filename
-    root.destroy()
-
-wb_obj = openpyxl.load_workbook(filename)
-
-# Read the active sheet:
-sheet = wb_obj.active
-
-i = 0
-a = []
-for row in sheet.iter_rows(max_row=2):
-    for cell in row:
-        if i == 1:
-            a.append(cell.value)
-
-    i = i + 1
 
 if target:
 
@@ -449,7 +281,7 @@ else:
     nTot = SQ_array.shape[2]
 
 realization = np.zeros(TQ_array.shape[2] + SQ_array.shape[2])
-realization[0:SQ_array.shape[2]] = a[0:SQ_array.shape[2]]
+realization[0:SQ_array.shape[2]] = SQ_realization
 
 print("")
 print('Realization', realization)
@@ -566,11 +398,11 @@ for j in np.arange(n_SQ + n_TQ):
 
             quan05, quan50, qmean, quan95, C = createDATA1(
                 DAT, j, W[:, 4].flatten(), n_sample, 'red', 10, 60, True, '',
-                0, 0, [-np.inf, np.inf], 1)
+                0, 0, [-np.inf, np.inf], 1, ERF_flag)
 
             quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
                 DAT, j, Weqok, n_sample, 'green', 10, 60, True, '', 0, 0,
-                [-np.inf, np.inf], 1)
+                [-np.inf, np.inf], 1, ERF_flag)
 
         # print(j, quan05, quan50, qmean, quan95)
         # print(j, quan05_EW, quan50_EW, qmean_EW, quan95_EW)
@@ -933,7 +765,7 @@ for j in np.arange(n_SQ):
     slide = prs.slides.add_slide(title_slide_layout)
 
     title_shape = slide.shapes.title
-    title_shape.text = SQ_title[j]
+    title_shape.text = SQ_question[j]
     title_shape.width = Inches(15)
     title_shape.height = Inches(2)
 
