@@ -1,6 +1,6 @@
 # Elicipy
 
-Elicipy is an Expert elicitation Python code
+Elicipy is an Expert elicitation Python code.
 
 The input files are created with a companion WebApp that can be dowloaded at:
 
