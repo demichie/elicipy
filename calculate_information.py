@@ -1,5 +1,11 @@
 def calculate_information(SQ_array, TQ_array, realization, k, background_measure):
 
+    """
+    This function is based on the Matlab package ANDURIL
+    Authors:  Georgios Leontaris and Oswaldo Morales-Napoles
+    email:    G.Leontaris@tudelft.nl & O.MoralesNapoles@tudelft.nl
+    """
+
     import numpy as np
     from calscore import calscore
 

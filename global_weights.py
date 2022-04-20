@@ -4,36 +4,11 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure, k
     import numpy as np
     from calculate_information import calculate_information
     from calscore import calscore
+
     """
-    %--------------------------------------------------------------------------
-    % Description
-    %--------------------------------------------------------------------------
-    % This function calculates the calibration score, the information score 
-    % over the seed items and subsequently the global weight of every expert e.
-    %--------------------------------------------------------------------------
-    % Input(s)
-    %--------------------------------------------------------------------------
-    % SQ_array:  A three-dimensional array that contains the assessments of the 
-    % experts for every seed item.
-    % TQ_array:  A three-dimensional array that contains the assessments of the 
-    % experts for every target variable.
-    % realization:  A 1D array  that contains the realization of every seed 
-    % question and as many empty cells ([]) as target variables
-    % alpha: Significance level. 
-    % back_measure: A cell array with the background measure of every item.
-    % k: overshoot.
-    %--------------------------------------------------------------------------
-    % Output(s)
-    %--------------------------------------------------------------------------
-    % A table W with the calibration score (first column) the information score 
-    % over all the items (second column), the information score over the seed 
-    % items (third column), unnormalized weight (fourth column), normalized 
-    % weight (fifth column) for every expert (in a different row of the table).
-    %--------------------------------------------------------------------------
-    % Last Update:  8-Dec-2017 
-    % Authors:  Georgios Leontaris and Oswaldo Morales-Napoles
-    % email:    G.Leontaris@tudelft.nl & O.MoralesNapoles@tudelft.nl
-    %--------------------------------------------------------------------------
+    This function is based on the Matlab package ANDURIL
+    Authors:  Georgios Leontaris and Oswaldo Morales-Napoles
+    email:    G.Leontaris@tudelft.nl & O.MoralesNapoles@tudelft.nl
     """
 
     N = SQ_array.shape[2]
