@@ -27,28 +27,41 @@ import openpyxl
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+
 from ElicipyDict import *
 
 matplotlib.use("TkAgg")
+
 
 def iter_cells(table):
     for row in table.rows:
         for cell in row.cells:
             yield cell
 
+# get current path
+path = os.getcwd()
 
+os.chdir(path)
+
+# change to full path
+output_dir = path+'/'+output_dir
+input_dir = path+'/'+input_dir
+
+# merge the files of the different experts
+# creating one file for seeds and one for tagets
 merge_csv(input_dir)
 
 # Check whether the specified output path exists or not
-isExist = os.path.exists(path)
+isExist = os.path.exists(output_dir)
 
 if not isExist:
 
     # Create a new directory because it does not exist
-    os.makedirs(path)
-    print("The new directory OUTPUT is created!")
+    os.makedirs(output_dir)
+    print('The new directory '+output_dir+' is created!')
 
-filename = './'+input_dir+'/seed.csv'
+# seeds file name
+filename = input_dir + '/seed.csv'
 
 # Read a comma-separated values (csv) file into DataFrame df_SQ
 df_SQ = pd.read_csv(filename)
@@ -88,42 +101,44 @@ SQ_array = np.swapaxes(SQ_array, 1, 2)
 # (sometimes the expert give the percentiles in the wrong order)
 SQ_array = np.sort(SQ_array, axis=1)
 
-df_quest = pd.read_csv('./'+input_dir+'/'+csv_file,header=0)
-    
-# list with the "title" of the target questions
+df_quest = pd.read_csv(input_dir + '/' + csv_file, header=0)
+
+# list with the short title of the target questions
 SQ_question = []
+# list with min vals for target questions
 SQ_minVals = []
+# list with max vals for target questions
 SQ_maxVals = []
 # list with the units of the target questions
 SQ_units = []
 # scale for target question:
 SQ_scale = []
-   
+
 SQ_realization = []
-    
+
 for i in df_quest.itertuples():
-    
-    idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question = i[0:9]
-        
-    if ( question == 'seed'):
+
+    idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
+        0:9]
+
+    if (question == 'seed'):
 
         SQ_question.append(shortQ)
         SQ_units.append(unit)
         SQ_scale.append(scale)
-        
+
         SQ_realization.append(realization)
-            
+
         if minVal.is_integer():
-            
+
             minVal = int(minVal)
-                    
+
         if maxVal.is_integer():
-            
+
             maxVal = int(maxVal)
 
         SQ_minVals.append(minVal)
         SQ_maxVals.append(maxVal)
-
 
 # print on screen the units
 print("Seed_units = ", SQ_units)
@@ -152,7 +167,7 @@ for i in np.arange(n_SQ):
 
 if target:
 
-    filename = './'+input_dir+'/target.csv'
+    filename = input_dir + '/target.csv'
 
     # Read a comma-separated values (csv) file into DataFrame df_TQ
     df_TQ = pd.read_csv(filename)
@@ -220,28 +235,28 @@ if target:
     TQ_units = []
     # scale for target question:
     TQ_scale = []
-    
+
     for i in df_quest.itertuples():
-    
-        idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question = i[0:9]
-        
-        if ( question == 'target'):
+
+        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
+            0:9]
+
+        if (question == 'target'):
 
             TQ_question.append(shortQ)
             TQ_units.append(unit)
             TQ_scale.append(scale)
-            
+
             if minVal.is_integer():
-            
+
                 minVal = int(minVal)
-                    
+
             if maxVal.is_integer():
-            
+
                 maxVal = int(maxVal)
 
             TQ_minVals.append(minVal)
             TQ_maxVals.append(maxVal)
-
 
     # print on screen the units
     print("Target units = ", TQ_units)
@@ -270,7 +285,6 @@ else:
 
     TQ_array = np.zeros((n_experts, n_pctl, n_TQ))
     ALL_scale = SQ_scale
-
 
 if target:
 
@@ -309,15 +323,15 @@ N_max_it = 5  # maximum number of seed items to be removed at a time when
 if analysis:
 
     if optimization == 'no':
-    
+
         if ERF_flag:
-        
-            W = generate_ERF(realization,SQ_array)
+
+            W = generate_ERF(realization, SQ_array)
 
         else:
 
             W = global_weights(SQ_array, TQ_array, realization, alpha,
-                           back_measure, k, cal_power)
+                               back_measure, k, cal_power)
 
     Weq = np.ones(n_experts)
     Weqok = [x / n_experts for x in Weq]
@@ -378,21 +392,21 @@ for j in np.arange(n_SQ + n_TQ):
 
             quan05, quan50, qmean, quan95, C = createDATA1(
                 DAT, j, W[:, 4].flatten(), n_sample, 'red', 10, 60, False, '',
-                0, 0, [0, 100], 1, ERF_flag )
+                0, 0, [0, 100], 1, ERF_flag)
 
             quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
                 DAT, j, Weqok, n_sample, 'green', 10, 60, False, '', 0, 0,
-                [0, 100], 1, ERF_flag )
+                [0, 100], 1, ERF_flag)
 
         elif ALL_scale[j] == "uni":
 
             quan05, quan50, qmean, quan95, C = createDATA1(
                 DAT, j, W[:, 4].flatten(), n_sample, 'red', 10, 60, False, '',
-                0, 0, [0, np.inf], 1, ERF_flag )
+                0, 0, [0, np.inf], 1, ERF_flag)
 
             quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
                 DAT, j, Weqok, n_sample, 'green', 10, 60, False, '', 0, 0,
-                [0, np.inf], 1, ERF_flag )
+                [0, np.inf], 1, ERF_flag)
 
         else:
 
@@ -406,8 +420,10 @@ for j in np.arange(n_SQ + n_TQ):
 
         # print(j, quan05, quan50, qmean, quan95)
         # print(j, quan05_EW, quan50_EW, qmean_EW, quan95_EW)
-        print("%2i %9.2f %9.2f %9.2f %9.2f"% (j, quan05, quan50, qmean, quan95))
-        print("%2i %9.2f %9.2f %9.2f %9.2f"% (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
+        print("%2i %9.2f %9.2f %9.2f %9.2f" %
+              (j, quan05, quan50, qmean, quan95))
+        print("%2i %9.2f %9.2f %9.2f %9.2f" %
+              (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
 
         q05.append(quan05)
         q50.append(quan50)
@@ -489,12 +505,12 @@ for j in np.arange(n_SQ + n_TQ):
             plt.legend(['CM', 'EW'])
             plt.title('Target Question ' + str(j - n_SQ + 1))
 
-            figname = path + '/' + elicitation_name + \
+            figname = output_dir + '/' + elicitation_name + \
                 '_hist_' + str(j - n_SQ + 1).zfill(2) + '.pdf'
             figs_h[j].savefig(figname)
 
             images = convert_from_path(figname)
-            figname = path + '/' + elicitation_name + \
+            figname = output_dir + '/' + elicitation_name + \
                 '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
             images[0].save(figname, 'PNG')
 
@@ -604,12 +620,12 @@ for j in np.arange(n_SQ):
 
     axs0[j].grid()
 
-    figname = path + '/' + elicitation_name + \
+    figname = output_dir + '/' + elicitation_name + \
         '_seed_' + str(j + 1).zfill(2) + '.pdf'
     figs0[j].savefig(figname)
 
     images = convert_from_path(figname)
-    figname = path + '/' + elicitation_name + \
+    figname = output_dir + '/' + elicitation_name + \
         '_seed_' + str(j + 1).zfill(2) + '.png'
     images[0].save(figname, 'PNG')
 
@@ -693,12 +709,12 @@ for j in np.arange(n_TQ):
 
     axs[j].grid(linewidth=0.4)
 
-    figname = path + '/' + elicitation_name + \
+    figname = output_dir + '/' + elicitation_name + \
         '_target_' + str(j + 1).zfill(2) + '.pdf'
     figs[j].savefig(figname)
 
     images = convert_from_path(figname)
-    figname = path + '/' + elicitation_name + \
+    figname = output_dir + '/' + elicitation_name + \
         '_target_' + str(j + 1).zfill(2) + '.png'
     images[0].save(figname, 'PNG')
 
@@ -755,7 +771,7 @@ if analysis:
 
 for j in np.arange(n_SQ):
 
-    figname = path + '/' + elicitation_name + \
+    figname = output_dir + '/' + elicitation_name + \
         '_seed_' + str(j + 1).zfill(2) + '.png'
 
     title_slide_layout = prs.slide_layouts[5]
@@ -773,7 +789,7 @@ for j in np.arange(n_SQ):
 
     title_para.font.name = "Helvetica"
 
-    img = slide.shapes.add_picture('./' + figname, left, top, width=Inches(10))
+    img = slide.shapes.add_picture(figname, left, top, width=Inches(10))
 
     shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),
                                    Inches(16), Inches(0.3))
@@ -788,7 +804,7 @@ for j in np.arange(n_SQ):
 
 for j in np.arange(n_TQ):
 
-    figname = path + '/' + elicitation_name + \
+    figname = output_dir + '/' + elicitation_name + \
         '_target_' + str(j + 1).zfill(2) + '.png'
 
     blank_slide_layout = prs.slide_layouts[6]
@@ -801,7 +817,7 @@ for j in np.arange(n_TQ):
     title_para = slide.shapes.title.text_frame.paragraphs[0]
     title_para.font.name = "Helvetica"
 
-    img = slide.shapes.add_picture('./' + figname, left, top, width=Inches(10))
+    img = slide.shapes.add_picture(figname, left, top, width=Inches(10))
 
     shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),
                                    Inches(16), Inches(0.3))
@@ -861,7 +877,7 @@ for j in np.arange(n_SQ + n_TQ):
 
         if (j >= n_SQ):
 
-            figname = path + '/' + elicitation_name + \
+            figname = output_dir + '/' + elicitation_name + \
                 '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
 
             blank_slide_layout = prs.slide_layouts[6]
@@ -875,7 +891,7 @@ for j in np.arange(n_SQ + n_TQ):
             title_para = slide.shapes.title.text_frame.paragraphs[0]
             title_para.font.name = "Helvetica"
 
-            img = slide.shapes.add_picture('./' + figname,
+            img = slide.shapes.add_picture(figname,
                                            left,
                                            top,
                                            width=Inches(10))
@@ -890,4 +906,4 @@ for j in np.arange(n_SQ + n_TQ):
             shape_para = shape.text_frame.paragraphs[0]
             shape_para.font.name = "Helvetica"
 
-prs.save(path + "/" + elicitation_name + ".pptx")  # saving file
+prs.save(output_dir + "/" + elicitation_name + ".pptx")  # saving file

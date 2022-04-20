@@ -7,7 +7,7 @@ def merge_csv(input_dir):
     current_path = os.getcwd()
 
     foldername = 'seed'
-    path = "./"+input_dir+'/'+foldername
+    path = "./" + input_dir + '/' + foldername
 
     # Check whether the specified path exists or not
     isExist = os.path.exists(path)
@@ -24,21 +24,21 @@ def merge_csv(input_dir):
 
             split_f = f.split('_')
             timestamp.append('-'.join(split_f[1:-1]))
-    
-        #combine all files in the list
-        combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames ])
 
-        combined_csv.insert(loc=0,column='timestamp',value=timestamp)
+        # combine all files in the list
+        combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames])
 
-        #export to csv
-        merged_file = '../'+foldername + '.csv'
+        combined_csv.insert(loc=0, column='timestamp', value=timestamp)
 
-        combined_csv.to_csv( merged_file, index=False, encoding='utf-8-sig')
+        # export to csv
+        merged_file = '../' + foldername + '.csv'
+
+        combined_csv.to_csv(merged_file, index=False, encoding='utf-8-sig')
 
     os.chdir(current_path)
 
     foldername = 'target'
-    path = "./"+input_dir+'/'+foldername
+    path = "./" + input_dir + '/' + foldername
 
     # Check whether the specified path exists or not
     isExist = os.path.exists(path)
@@ -55,15 +55,15 @@ def merge_csv(input_dir):
 
             split_f = f.split('_')
             timestamp.append('-'.join(split_f[1:-1]))
-    
-        #combine all files in the list
-        combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames ])
 
-        combined_csv.insert(loc=0,column='timestamp',value=timestamp)
+        # combine all files in the list
+        combined_csv = pd.concat([pd.read_csv(f) for f in all_filenames])
 
-        #export to csv
-        merged_file = '../'+foldername + '.csv'
+        combined_csv.insert(loc=0, column='timestamp', value=timestamp)
 
-        combined_csv.to_csv( merged_file, index=False, encoding='utf-8-sig')
+        # export to csv
+        merged_file = '../' + foldername + '.csv'
+
+        combined_csv.to_csv(merged_file, index=False, encoding='utf-8-sig')
 
     os.chdir(current_path)

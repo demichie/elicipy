@@ -1,10 +1,9 @@
-def global_weights(SQ_array, TQ_array, realization, alpha, background_measure, k,
-                   cal_power):
+def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
+                   k, cal_power):
 
     import numpy as np
     from calculate_information import calculate_information
     from calscore import calscore
-
     """
     This function is based on the Matlab package ANDURIL
     Authors:  Georgios Leontaris and Oswaldo Morales-Napoles
@@ -19,7 +18,7 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure, k
 
     W = np.zeros((E, 5))
 
-    # create numpy array M with the number of realizations captured in every 
+    # create numpy array M with the number of realizations captured in every
     # expert's bin that is formed by the provided quantiles
     for ex in np.arange(E):
         for i in np.arange(N):
