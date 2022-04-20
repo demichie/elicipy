@@ -19,4 +19,4 @@ Authors:
 - Andrea Bevilacqua
 - Alessandro Tadini
 
-
+Some of the functions are based on the scripts of the Matlab package Anduril (authors:  Georgios Leontaris and Oswaldo Morales-Napoles).
