@@ -1,5 +1,4 @@
-def createDATA1(DAT, j, W, N, col, dd, angle, add, name, logSCALE, dens,
-                dominion, logPlot, ERF_flag):
+def createDATA1(DAT, j, W, N, logSCALE, dominion, ERF_flag):
 
     # input:
     # DAT risposte a seed e target questions
@@ -27,13 +26,11 @@ def createDATA1(DAT, j, W, N, col, dd, angle, add, name, logSCALE, dens,
     if ERF_flag:
 
         quan05, quan50, qmean, quan95, C = createSamplesERF(
-            incm, mid, incM, W, N, col, dd, angle, add, name, logSCALE, dens,
-            dominion, logPlot)
+            incm, mid, incM, W, N, logSCALE, dominion)
     else:
 
         quan05, quan50, qmean, quan95, C = createSamplesUCA2(
-            incm, mid, incM, W, N, col, dd, angle, add, name, logSCALE, dens,
-            dominion, logPlot)
+            incm, mid, incM, W, N, logSCALE, dominion)
 
     return quan05, quan50, qmean, quan95, C
 
@@ -93,8 +90,7 @@ def sampleDISCR(P, N):
     return a
 
 
-def createSamplesUCA2(incm, mid, incM, W, N, col, dd, angle, add, name,
-                      logSCALE, dens, dominion, logPlot):
+def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, dominion):
 
     import numpy as np
 
@@ -103,32 +99,35 @@ def createSamplesUCA2(incm, mid, incM, W, N, col, dd, angle, add, name,
     # print(incM)
 
     W = W / np.sum(W)
+    DDD = dominion
 
     if (logSCALE):
 
         VV = incm > 0
-        incm = np.log(incm[VV]) / np.log(10.0)
-        incM = np.log(incM[VV]) / np.log(10.0)
-        mid = np.log(mid[VV]) / np.log(10.0)
+        incm = np.log10(incm[VV])
+        incM = np.log10(incM[VV])
+        mid = np.log10(mid[VV])
         W = W[VV]
         W = W / sum(W)
+        if DDD[0] > 0:
+
+            DDD[0] = np.log10(DDD[0])
+
+        else:
+
+            DDD[0] = -np.inf
+
+        DDD[1] = np.log10(DDD[1])
 
     C = np.zeros(N)
-    Ne = len(incm)
+
     rA = np.amin(incm[W > 0])
     rB = np.amax(incM[W > 0])
     R = rB - rA
     rA = rA - R / 10.0
     rB = rB + R / 10.0
 
-    # print('rA,rB',rA,rB)
-
     sV = sampleDISCR(W, N)
-    # print('sV',sV)
-
-    DDD = dominion
-
-    # print('DDD',DDD)
 
     for j in np.arange(N):
 
@@ -142,23 +141,78 @@ def createSamplesUCA2(incm, mid, incM, W, N, col, dd, angle, add, name,
 
     s = np
 
-    if (not logPlot):
+    if (logSCALE):
 
         C1 = 10.0**C
-        DDD = 10.0**DDD
 
-    if (logPlot):
+    else:
 
         C1 = C
-
-    C1 = C
 
     quan05 = np.quantile(C1, 0.05)
     quan50 = np.quantile(C1, 0.5)
     qmean = np.mean(C1)
     quan95 = np.quantile(C1, 0.95)
 
-    return quan05, quan50, qmean, quan95, C
+    return quan05, quan50, qmean, quan95, C1
+
+
+def createSamplesERF(incm, mid, incM, W, N, logSCALE, dominion):
+
+    import numpy as np
+
+    W = W / np.sum(W)
+
+    DDD = dominion
+
+    if (logSCALE):
+
+        VV = incm > 0
+        incm = np.log10(incm[VV])
+        incM = np.log10(incM[VV])
+        mid = np.log10(mid[VV])
+        W = W[VV]
+        W = W / sum(W)
+        if DDD[0] > 0:
+
+            DDD[0] = np.log10(DDD[0])
+
+        else:
+
+            DDD[0] = -np.inf
+
+        DDD[1] = np.log(DDD[1])
+
+    C = np.zeros(N)
+
+    sV = sampleDISCR(W, N)
+
+    for j in np.arange(N):
+
+        s = int(sV[j]) - 1
+
+        C[j] = rtrian(incm[s], mid[s], incM[s])
+
+        while ((C[j] < DDD[0]) or (C[j] > DDD[1])):
+
+            C[j] = rtrian(incm[s], mid[s], incM[s])
+
+    s = np
+
+    if (logSCALE):
+
+        C1 = 10.0**C
+
+    else:
+
+        C1 = C
+
+    quan05 = np.quantile(C1, 0.05)
+    quan50 = np.quantile(C1, 0.5)
+    qmean = np.mean(C1)
+    quan95 = np.quantile(C1, 0.95)
+
+    return quan05, quan50, qmean, quan95, C1
 
 
 def generate_ERF(true_seed, SQ_array):
@@ -167,6 +221,7 @@ def generate_ERF(true_seed, SQ_array):
     # true values; arrays of 5th, 50th and 95th percentiles by the experts.
 
     import numpy as np
+    import itertools
 
     Ne = SQ_array.shape[0]
     Nq = SQ_array.shape[2]
@@ -174,10 +229,12 @@ def generate_ERF(true_seed, SQ_array):
     pERF = np.zeros((Ne))
     p_single = np.zeros((Nq))
 
-    for (i, j) in zip(range(Ne), range(Nq)):
+    for i in range(Ne):
 
-        p_single[j] = ERFweight(true_seed[j], SQ_array[i, 0, j],
-                                SQ_array[i, 1, j], SQ_array[i, 2, j])
+        for j in range(Nq):
+
+            p_single[j] = ERFweight(true_seed[j], SQ_array[i, 0, j],
+                                    SQ_array[i, 1, j], SQ_array[i, 2, j])
 
         pERF[i] = np.mean(p_single)
 
@@ -305,64 +362,3 @@ def rtrian_inner(a, b, c):
         x = c - np.sqrt((1 - u) * (c - a) * (c - b))
 
     return x
-
-
-def createSamplesERF(incm, mid, incM, W, N, col, dd, angle, add, name,
-                     logSCALE, dens, dominion, logPlot):
-
-    import numpy as np
-
-    # print(incm)
-    # print(mid)
-    # print(incM)
-
-    W = W / np.sum(W)
-
-    if (logSCALE):
-
-        VV = incm > 0
-        incm = np.log(incm[VV]) / np.log(10.0)
-        incM = np.log(incM[VV]) / np.log(10.0)
-        mid = np.log(mid[VV]) / np.log(10.0)
-        W = W[VV]
-        W = W / sum(W)
-
-    C = np.zeros(N)
-    Ne = len(incm)
-
-    sV = sampleDISCR(W, N)
-    # print('sV',sV)
-
-    DDD = dominion
-
-    # print('DDD',DDD)
-
-    for j in np.arange(N):
-
-        s = int(sV[j]) - 1
-
-        C[j] = rtrian(incm[s], mid[s], incM[s])
-
-        while ((C[j] < DDD[0]) or (C[j] > DDD[1])):
-
-            C[j] = rtrian(incm[s], mid[s], incM[s])
-
-    s = np
-
-    if (not logPlot):
-
-        C1 = 10.0**C
-        DDD = 10.0**DDD
-
-    if (logPlot):
-
-        C1 = C
-
-    C1 = C
-
-    quan05 = np.quantile(C1, 0.05)
-    quan50 = np.quantile(C1, 0.5)
-    qmean = np.mean(C1)
-    quan95 = np.quantile(C1, 0.95)
-
-    return quan05, quan50, qmean, quan95, C

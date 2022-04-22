@@ -29,8 +29,62 @@ import matplotlib
 import matplotlib.pyplot as plt
 
 from ElicipyDict import *
+from matplotlib import rcParams
+
+rcParams['font.family'] = 'sans-serif'
+rcParams['font.sans-serif'] = ['Helvetica']
 
 matplotlib.use("TkAgg")
+
+def add_date(slide):
+
+    shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),
+                                           Inches(16), Inches(0.3))
+    shape.shadow.inherit = False
+    fill = shape.fill
+    fill.solid()
+    fill.fore_color.rgb = RGBColor(60, 90, 180)
+    line = shape.line
+    line.color.rgb = RGBColor(60, 90, 180)
+    shape.text = "Expert elicitation " + \
+        datetime.datetime.today().strftime('%d-%b-%Y')
+    shape_para = shape.text_frame.paragraphs[0]
+    shape_para.font.name = "Helvetica"
+    shape_para.font.size = Pt(17)
+
+def add_small_logo(slide,left,top):
+
+    img = slide.shapes.add_picture('logo.png',left + Inches(13.0),
+                                   top+Inches(6.8),
+                                   width=Inches(0.8))
+
+def add_figure(slide,figname,left,top):
+
+    img = slide.shapes.add_picture(figname,left + Inches(3.4),
+                                           top,
+                                           width=Inches(10))
+
+def add_title(slide,text_title):
+
+    title_shape = slide.shapes.title
+    title_shape.text = text_title
+    title_shape.width = Inches(15)
+    title_shape.height = Inches(2)
+    title_para = slide.shapes.title.text_frame.paragraphs[0]
+    title_para.font.name = "Helvetica"
+
+def add_text_box(slide,left,top,text_box):
+
+    txBox = slide.shapes.add_textbox(left - Inches(1),
+                                     top + Inches(0.5),
+                                     width=Inches(4),
+                                     height=Inches(5))
+    tf = txBox.text_frame
+
+    p = tf.add_paragraph()
+    p.text = text_box
+    p.font.name = "Helvetica"
+    p.font.size = Pt(16)
 
 
 def iter_cells(table):
@@ -38,18 +92,19 @@ def iter_cells(table):
         for cell in row.cells:
             yield cell
 
+
 # get current path
 path = os.getcwd()
 
 os.chdir(path)
 
 # change to full path
-output_dir = path+'/'+output_dir
-input_dir = path+'/'+input_dir
+output_dir = path + '/' + output_dir
+input_dir = path + '/' + input_dir
 
 # merge the files of the different experts
 # creating one file for seeds and one for tagets
-merge_csv(input_dir)
+merge_csv(input_dir, target)
 
 # Check whether the specified output path exists or not
 isExist = os.path.exists(output_dir)
@@ -58,7 +113,7 @@ if not isExist:
 
     # Create a new directory because it does not exist
     os.makedirs(output_dir)
-    print('The new directory '+output_dir+' is created!')
+    print('The new directory ' + output_dir + ' is created!')
 
 # seeds file name
 filename = input_dir + '/seed.csv'
@@ -105,6 +160,8 @@ df_quest = pd.read_csv(input_dir + '/' + csv_file, header=0)
 
 # list with the short title of the target questions
 SQ_question = []
+# list with the long title of the target questions
+SQ_LongQuestion = []
 # list with min vals for target questions
 SQ_minVals = []
 # list with max vals for target questions
@@ -116,14 +173,25 @@ SQ_scale = []
 
 SQ_realization = []
 
+global_log = []
+
 for i in df_quest.itertuples():
 
     idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
         0:9]
 
+    if scale == 'uni':
+
+        global_log.append(0)
+
+    else:
+
+        global_log.append(1)
+
     if (question == 'seed'):
 
         SQ_question.append(shortQ)
+        SQ_LongQuestion.append(longQ)
         SQ_units.append(unit)
         SQ_scale.append(scale)
 
@@ -164,6 +232,17 @@ for i in np.arange(n_SQ):
     print('Seed question ', i)
     print(SQ_array[:, :, i])
     # print('mean(lin) =',np.nanmean(check_lin),'mean(log) =',np.nanmean(check_log))
+
+# list with the "title" of the target questions
+TQ_question = []
+# list with the long title of the target questions
+TQ_LongQuestion = []
+TQ_minVals = []
+TQ_maxVals = []
+# list with the units of the target questions
+TQ_units = []
+# scale for target question:
+TQ_scale = []
 
 if target:
 
@@ -214,7 +293,6 @@ if target:
         print('Error: number of experts in seeds and targets different')
         sys.exit()
 
-    n_pctl = 3
     n_TQ = int(cols_as_np.shape[1] / n_pctl)
 
     # reshaped numpy array with expert answers
@@ -227,15 +305,6 @@ if target:
     # (sometimes the expert give the percentiles in the wrong order)
     TQ_array = np.sort(TQ_array, axis=1)
 
-    # list with the "title" of the target questions
-    TQ_question = []
-    TQ_minVals = []
-    TQ_maxVals = []
-    # list with the units of the target questions
-    TQ_units = []
-    # scale for target question:
-    TQ_scale = []
-
     for i in df_quest.itertuples():
 
         idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
@@ -244,6 +313,7 @@ if target:
         if (question == 'target'):
 
             TQ_question.append(shortQ)
+            TQ_LongQuestion.append(longQ)
             TQ_units.append(unit)
             TQ_scale.append(scale)
 
@@ -264,7 +334,7 @@ if target:
     # print on screen the units
     print("Target scales = ", TQ_scale)
 
-    ALL_scale = SQ_scale + TQ_scale
+    global_scale = SQ_scale + TQ_scale
 
     for i in np.arange(n_TQ):
 
@@ -281,10 +351,9 @@ else:
 
     # if we do not read the target questions, set empty array
     n_TQ = 0
-    n_pctl = 3
 
     TQ_array = np.zeros((n_experts, n_pctl, n_TQ))
-    ALL_scale = SQ_scale
+    global_scale = SQ_scale
 
 if target:
 
@@ -297,41 +366,26 @@ else:
 realization = np.zeros(TQ_array.shape[2] + SQ_array.shape[2])
 realization[0:SQ_array.shape[2]] = SQ_realization
 
+global_minVal = SQ_minVals + TQ_minVals
+global_maxVal = SQ_maxVals + TQ_maxVals
+global_units = SQ_units + TQ_units
+global_longQuestion = SQ_LongQuestion + TQ_LongQuestion
+global_shortQuestion = SQ_question + TQ_question
+
 print("")
 print('Realization', realization)
 
-back_measure = []
+# ----------------------------------------- #
+# ------------ Compute weights ------------ #
+# ----------------------------------------- #
 
-for i in np.arange(TQ_array.shape[2] + SQ_array.shape[2]):
-
-    back_measure.append('uni')
-
-# parameters for DM
-alpha = 0.05  # significance level (this value cannot be higher than the
-# highest calibration score of the pool of experts)
-k = 0.1  # overshoot for intrinsic range
-
-# global cal_power
-cal_power = 1  # this value should be between [0.1, 1]. The default is 1.
-
-optimization = 'no'  # choose from 'yes' or 'no'
-
-weight_type = 'global'  # choose from 'equal', 'item', 'global', 'user'
-
-N_max_it = 5  # maximum number of seed items to be removed at a time when
 
 if analysis:
 
-    if optimization == 'no':
+    W = global_weights(SQ_array, TQ_array, realization, alpha, global_scale, k,
+                       cal_power)
 
-        if ERF_flag:
-
-            W = generate_ERF(realization, SQ_array)
-
-        else:
-
-            W = global_weights(SQ_array, TQ_array, realization, alpha,
-                               back_measure, k, cal_power)
+    W_erf = generate_ERF(realization, SQ_array)
 
     Weq = np.ones(n_experts)
     Weqok = [x / n_experts for x in Weq]
@@ -351,12 +405,34 @@ if analysis:
 
     W_gt0 = [round((x * 100), 1) for x in W_gt0_01]
 
+    Werf_gt0_01 = []
+    expin = []
+
+    for x in W_erf[:, 4]:
+        if x > 0:
+            Werf_gt0_01.append(x)
+
+    k = 1
+    for i in W_erf[:, 4]:
+        if i > 0:
+            expin.append(k)
+        k += 1
+
+    Werf_gt0 = [round((x * 100), 1) for x in Werf_gt0_01]
+
+    print("")
+    print('W_erf')
+    print(W_erf[:, -1])
     print("")
     print('W')
     print(W[:, -1])
     print("")
     print('Weq')
     print(Weqok)
+
+# ----------------------------------------- #
+# ------ Create samples and bar plots ----- #
+# ----------------------------------------- #
 
 DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
 
@@ -370,6 +446,10 @@ q05 = []
 q50 = []
 q95 = []
 
+q05_erf = []
+q50_erf = []
+q95_erf = []
+
 q05_EW = []
 q50_EW = []
 q95_EW = []
@@ -380,54 +460,68 @@ axs_h2 = {}
 
 plt.rcParams.update({'font.size': 8})
 
+samples = np.zeros((n_sample, n_TQ))
+samples_erf = np.zeros((n_sample, n_TQ))
+samples_EW = np.zeros((n_sample, n_TQ))
+
 print("")
 if analysis:
     print(" j   quan05    quan50     qmean    quan95")
+
+del_rows = []
+keep_rows = []
+
+if (not Cooke_flag):
+    del_rows.append(int(0))
+else:
+    keep_rows.append(int(0))
+if (not ERF_flag):
+    del_rows.append(int(1))
+else:
+    keep_rows.append(int(1))
+if (not EW_flag):
+    del_rows.append(int(2))
+else:
+    keep_rows.append(int(2))
+
+colors = ['orange', 'purple', 'springgreen']
+colors = [colors[index] for index in keep_rows]
+
+legends = ['CM', 'ERF', 'EW']
+legends = [legends[index] for index in keep_rows]
 
 for j in np.arange(n_SQ + n_TQ):
 
     if analysis:
 
-        if ALL_scale[j] == "uni%":
+        quan05, quan50, qmean, quan95, C = createDATA1(
+            DAT, j, W[:, 4].flatten(), n_sample, global_log[j],
+            [global_minVal[j], global_maxVal[j]], False)
 
-            quan05, quan50, qmean, quan95, C = createDATA1(
-                DAT, j, W[:, 4].flatten(), n_sample, 'red', 10, 60, False, '',
-                0, 0, [0, 100], 1, ERF_flag)
-
-            quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
-                DAT, j, Weqok, n_sample, 'green', 10, 60, False, '', 0, 0,
-                [0, 100], 1, ERF_flag)
-
-        elif ALL_scale[j] == "uni":
-
-            quan05, quan50, qmean, quan95, C = createDATA1(
-                DAT, j, W[:, 4].flatten(), n_sample, 'red', 10, 60, False, '',
-                0, 0, [0, np.inf], 1, ERF_flag)
-
-            quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
-                DAT, j, Weqok, n_sample, 'green', 10, 60, False, '', 0, 0,
-                [0, np.inf], 1, ERF_flag)
-
-        else:
-
-            quan05, quan50, qmean, quan95, C = createDATA1(
-                DAT, j, W[:, 4].flatten(), n_sample, 'red', 10, 60, True, '',
-                0, 0, [-np.inf, np.inf], 1, ERF_flag)
-
-            quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
-                DAT, j, Weqok, n_sample, 'green', 10, 60, True, '', 0, 0,
-                [-np.inf, np.inf], 1, ERF_flag)
-
-        # print(j, quan05, quan50, qmean, quan95)
-        # print(j, quan05_EW, quan50_EW, qmean_EW, quan95_EW)
         print("%2i %9.2f %9.2f %9.2f %9.2f" %
               (j, quan05, quan50, qmean, quan95))
-        print("%2i %9.2f %9.2f %9.2f %9.2f" %
-              (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
 
         q05.append(quan05)
         q50.append(quan50)
         q95.append(quan95)
+
+        quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = createDATA1(
+            DAT, j, W_erf[:, 4].flatten(), n_sample, global_log[j],
+            [global_minVal[j], global_maxVal[j]], True)
+
+        print("%2i %9.2f %9.2f %9.2f %9.2f" %
+              (j, quan05_erf, quan50_erf, qmean_erf, quan95_erf))
+
+        q05_erf.append(quan05_erf)
+        q50_erf.append(quan50_erf)
+        q95_erf.append(quan95_erf)
+
+        quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
+            DAT, j, Weqok, n_sample, global_log[j],
+            [global_minVal[j], global_maxVal[j]], False)
+
+        print("%2i %9.2f %9.2f %9.2f %9.2f" %
+              (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
 
         q05_EW.append(quan05_EW)
         q50_EW.append(quan50_EW)
@@ -435,11 +529,18 @@ for j in np.arange(n_SQ + n_TQ):
 
         if (j >= n_SQ):
 
+            samples[:, j - n_SQ] = C
+            samples_erf[:, j - n_SQ] = C_erf
+            samples_EW[:, j - n_SQ] = C_EW
+
+        if (j >= n_SQ):
+
             ntarget = str(j - n_SQ + 1)
 
             figs_h[j] = plt.figure()
             axs_h[j] = figs_h[j].add_subplot(111)
-            C_stack = np.stack((C, C_EW), axis=0)
+            C_stack = np.stack((C, C_erf, C_EW), axis=0)
+            C_stack = np.delete(C_stack, del_rows, 0)
             wg = np.ones_like(C_stack.T) / n_sample
 
             if hist_type == 'step':
@@ -450,7 +551,7 @@ for j in np.arange(n_SQ + n_TQ):
                               histtype='step',
                               fill=False,
                               rwidth=0.95,
-                              color=['orange', 'springgreen'])
+                              color=colors)
 
             elif hist_type == 'bar':
 
@@ -460,7 +561,7 @@ for j in np.arange(n_SQ + n_TQ):
                               histtype='bar',
                               rwidth=0.95,
                               ec="k",
-                              color=['orange', 'springgreen'])
+                              color=colors)
 
             axs_h[j].set_xlabel(TQ_units[j - n_SQ])
             plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
@@ -469,32 +570,38 @@ for j in np.arange(n_SQ + n_TQ):
 
             axs_h2[j] = axs_h[j].twinx()
 
-            gkde = stats.gaussian_kde(C)
-            gkde_EW = stats.gaussian_kde(C_EW)
-
-            if ALL_scale[j] == "uni%":
+            if global_units[j] == "%":
 
                 xmin = 0.0
                 xmax = 100.0
-
-            elif ALL_scale[j] == "uni":
-
-                xmin = 0.0
-                xmax = np.amax(C_stack)
 
             else:
 
                 xmin = np.amin(C_stack)
                 xmax = np.amax(C_stack)
 
-            gkde_norm = gkde.integrate_box_1d(xmin, xmax)
-            gkde_EW_norm = gkde_EW.integrate_box_1d(xmin, xmax)
-
             lnspc = np.linspace(xmin, xmax, 1000)
-            kdepdf = gkde.evaluate(lnspc) / gkde_norm
-            kdepdf_EW = gkde_EW.evaluate(lnspc) / gkde_EW_norm
-            axs_h2[j].plot(lnspc, kdepdf, 'r--')
-            axs_h2[j].plot(lnspc, kdepdf_EW, 'g--')
+
+            if (Cooke_flag):
+                gkde = stats.gaussian_kde(C)
+                gkde_norm = gkde.integrate_box_1d(global_minVal[j],
+                                                  global_maxVal[j])
+                kdepdf = gkde.evaluate(lnspc) / gkde_norm
+                axs_h2[j].plot(lnspc, kdepdf, 'r--')
+
+            if (ERF_flag):
+                gkde_erf = stats.gaussian_kde(C_erf)
+                gkde_erf_norm = gkde_erf.integrate_box_1d(
+                    global_minVal[j], global_maxVal[j])
+                kdepdf_erf = gkde_erf.evaluate(lnspc) / gkde_erf_norm
+                axs_h2[j].plot(lnspc, kdepdf_erf, '--', color='tab:purple')
+
+            if (EW_flag):
+                gkde_EW = stats.gaussian_kde(C_EW)
+                gkde_EW_norm = gkde_EW.integrate_box_1d(
+                    global_minVal[j], global_maxVal[j])
+                kdepdf_EW = gkde_EW.evaluate(lnspc) / gkde_EW_norm
+                axs_h2[j].plot(lnspc, kdepdf_EW, 'g--')
 
             axs_h[j].set_xlim(xmin, xmax)
             axs_h2[j].set_xlim(xmin, xmax)
@@ -502,7 +609,7 @@ for j in np.arange(n_SQ + n_TQ):
             axs_h2[j].set_ylabel('PDF', color='b')
 
             axs_h2[j].set_ylim(bottom=0)
-            plt.legend(['CM', 'EW'])
+            plt.legend(legends)
             plt.title('Target Question ' + str(j - n_SQ + 1))
 
             figname = output_dir + '/' + elicitation_name + \
@@ -516,134 +623,52 @@ for j in np.arange(n_SQ + n_TQ):
 
             plt.close()
 
-h = 0
-figs0 = {}
-axs0 = {}
+# ----------------------------------------- #
+# ---------- Save samples on csv ---------- #
+# ----------------------------------------- #
 
-for j in np.arange(n_SQ):
+if Cooke_flag:
 
-    nseed = str(j + 1)
+    csv_name = output_dir + '/' + elicitation_name + '_samples.csv'
+    np.savetxt(csv_name, samples, delimiter=",", fmt='%1.4e')
 
-    x = SQ_array[:, 1, j]
-    y = np.arange(n_experts) + 1
+if ERF_flag:
 
-    # creating error
-    x_errormax = SQ_array[:, 2, j] - SQ_array[:, 1, j]
-    x_errormin = SQ_array[:, 1, j] - SQ_array[:, 0, j]
+    csv_name = output_dir + '/' + elicitation_name + '_samples_erf.csv'
+    np.savetxt(csv_name, samples_erf, delimiter=",", fmt='%1.4e')
 
-    x_error = [x_errormin, x_errormax]
+if EW_flag:
 
-    figs0[j] = plt.figure()
-    axs0[j] = figs0[j].add_subplot(111)
-    axs0[j].errorbar(x, y, xerr=x_error, fmt='bo')
-    axs0[j].plot(x - x_errormin, y, 'bx')
-    axs0[j].plot(x + x_errormax, y, 'bx')
+    csv_name = output_dir + '/' + elicitation_name + '_samples_EW.csv'
+    np.savetxt(csv_name, samples_EW, delimiter=",", fmt='%1.4e')
 
-    if analysis:
-
-        axs0[j].errorbar([q50[h]],
-                         n_experts + 1,
-                         xerr=[[q50[h] - q05[h]], [q95[h] - q50[h]]],
-                         fmt='ro')
-        axs0[j].plot(q05[h], n_experts + 1, 'rx')
-        axs0[j].plot(q95[h], n_experts + 1, 'rx')
-
-        axs0[j].errorbar([q50_EW[h]],
-                         n_experts + 2,
-                         xerr=[[q50_EW[h] - q05_EW[h]],
-                               [q95_EW[h] - q50_EW[h]]],
-                         fmt='go')
-        axs0[j].plot(q05_EW[h], n_experts + 2, 'gx')
-        axs0[j].plot(q95_EW[h], n_experts + 2, 'gx')
-
-        axs0[j].plot(realization[j], n_experts + 3, 'kx')
-
-    else:
-
-        axs0[j].plot(realization[j], n_experts + 1, 'kx')
-
-    xt = plt.xticks()[0]
-    xmin, xmax = min(xt), max(xt)
-
-    if (realization[j] > 999):
-        txt = '%5.2e' % realization[j]
-    else:
-        txt = '%6.2f' % realization[j]
-
-    if analysis:
-
-        b = np.amin([np.amin(SQ_array[:, 0, j]), q05[h], realization[j]])
-        c = np.amin([np.amax(SQ_array[:, 0, j]), q95[h], realization[j]])
-        axs0[j].annotate(txt, (realization[j], n_experts + 3 + 0.15))
-
-    else:
-
-        b = np.amin([np.amin(SQ_array[:, 0, j]), realization[j]])
-        c = np.amin([np.amax(SQ_array[:, 0, j]), realization[j]])
-        axs0[j].annotate(txt, (realization[j], n_experts + 1 + 0.15))
-
-    ytick = []
-    for i in y:
-        ytick.append('Exp.' + str(int(i)))
-
-    if analysis:
-
-        ytick.append('DM-Cooke')
-
-        ytick.append('DM-Equal')
-
-    ytick.append('Realization')
-
-    ytick_tuple = tuple(i for i in ytick)
-
-    if analysis:
-
-        y = np.arange(n_experts + 3) + 1
-
-    else:
-
-        y = np.arange(n_experts + 1) + 1
-
-    axs0[j].set_yticks(y)
-    axs0[j].set_yticklabels(ytick_tuple)
-    axs0[j].set_xlabel(SQ_units[j])
-    plt.title('Seed Question ' + str(j + 1))
-
-    if (np.abs(c - b) >= 9.99e2):
-
-        axs0[j].set_xscale('log')
-
-    if analysis:
-        axs0[j].set_ylim(0.5, n_experts + 4.0)
-    else:
-        axs0[j].set_ylim(0.5, n_experts + 2.0)
-
-    axs0[j].grid()
-
-    figname = output_dir + '/' + elicitation_name + \
-        '_seed_' + str(j + 1).zfill(2) + '.pdf'
-    figs0[j].savefig(figname)
-
-    images = convert_from_path(figname)
-    figname = output_dir + '/' + elicitation_name + \
-        '_seed_' + str(j + 1).zfill(2) + '.png'
-    images[0].save(figname, 'PNG')
-
-    plt.close()
-
-    h = h + 1
+# ----------------------------------------- #
+# --------- Create answ. figures ---------- #
+# ----------------------------------------- #
 
 figs = {}
 axs = {}
 
-for j in np.arange(n_TQ):
+for h in np.arange(n_SQ + n_TQ):
 
-    x = TQ_array[:, 1, j]
+    if (h >= n_SQ):
+
+        j = h - n_SQ
+        Q_array = TQ_array[:, :, j]
+        string = 'Target'
+
+    else:
+
+        j = h
+        Q_array = SQ_array[:, :, j]
+        string = 'Seed'
+
+    x = Q_array[:, 1]
     y = np.arange(n_experts) + 1
 
     # creating error
-    x_errormax = TQ_array[:, 2, j] - TQ_array[:, 1, j]
-    x_errormin = TQ_array[:, 1, j] - TQ_array[:, 0, j]
+    x_errormax = Q_array[:, 2] - Q_array[:, 1]
+    x_errormin = Q_array[:, 1] - Q_array[:, 0]
 
     x_error = [x_errormin, x_errormax]
 
@@ -653,109 +678,157 @@ for j in np.arange(n_TQ):
     axs[j].plot(x - x_errormin, y, 'bx')
     axs[j].plot(x + x_errormax, y, 'bx')
 
-    if analysis:
-
-        axs[j].errorbar(q50[h], [n_experts + 1],
-                        xerr=[[q50[h] - q05[h]], [q95[h] - q50[h]]],
-                        fmt='ro')
-        axs[j].plot(q05[h], n_experts + 1, 'rx')
-        axs[j].plot(q95[h], n_experts + 1, 'rx')
-
-        axs[j].errorbar([q50_EW[h]],
-                        n_experts + 2,
-                        xerr=[[q50_EW[h] - q05_EW[h]],
-                              [q95_EW[h] - q50_EW[h]]],
-                        fmt='go')
-        axs[j].plot(q05_EW[h], n_experts + 2, 'gx')
-        axs[j].plot(q95_EW[h], n_experts + 2, 'gx')
-
-    xt = plt.xticks()[0]
-    xmin, xmax = min(xt), max(xt)
-
-    if analysis:
-
-        b = np.amin([np.amin(TQ_array[:, 0, j]), q05[h]])
-        c = np.amin([np.amax(TQ_array[:, 0, j]), q95[h]])
-
+    if (realization[j] > 999):
+        txt = '%5.2e' % realization[h]
     else:
-
-        b = np.amin(TQ_array[:, 0, j])
-        c = np.amax(TQ_array[:, 0, j])
+        txt = '%6.2f' % realization[h]
 
     ytick = []
     for i in y:
         ytick.append('Exp.' + str(int(i)))
 
-    ytick.append('DM-Cooke')
+    yerror = n_experts
+    if analysis:
 
-    ytick.append('DM-Equal')
+        if Cooke_flag:
 
-    y = np.arange(n_experts + 2) + 1
+            yerror = yerror + 1
+            axs[j].errorbar(q50[h],
+                            yerror,
+                            xerr=[[q50[h] - q05[h]], [q95[h] - q50[h]]],
+                            fmt='ro')
+            axs[j].plot(q05[h], yerror, 'rx')
+            axs[j].plot(q95[h], yerror, 'rx')
+
+            ytick.append('DM-Cooke')
+
+        if ERF_flag:
+
+            yerror = yerror + 1
+            axs[j].errorbar(q50_erf[h], [yerror],
+                            xerr=[[q50_erf[h] - q05_erf[h]],
+                                  [q95_erf[h] - q50_erf[h]]],
+                            fmt='o',
+                            color='tab:purple')
+            axs[j].plot(q05_erf[h], yerror, 'x', color='tab:purple')
+            axs[j].plot(q95_erf[h], yerror, 'x', color='tab:purple')
+
+            ytick.append('DM-ERF')
+
+        if EW_flag:
+
+            yerror = yerror + 1
+            axs[j].errorbar([q50_EW[h]], [yerror],
+                            xerr=[[q50_EW[h] - q05_EW[h]],
+                                  [q95_EW[h] - q50_EW[h]]],
+                            fmt='go')
+
+            axs[j].plot(q05_EW[h], yerror, 'gx')
+            axs[j].plot(q95_EW[h], yerror, 'gx')
+
+            ytick.append('DM-Equal')
+
+        if (h < n_SQ):
+
+            yerror = yerror + 1
+            axs[j].plot(realization[h], yerror, 'kx')
+            axs[j].annotate(txt, (realization[h], yerror + 0.15))
+
+            ytick.append('Realization')
+
+    else:
+
+        if (h < n_SQ):
+
+            axs[j].plot(realization[h], n_experts + 1, 'kx')
+            axs[j].annotate(txt, (realization[j], yerror + 0.15))
+
+    y = np.arange(len(ytick)) + 1
 
     ytick_tuple = tuple(i for i in ytick)
     axs[j].set_yticks(y)
-    axs[j].set_yticklabels(ytick_tuple)
-    axs[j].set_xlabel(TQ_units[j])
-    plt.title('Target Question ' + str(j + 1))
 
-    if (np.abs(c - b) >= 9.99e2):
+    axs[j].set_yticklabels(ytick_tuple)
+    axs[j].set_xlabel(global_units[h])
+
+    if (global_log[h] == 1):
 
         axs[j].set_xscale('log')
 
-    if analysis:
-        axs[j].set_ylim(0.5, n_experts + 2.5)
-    else:
-        axs[j].set_ylim(0.5, n_experts + 0.5)
+    axs[j].set_ylim(0.5, len(ytick) + 0.5)
 
     axs[j].grid(linewidth=0.4)
 
+    plt.title(string + ' Question ' + str(j + 1))
     figname = output_dir + '/' + elicitation_name + \
-        '_target_' + str(j + 1).zfill(2) + '.pdf'
+        '_'+string+'_' + str(j + 1).zfill(2) + '.pdf'
     figs[j].savefig(figname)
 
     images = convert_from_path(figname)
     figname = output_dir + '/' + elicitation_name + \
-        '_target_' + str(j + 1).zfill(2) + '.png'
+        '_'+string+'_' + str(j + 1).zfill(2) + '.png'
     images[0].save(figname, 'PNG')
-
     plt.close()
 
-    h = h + 1
+# ----------------------------------------- #
+# ------- Create .pptx presentation ------- #
+# ----------------------------------------- #
 
 prs = Presentation()
 prs.slide_width = Inches(16)
 prs.slide_height = Inches(9)
+left = Inches(2)
+top = Inches(1.5)
 
+# ------------- Title slide ----------------#
 lyt = prs.slide_layouts[0]  # choosing a slide layout
 slide = prs.slides.add_slide(lyt)  # adding a slide
 title = slide.shapes.title  # assigning a title
 subtitle = slide.placeholders[1]  # placeholder for subtitle
-title.text = "Expert elicitation"  # title
+title.text = "Expert elicitation - "+elicitation_name  # title
+
+title_para = slide.shapes.title.text_frame.paragraphs[0]
+title_para.font.name = "Helvetica"
+
 Current_Date_Formatted = datetime.datetime.today().strftime('%d-%b-%Y')
 
 subtitle.text = Current_Date_Formatted  # subtitle
 
+subtitle_para = slide.shapes.placeholders[1].text_frame.paragraphs[0]
+subtitle_para.font.name = "Helvetica"
+
+img = slide.shapes.add_picture('logo.png',left + Inches(11.3),
+                                   top+Inches(5.4),
+                                   width=Inches(2.4))
+
+title_slide_layout = prs.slide_layouts[5]
+
+# ------------- Weights slide -------------#
+
 if analysis:
 
-    slide = prs.slides.add_slide(prs.slide_layouts[5])
-    title_shape = slide.shapes.title
-    title_shape.text = "Experts' weights"
-    title_para = slide.shapes.title.text_frame.paragraphs[0]
-    title_para.font.name = "Helvetica"
+    slide = prs.slides.add_slide(title_slide_layout)
+    
+    text_title = "Experts' weights"
+    add_title(slide,text_title)
+    
     # ---add table weights to slide---
     x, y, cx, cy = Inches(2), Inches(2), Inches(8), Inches(4)
-    #x, y, cx, cy = Inches(2), Inches(2), MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT, Inches(4)
-    shape = slide.shapes.add_table(2,
+
+    shape = slide.shapes.add_table(3,
                                    len(W_gt0) + 1, x, y, cx,
                                    MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
-    #shape = slide.shapes.add_table(2, len(W_gt0)+1, x, y, cx, cy)
+
     table = shape.table
 
     cell = table.cell(0, 0)
     cell.text = 'Expert ID'
 
     cell = table.cell(1, 0)
-    cell.text = 'Expert weight'
+    cell.text = 'Expert weight (Cooke)'
+
+    cell = table.cell(2, 0)
+    cell.text = 'Expert weight (ERF)'
 
     for j in np.arange(len(W_gt0)):
         cell = table.cell(0, j + 1)
@@ -764,112 +837,114 @@ if analysis:
         cell = table.cell(1, j + 1)
         cell.text = '%6.2f' % W_gt0[j]
 
+        cell = table.cell(2, j + 1)
+        cell.text = '%6.2f' % Werf_gt0[j]
+
     for cell in iter_cells(table):
         for paragraph in cell.text_frame.paragraphs:
             for run in paragraph.runs:
                 run.font.size = Pt(12)
 
-for j in np.arange(n_SQ):
+    add_date(slide)            
+    add_small_logo(slide,left,top)
 
-    figname = output_dir + '/' + elicitation_name + \
-        '_seed_' + str(j + 1).zfill(2) + '.png'
+# ------------- Answers slides ------------#
 
-    title_slide_layout = prs.slide_layouts[5]
-    left = Inches(2)
-    top = Inches(1.5)
+for h in np.arange(n_SQ + n_TQ):
+
+    if (h >= n_SQ):
+
+        j = h - n_SQ
+        string = 'Target'
+
+    else:
+
+        j = h
+        string = 'Seed'
 
     slide = prs.slides.add_slide(title_slide_layout)
 
-    title_shape = slide.shapes.title
-    title_shape.text = SQ_question[j]
-    title_shape.width = Inches(15)
-    title_shape.height = Inches(2)
+    text_title = global_shortQuestion[h]
+    add_title(slide,text_title)
 
-    title_para = slide.shapes.title.text_frame.paragraphs[0]
-
-    title_para.font.name = "Helvetica"
-
-    img = slide.shapes.add_picture(figname, left, top, width=Inches(10))
-
-    shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),
-                                   Inches(16), Inches(0.3))
-    shape.shadow.inherit = False
-    fill = shape.fill
-    fill.solid()
-    fill.fore_color.rgb = RGBColor(0, 0, 255)
-    shape.text = "Expert elicitation " + \
-        datetime.datetime.today().strftime('%d-%b-%Y')
-    shape_para = shape.text_frame.paragraphs[0]
-    shape_para.font.name = "Helvetica"
-
-for j in np.arange(n_TQ):
+    text_box = global_longQuestion[h]
+    add_text_box(slide,left,top,text_box)
 
     figname = output_dir + '/' + elicitation_name + \
-        '_target_' + str(j + 1).zfill(2) + '.png'
+        '_'+string+'_' + str(j + 1).zfill(2) + '.png'
+    add_figure(slide,figname,left,top)
 
-    blank_slide_layout = prs.slide_layouts[6]
-    slide = prs.slides.add_slide(title_slide_layout)
+    add_date(slide)            
+    add_small_logo(slide,left,top)
 
-    title_shape = slide.shapes.title
-    title_shape.text = TQ_question[j]
-    title_shape.width = Inches(15)
-    title_shape.height = Inches(2)
-    title_para = slide.shapes.title.text_frame.paragraphs[0]
-    title_para.font.name = "Helvetica"
-
-    img = slide.shapes.add_picture(figname, left, top, width=Inches(10))
-
-    shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),
-                                   Inches(16), Inches(0.3))
-    shape.shadow.inherit = False
-    fill = shape.fill
-    fill.solid()
-    fill.fore_color.rgb = RGBColor(0, 0, 255)
-    shape.text = "Expert elicitation " + \
-        datetime.datetime.today().strftime('%d-%b-%Y')
-    shape_para = shape.text_frame.paragraphs[0]
-    shape_para.font.name = "Helvetica"
+# ------------- Pctls slides -------------#
 
 if analysis and target:
 
     slide = prs.slides.add_slide(prs.slide_layouts[5])
-    title_shape = slide.shapes.title
-    title_shape.text = "Percentiles of target questions"
-    title_para = slide.shapes.title.text_frame.paragraphs[0]
-    title_para.font.name = "Helvetica"
+        
+    text_title = "Percentiles of target questions"
+    add_title(slide,text_title)
+    
+    
     # ---add table to slide---
     x, y, cx, cy = Inches(2), Inches(2), Inches(12), Inches(4)
-    shape = slide.shapes.add_table(n_TQ + 1, 4, x, y, cx,
+    shape = slide.shapes.add_table(n_TQ + 1, 7, x, y, cx,
                                    MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
     table = shape.table
 
     cell = table.cell(0, 1)
-    cell.text = 'Q05'
+    cell.text = 'Q05 (Cooke)'
 
     cell = table.cell(0, 2)
-    cell.text = 'Q50'
+    cell.text = 'Q50 (Cooke)'
 
     cell = table.cell(0, 3)
-    cell.text = 'Q95'
+    cell.text = 'Q95 (Cooke)'
 
-    for j in np.arange(n_TQ):
+    cell = table.cell(0, 4)
+    cell.text = 'Q05 (ERF)'
 
-        cell = table.cell(j + 1, 0)
-        cell.text = 'Target Question ' + str(j + 1)
+    cell = table.cell(0, 5)
+    cell.text = 'Q50 (ERF)'
 
-        cell = table.cell(j + 1, 1)
-        cell.text = '%6.2f' % q05[n_SQ + j]
+    cell = table.cell(0, 6)
+    cell.text = 'Q95 (ERF)'
 
-        cell = table.cell(j + 1, 2)
-        cell.text = '%6.2f' % q50[n_SQ + j]
+    for h in np.arange(n_TQ):
 
-        cell = table.cell(j + 1, 3)
-        cell.text = '%6.2f' % q95[n_SQ + j]
+        j = h + n_SQ
+
+        cell = table.cell(h + 1, 0)
+        cell.text = 'Target Question ' + str(h + 1)
+
+        cell = table.cell(h + 1, 1)
+        cell.text = '%6.2f' % q05[j]
+
+        cell = table.cell(h + 1, 2)
+        cell.text = '%6.2f' % q50[j]
+
+        cell = table.cell(h + 1, 3)
+        cell.text = '%6.2f' % q95[j]
+
+        cell = table.cell(h + 1, 4)
+        cell.text = '%6.2f' % q05_erf[j]
+
+        cell = table.cell(h + 1, 5)
+        cell.text = '%6.2f' % q50_erf[j]
+
+        cell = table.cell(h + 1, 6)
+        cell.text = '%6.2f' % q95_erf[j]
 
     for cell in iter_cells(table):
         for paragraph in cell.text_frame.paragraphs:
             for run in paragraph.runs:
                 run.font.size = Pt(14)
+     
+    add_date(slide)            
+    add_small_logo(slide,left,top)
+
+# ------------ Barplot slides ------------#
 
 for j in np.arange(n_SQ + n_TQ):
 
@@ -877,33 +952,20 @@ for j in np.arange(n_SQ + n_TQ):
 
         if (j >= n_SQ):
 
+            slide = prs.slides.add_slide(title_slide_layout)
+
             figname = output_dir + '/' + elicitation_name + \
                 '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
+            
+            text_title = TQ_question[j - n_SQ]
+            add_title(slide,text_title)
 
-            blank_slide_layout = prs.slide_layouts[6]
-            title_slide_layout = prs.slide_layouts[5]
-            slide = prs.slides.add_slide(title_slide_layout)
-            left = Inches(2)
-            top = Inches(1.5)
+            text_box = TQ_LongQuestion[j - n_SQ]
+            add_text_box(slide,left,top,text_box)
 
-            title_shape = slide.shapes.title
-            title_shape.text = TQ_question[j - n_SQ]
-            title_para = slide.shapes.title.text_frame.paragraphs[0]
-            title_para.font.name = "Helvetica"
+            add_date(slide)
+            add_small_logo(slide,left,top)
+            add_figure(slide,figname,left-Inches(0.8),top)
 
-            img = slide.shapes.add_picture(figname,
-                                           left,
-                                           top,
-                                           width=Inches(10))
-            shape = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, 0, Inches(0.2),
-                                           Inches(16), Inches(0.3))
-            shape.shadow.inherit = False
-            fill = shape.fill
-            fill.solid()
-            fill.fore_color.rgb = RGBColor(0, 0, 255)
-            shape.text = "Expert elicitation " + \
-                datetime.datetime.today().strftime('%d-%b-%Y')
-            shape_para = shape.text_frame.paragraphs[0]
-            shape_para.font.name = "Helvetica"
 
 prs.save(output_dir + "/" + elicitation_name + ".pptx")  # saving file

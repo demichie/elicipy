@@ -45,7 +45,7 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
                 tmp2 = np.append(tmp, x_n[i])
                 x[e, :] = tmp2
 
-            elif background_measure[i] == 'log_uni':
+            elif background_measure[i] == 'log':
 
                 if l[i] < 0 or h[i] < 0:
 
@@ -91,7 +91,7 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
                     tmp2 = np.append(tmp, x_n[i])
                     x[e, :] = tmp2
 
-                elif background_measure[i] == 'log_uni':
+                elif background_measure[i] == 'log':
                     if l(i) < 0 or h(i) < 0:
                         raise ValueError(
                             'Log-Uniform background measure cannot be used for item %d because an expert provided negative values',

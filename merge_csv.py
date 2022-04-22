@@ -1,4 +1,4 @@
-def merge_csv(input_dir):
+def merge_csv(input_dir, target):
 
     import os
     import glob
@@ -7,13 +7,14 @@ def merge_csv(input_dir):
     current_path = os.getcwd()
 
     foldername = 'seed'
-    path = "./" + input_dir + '/' + foldername
+    path = input_dir + '/' + foldername
 
     # Check whether the specified path exists or not
     isExist = os.path.exists(path)
 
     if isExist:
 
+        print('Merging seeds')
         os.chdir(path)
 
         extension = 'csv'
@@ -38,12 +39,12 @@ def merge_csv(input_dir):
     os.chdir(current_path)
 
     foldername = 'target'
-    path = "./" + input_dir + '/' + foldername
+    path = input_dir + '/' + foldername
 
     # Check whether the specified path exists or not
     isExist = os.path.exists(path)
 
-    if isExist:
+    if isExist and target:
 
         os.chdir(path)
 
