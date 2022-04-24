@@ -80,13 +80,10 @@ def add_text_box(slide,left,top,text_box):
                                      width=Inches(4),
                                      height=Inches(5))
     tf = txBox.text_frame
-
-    p = tf.add_paragraph()
-    p.text = text_box
-    p.font.name = "Helvetica"
-    p.font.size = Pt(16)
-
-
+    tf.text = text_box
+    # tf.text = 'prova'
+    tf.word_wrap = True
+    
 def iter_cells(table):
     for row in table.rows:
         for cell in row.cells:
