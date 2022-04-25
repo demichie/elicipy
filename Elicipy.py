@@ -177,6 +177,8 @@ for i in df_quest.itertuples():
     idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
         0:9]
 
+    minVal = floaf(minVal)
+    maxVal = float(maxVal)
     if scale == 'uni':
 
         global_log.append(0)
@@ -307,6 +309,8 @@ if target:
         idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
             0:9]
 
+        minVal = float(minVal)
+        maxVal = float(maxVal)
         if (question == 'target'):
 
             TQ_question.append(shortQ)
