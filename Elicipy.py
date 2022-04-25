@@ -177,7 +177,7 @@ for i in df_quest.itertuples():
     idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
         0:9]
 
-    minVal = floaf(minVal)
+    minVal = float(minVal)
     maxVal = float(maxVal)
     if scale == 'uni':
 
