@@ -37,6 +37,7 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
     # print('I_real, I_tot',I_real, I_tot)
 
     for ex in np.arange(E):
+    
         C[ex] = calscore(M[ex, :], cal_power)
 
         W[ex, 0] = C[ex]
