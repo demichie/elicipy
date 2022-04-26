@@ -177,6 +177,8 @@ for i in df_quest.itertuples():
     idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
         0:9]
 
+    minVal = float(minVal)
+    maxVal = float(maxVal)
     if scale == 'uni':
 
         global_log.append(0)
@@ -307,6 +309,8 @@ if target:
         idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
             0:9]
 
+        minVal = float(minVal)
+        maxVal = float(maxVal)
         if (question == 'target'):
 
             TQ_question.append(shortQ)
@@ -388,33 +392,19 @@ if analysis:
     Weqok = [x / n_experts for x in Weq]
 
     W_gt0_01 = []
-    expin = []
-
-    for x in W[:, 4]:
-        if x > 0:
-            W_gt0_01.append(x)
-
-    k = 1
-    for i in W[:, 4]:
-        if i > 0:
-            expin.append(k)
-        k += 1
-
-    W_gt0 = [round((x * 100), 1) for x in W_gt0_01]
-
     Werf_gt0_01 = []
     expin = []
 
-    for x in W_erf[:, 4]:
-        if x > 0:
-            Werf_gt0_01.append(x)
-
     k = 1
-    for i in W_erf[:, 4]:
-        if i > 0:
+    for x,y in zip(W[:, 4],W_erf[:,4]):
+        if (x > 0) or (y > 0):
+            W_gt0_01.append(x)
+            Werf_gt0_01.append(y)
             expin.append(k)
         k += 1
 
+
+    W_gt0 = [round((x * 100), 1) for x in W_gt0_01]
     Werf_gt0 = [round((x * 100), 1) for x in Werf_gt0_01]
 
     print("")
@@ -812,8 +802,7 @@ if analysis:
     # ---add table weights to slide---
     x, y, cx, cy = Inches(2), Inches(2), Inches(8), Inches(4)
 
-    shape = slide.shapes.add_table(3,
-                                   len(W_gt0) + 1, x, y, cx,
+    shape = slide.shapes.add_table(len(W_gt0) + 1, 3, x, y, cx,
                                    MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
 
     table = shape.table
@@ -821,20 +810,20 @@ if analysis:
     cell = table.cell(0, 0)
     cell.text = 'Expert ID'
 
-    cell = table.cell(1, 0)
-    cell.text = 'Expert weight (Cooke)'
+    cell = table.cell(0, 1)
+    cell.text = 'Cooke'
 
-    cell = table.cell(2, 0)
-    cell.text = 'Expert weight (ERF)'
+    cell = table.cell(0, 2)
+    cell.text = 'ERF'
 
     for j in np.arange(len(W_gt0)):
-        cell = table.cell(0, j + 1)
+        cell = table.cell(j + 1,0)
         cell.text = 'Exp' + str(expin[j])
 
-        cell = table.cell(1, j + 1)
+        cell = table.cell(j + 1,1)
         cell.text = '%6.2f' % W_gt0[j]
 
-        cell = table.cell(2, j + 1)
+        cell = table.cell(j + 1,2)
         cell.text = '%6.2f' % Werf_gt0[j]
 
     for cell in iter_cells(table):
