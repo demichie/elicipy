@@ -1,5 +1,5 @@
 def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
-                   k, cal_power):
+                   overshoot, cal_power):
 
     import numpy as np
     from calculate_information import calculate_information
@@ -32,10 +32,9 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
                 M[ex, 3] = M[ex, 3] + 1
 
     # calculate calibration and information score for every expert
-    [I_real, I_tot] = calculate_information(SQ_array, TQ_array, realization, k,
+    [I_real, I_tot] = calculate_information(SQ_array, TQ_array, realization, overshoot,
                                             background_measure)
-    # print('I_real, I_tot',I_real, I_tot)
-
+    
     for ex in np.arange(E):
     
         C[ex] = calscore(M[ex, :], cal_power)
@@ -45,11 +44,10 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
         W[ex, 2] = I_real[ex, 0]
 
         if C[ex] < alpha:
-            ind = 0
+        
+            w[ex] = 0
         else:
-            ind = 1
-
-        w[ex] = C[ex] * I_real[ex] * ind
+            w[ex] = C[ex] * I_real[ex]
 
     # unNormalized weight
     W[:, 3] = w.T

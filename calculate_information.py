@@ -7,7 +7,6 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
     """
 
     import numpy as np
-    from calscore import calscore
 
     per = [0.05, 0.5, 0.95]
     p = [0.05, 0.45, 0.45, 0.05]
@@ -30,7 +29,7 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
     Info_score_tot = np.zeros((E, 1))
 
     for i in np.arange(N):
-
+    
         l[i] = np.minimum(np.amin(SQ_array[:, :, i]), realization[i])
         h[i] = np.maximum(np.amax(SQ_array[:, :, i]), realization[i])
 

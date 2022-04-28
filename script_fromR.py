@@ -23,10 +23,16 @@ def createDATA1(DAT, j, W, N, logSCALE, dominion, ERF_flag):
     # print('mid',mid)
     # print('incM',incM)
 
-    if ERF_flag:
+    if ERF_flag ==1:
+
+        quan05, quan50, qmean, quan95, C = createSamplesERF_original(
+            incm, mid, incM, W, N, logSCALE, dominion)
+            
+    elif ERF_flag ==2:
 
         quan05, quan50, qmean, quan95, C = createSamplesERF(
             incm, mid, incM, W, N, logSCALE, dominion)
+
     else:
 
         quan05, quan50, qmean, quan95, C = createSamplesUCA2(
@@ -108,7 +114,7 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, dominion):
         incM = np.log10(incM[VV])
         mid = np.log10(mid[VV])
         W = W[VV]
-        W = W / sum(W)
+        W = W / np.sum(W)
         if DDD[0] > 0:
 
             DDD[0] = np.log10(DDD[0])
@@ -157,6 +163,86 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, dominion):
     return quan05, quan50, qmean, quan95, C1
 
 
+#sampler quantile averaging
+
+def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, dominion):
+
+    import numpy as np
+
+    W = W / np.sum(W)
+
+    DDD = dominion
+
+    if (logSCALE):
+
+        VV = incm > 0
+        incm = np.log10(incm[VV])
+        incM = np.log10(incM[VV])
+        mid = np.log10(mid[VV])
+        W = W[VV]
+        W = W / np.sum(W)
+        if DDD[0] > 0:
+
+            DDD[0] = np.log10(DDD[0])
+
+        else:
+
+            DDD[0] = -np.inf
+
+        DDD[1] = np.log(DDD[1])
+
+    C = np.zeros(N)
+    C = np.zeros(N)
+
+    Ne = len(incm)
+
+    P = np.zeros_like(incm)
+    a = np.zeros_like(incm)
+    b = np.zeros_like(incm)
+    c = np.zeros_like(incm)
+
+    rng = np.random.default_rng(12345)
+    u = rng.random(N)
+    
+
+    for i in range(Ne):
+    
+        Vp = NewRap(incm[i],mid[i],incM[i])
+        a[i]=Vp[0]
+        b[i]=mid[i]
+        c[i]=Vp[1]
+
+ 
+
+    for j in range(N):
+        
+        for i in range(Ne):
+        
+            if (u[j]<((b[i]-a[i])/(c[i]-a[i]))):
+            
+                P[i] = np.sqrt(u[j]*(b[i]-a[i])*(c[i]-a[i]))+a[i]
+
+            else:
+            
+                P[i] = c[i] - np.sqrt((1.0-u[j])*(c[i]-a[i])*(c[i]-b[i]))
+
+        C[j] = np.dot(P,W)
+
+    if (logSCALE):
+
+        C1 = 10.0**C
+
+    else:
+
+        C1 = C
+
+    quan05 = np.quantile(C1, 0.05)
+    quan50 = np.quantile(C1, 0.5)
+    qmean = np.mean(C1)
+    quan95 = np.quantile(C1, 0.95)
+
+    return quan05, quan50, qmean, quan95, C1
+
 def createSamplesERF(incm, mid, incM, W, N, logSCALE, dominion):
 
     import numpy as np
@@ -172,7 +258,7 @@ def createSamplesERF(incm, mid, incM, W, N, logSCALE, dominion):
         incM = np.log10(incM[VV])
         mid = np.log10(mid[VV])
         W = W[VV]
-        W = W / sum(W)
+        W = W / np.sum(W)
         if DDD[0] > 0:
 
             DDD[0] = np.log10(DDD[0])
@@ -196,8 +282,6 @@ def createSamplesERF(incm, mid, incM, W, N, logSCALE, dominion):
         while ((C[j] < DDD[0]) or (C[j] > DDD[1])):
 
             C[j] = rtrian(incm[s], mid[s], incM[s])
-
-    s = np
 
     if (logSCALE):
 
