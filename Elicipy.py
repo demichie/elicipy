@@ -729,20 +729,25 @@ def main():
     # ---------- Save samples on csv ---------- #
     # ----------------------------------------- #
 
+    targets = ['target_'+str(i).zfill(2) for i in range(n_TQ)]
+
     if Cooke_flag>0:
 
         csv_name = output_dir + '/' + elicitation_name + '_samples.csv'
-        np.savetxt(csv_name, samples, delimiter=",", fmt='%1.4e')
+        np.savetxt(csv_name, samples, header=','.join(targets),
+                   comments='',delimiter=",", fmt='%1.4e')
 
     if ERF_flag>0:
 
         csv_name = output_dir + '/' + elicitation_name + '_samples_erf.csv'
-        np.savetxt(csv_name, samples_erf, delimiter=",", fmt='%1.4e')
+        np.savetxt(csv_name, samples_erf, header=','.join(targets),
+                   comments='', delimiter=",", fmt='%1.4e')
 
     if EW_flag>0:
 
         csv_name = output_dir + '/' + elicitation_name + '_samples_EW.csv'
-        np.savetxt(csv_name, samples_EW, delimiter=",", fmt='%1.4e')
+        np.savetxt(csv_name, samples_EW, header=','.join(targets),
+                   comments='', delimiter=",", fmt='%1.4e')
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
