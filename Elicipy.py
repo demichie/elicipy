@@ -12,9 +12,9 @@ from pptx import Presentation
 import difflib
 from scipy import stats
 from matplotlib.ticker import PercentFormatter
-from script_fromR import createDATA1
+from ERFweights import createDATA1
 from global_weights import global_weights
-from script_fromR import generate_ERF
+from ERFweights import generate_ERF
 from merge_csv import merge_csv
 import numpy as np
 import pkg_resources
