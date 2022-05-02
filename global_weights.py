@@ -203,13 +203,18 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
     """
 
     import numpy as np
-    
-    N = SQ_array.shape[2]
-    E = SQ_array.shape[0]
-    M = np.zeros((E, 4))
-    C = np.zeros((E))
-    w = np.zeros((E))
 
+    # number of Seed questions    
+    N = SQ_array.shape[2]
+    # number of experts
+    E = SQ_array.shape[0]
+    # number of realization in every bin
+    M = np.zeros((E, 4))
+	# score
+    C = np.zeros((E))
+    # unNormalized weight
+    w = np.zeros((E))
+    # array with information, score and normalized weight for each expert 
     W = np.zeros((E, 5))
 
     # create numpy array M with the number of realizations captured in every
