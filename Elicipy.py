@@ -31,6 +31,8 @@ import matplotlib.pyplot as plt
 from ElicipyDict import *
 from matplotlib import rcParams
 
+max_len_table = 20
+
 plt.rcParams.update({'font.size': 8})
 
 rcParams['font.family'] = 'sans-serif'
@@ -796,47 +798,57 @@ def main():
 
     # ------------- Weights slide -------------#
 
+ 
     if analysis:
 
-        slide = prs.slides.add_slide(title_slide_layout)
+        n_tables = int(np.ceil(len(W_gt0) / max_len_table))
+        
+        for i_table in range(n_tables):
+
+            slide = prs.slides.add_slide(title_slide_layout)
     
-        text_title = "Experts' weights"
-        add_title(slide,text_title)
+            text_title = "Experts' weights"
+            add_title(slide,text_title)
     
-        # ---add table weights to slide---
-        x, y, cx, cy = Inches(2), Inches(2), Inches(8), Inches(4)
+            # ---add table weights to slide---
+            x, y, cx, cy = Inches(2), Inches(2), Inches(8), Inches(4)
 
-        shape = slide.shapes.add_table(len(W_gt0) + 1, 3, x, y, cx,
-                                   MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+            fisrt_j = i_table*max_len_table
+            last_j = np.minimum( (i_table+1)*max_len_table , len(W_gt0) )
 
-        table = shape.table
+            shape = slide.shapes.add_table( last_j - fisrt_j + 1, 3, x, y, cx,
+                                       MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
 
-        cell = table.cell(0, 0)
-        cell.text = 'Expert ID'
+            table = shape.table
 
-        cell = table.cell(0, 1)
-        cell.text = 'Cooke'
+            cell = table.cell(0, 0)
+            cell.text = 'Expert ID'
 
-        cell = table.cell(0, 2)
-        cell.text = 'ERF'
+            cell = table.cell(0, 1)
+            cell.text = 'Cooke'
 
-        for j in np.arange(len(W_gt0)):
-            cell = table.cell(j + 1,0)
-            cell.text = 'Exp' + str(expin[j])
+            cell = table.cell(0, 2)
+            cell.text = 'ERF'
+            
 
-            cell = table.cell(j + 1,1)
-            cell.text = '%6.2f' % W_gt0[j]
+            for j in np.arange(fisrt_j,last_j):
+                j_mod = np.remainder(j,max_len_table)
+                cell = table.cell(j_mod + 1,0)
+                cell.text = 'Exp' + str(expin[j])
+                
+                cell = table.cell(j_mod + 1,1)
+                cell.text = '%6.2f' % W_gt0[j]
+                
+                cell = table.cell(j_mod + 1,2)
+                cell.text = '%6.2f' % Werf_gt0[j]
 
-            cell = table.cell(j + 1,2)
-            cell.text = '%6.2f' % Werf_gt0[j]
+            for cell in iter_cells(table):
+                for paragraph in cell.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(12)
 
-        for cell in iter_cells(table):
-            for paragraph in cell.text_frame.paragraphs:
-                for run in paragraph.runs:
-                    run.font.size = Pt(12)
-
-        add_date(slide)            
-        add_small_logo(slide,left,top)
+            add_date(slide)            
+            add_small_logo(slide,left,top)
 
     # ------------- Answers slides ------------#
 
@@ -871,59 +883,67 @@ def main():
 
     if analysis and target:
 
-        slide = prs.slides.add_slide(prs.slide_layouts[5])
-        
-        text_title = "Percentiles of target questions"
-        add_title(slide,text_title)
+        n_tables = int(np.ceil(n_TQ / max_len_table))
+
+        for i_table in range(n_tables):
+
+            slide = prs.slides.add_slide(prs.slide_layouts[5])
+                
+            text_title = "Percentiles of target questions"
+            add_title(slide,text_title)
     
+            fisrt_j = i_table*max_len_table
+            last_j = np.minimum( (i_table+1)*max_len_table , n_TQ )
         
-        # ---add table to slide---
-        x, y, cx, cy = Inches(2), Inches(2), Inches(12), Inches(4)
-        shape = slide.shapes.add_table(n_TQ + 1, 7, x, y, cx,
-                                   MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
-        table = shape.table
+            # ---add table to slide---
+            x, y, cx, cy = Inches(2), Inches(2), Inches(12), Inches(4)
+            shape = slide.shapes.add_table(last_j - fisrt_j + 1, 7, x, y, cx,
+                                       MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+            table = shape.table
 
-        cell = table.cell(0, 1)
-        cell.text = 'Q05 (Cooke)'
+            cell = table.cell(0, 1)
+            cell.text = 'Q05 (Cooke)'
 
-        cell = table.cell(0, 2)
-        cell.text = 'Q50 (Cooke)'
+            cell = table.cell(0, 2)
+            cell.text = 'Q50 (Cooke)'
 
-        cell = table.cell(0, 3)
-        cell.text = 'Q95 (Cooke)'
+            cell = table.cell(0, 3)
+            cell.text = 'Q95 (Cooke)'
 
-        cell = table.cell(0, 4)
-        cell.text = 'Q05 (ERF)'
+            cell = table.cell(0, 4)
+            cell.text = 'Q05 (ERF)'
 
-        cell = table.cell(0, 5)
-        cell.text = 'Q50 (ERF)'
+            cell = table.cell(0, 5)
+            cell.text = 'Q50 (ERF)'
 
-        cell = table.cell(0, 6)
-        cell.text = 'Q95 (ERF)'
+            cell = table.cell(0, 6)
+            cell.text = 'Q95 (ERF)'
 
-        for h in np.arange(n_TQ):
+            for h in np.arange(fisrt_j,last_j):
 
-            j = h + n_SQ
+                h_mod = np.remainder(h,max_len_table)
 
-            cell = table.cell(h + 1, 0)
-            cell.text = 'Target Question ' + str(h + 1)
+                j = h + n_SQ
+
+                cell = table.cell(h_mod + 1, 0)
+                cell.text = 'Target Question ' + str(h + 1)
             
-            for l in range(3):
+                for l in range(3):
             
-                cell = table.cell(h + 1, l+1)
-                cell.text = '%6.2f' % q_Cooke[j,l]
+                    cell = table.cell(h_mod + 1, l+1)
+                    cell.text = '%6.2f' % q_Cooke[j,l]
 
-                cell = table.cell(h + 1, l+4)
-                cell.text = '%6.2f' % q_erf[j,l]
+                    cell = table.cell(h_mod + 1, l+4)
+                    cell.text = '%6.2f' % q_erf[j,l]
 
 
-        for cell in iter_cells(table):
-            for paragraph in cell.text_frame.paragraphs:
-                for run in paragraph.runs:
-                    run.font.size = Pt(14)
+            for cell in iter_cells(table):
+                for paragraph in cell.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(14)
      
-        add_date(slide)            
-        add_small_logo(slide,left,top)
+            add_date(slide)            
+            add_small_logo(slide,left,top)
 
     # ------------ Barplot slides ------------#
 
