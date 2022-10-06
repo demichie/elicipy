@@ -3,6 +3,9 @@ elicitation_name = 'test'
 input_dir = 'DATA3'
 csv_file = 'questionnaire.csv'
 
+language = ''
+idx_list = [1,2,4,5]
+
 output_dir = 'OUTPUT3'
 
 analysis = True
