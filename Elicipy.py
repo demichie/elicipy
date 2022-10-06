@@ -368,7 +368,75 @@ def main():
     # (sometimes the expert give the percentiles in the wrong order)
     SQ_array = np.sort(SQ_array, axis=1)
 
-    df_quest = pd.read_csv(input_dir + '/' + csv_file, header=0)
+    df_read = pd.read_csv(input_dir + '/' + csv_file, header=0)
+    print(df_read)
+
+    if len(idx_list)>0:
+
+        # extract the questions with index in idx_list (from column IDX)
+        df_quest = df_read[df_read['IDX'].isin(idx_list)]
+        print(df_quest)
+        
+        # find the python indexes as rows of the dataframe
+        df_indexes = np.array([ df_read.index[df_read['IDX']==i][0] for i in idx_list])
+        print('df_indexes',df_indexes)
+
+    else:
+    
+        df_quest = df_read
+        df_indexes = np.arange(len(df_quest.index))
+
+    # find the indexes of the seed questions (0<idx<n_SQ)
+    df_indexes_SQ = df_indexes[(df_indexes<n_SQ)]
+    print('df_indexes_SQ',df_indexes_SQ)
+
+    # find the indexes of the target questions (0<idx<n_TQ)
+    df_indexes_TQ = df_indexes[(df_indexes>=n_SQ)]-n_SQ
+    print('df_indexes_TQ',df_indexes_TQ)
+     
+    # if we have a subset of the SQ, then extract from SQ_array
+    # the correct slice   
+    if len(df_indexes_SQ)>0:
+   
+        # print('SQ_array',SQ_array)
+        SQ_array = SQ_array[:,:,df_indexes_SQ]
+        n_SQ = len(df_indexes_SQ)
+        # print('SQ_array',SQ_array)
+
+    data_top = df_quest.head()
+    
+    langs = []
+    
+    # check if there are multiple languages
+    for head in data_top:
+    
+        if 'LONG Q' in head:
+        
+            string = head.replace('LONG Q','')
+            string2 = string.replace('_','')
+            
+            langs.append(string2)
+     
+    print('Languages:',langs)
+     
+    # select the columns to use according with the language        
+    if (len(langs)>1):
+    
+        if language in langs:
+    
+            lang_index = langs.index(language)
+            # list of column indexes to use
+            index_list = [1,2,lang_index+3]+list(range(len(langs)+3,len(langs)+10))
+        
+        else:
+        
+            raise Exception("Sorry, language is not in questionnaire")
+            
+    else:
+     
+        lang_index = 0
+        language = ''
+        index_list = list(range(1,11))
 
     # list with the short title of the target questions
     SQ_question = []
@@ -389,9 +457,8 @@ def main():
 
     for i in df_quest.itertuples():
 
-        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
-            0:9]
-
+        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question,image = [i[j] for j in index_list]
+        
         minVal = float(minVal)
         maxVal = float(maxVal)
         if scale == 'uni':
@@ -446,6 +513,37 @@ def main():
         print('Seed question ', i)
         print(SQ_array[:, :, i])
 
+    original_stdout = sys.stdout # Save a reference to the original standard output
+
+    filename = input_dir + '/seed.dtt'
+
+    with open(filename, 'w') as f:
+        sys.stdout = f # Change the standard output to the file we created.
+        
+        print('* CLASS ASCII OUTPUT FILE. NQ=   3   QU=   5  50  95')
+        print('')
+        print('')
+        
+        for k in np.arange(n_experts):
+    
+            for i in np.arange(n_SQ):
+
+                print(f'{k+1:4d} {"Exp"+str(k+1):>10} {i+1:4d} {"SQ"+str(i+1):15} {SQ_scale[i]:4} {SQ_array[k, 0, i]:6e} {SQ_array[k, 1, i]:6e} {SQ_array[k, 2, i]:6e}')
+
+        sys.stdout = original_stdout # Reset the standard output to its original value
+
+    filename = input_dir + '/seed.rls'
+
+    with open(filename, 'w') as f:
+        sys.stdout = f # Change the standard output to the file we created.
+        
+        for i in np.arange(n_SQ):
+
+            print(f'{i+1:>4d} {"SQ"+str(i+1):>15} {SQ_realization[i]:6e} {SQ_scale[i]:4}')
+
+        sys.stdout = original_stdout # Reset the standard output to its original value
+
+
     # list with the "title" of the target questions
     TQ_question = []
     # list with the long title of the target questions
@@ -490,7 +588,7 @@ def main():
 
         print('Sorted list of experts to match the order of seeds:', sorted_idx)
 
-        # create a 2D numpy array with the answers to the seed questions
+        # create a 2D numpy array with the answers to the target questions
         cols_as_np = df_TQ[df_TQ.columns[3:]].to_numpy()
 
         # sort for expert names
@@ -517,12 +615,19 @@ def main():
         # sort according to the percentile values
         # (sometimes the expert give the percentiles in the wrong order)
         TQ_array = np.sort(TQ_array, axis=1)
+        
+        if len(df_indexes_TQ)>0:
+   
+            # print('TQ_array',TQ_array)
+            TQ_array = TQ_array[:,:,df_indexes_TQ]
+            n_TQ = len(df_indexes_TQ)
+            # print('TQ_array',TQ_array)
+
 
         for i in df_quest.itertuples():
 
-            idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question = i[
-                0:9]
-
+            idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question,image = [i[j] for j in index_list]
+        
             minVal = float(minVal)
             maxVal = float(maxVal)
             if (question == 'target'):
@@ -561,6 +666,23 @@ def main():
 
             print('Target question ', i)
             print(TQ_array[:, :, i])
+
+        filename = input_dir + '/target.dtt'
+
+        with open(filename, 'w') as f:
+            sys.stdout = f # Change the standard output to the file we created.
+        
+            print('* CLASS ASCII OUTPUT FILE. NQ=   3   QU=   5  50  95')
+            print('')
+            print('')
+        
+            for k in np.arange(n_experts):
+     
+                for i in np.arange(n_TQ):
+
+                    print(f'{k+1:>4d} {"Exp"+str(k+1):>10} {i+1:>4d} {"TQ"+str(i+1):>15} {TQ_scale[i]:>4} {TQ_array[k, 0, i]:>6e} {TQ_array[k, 1, i]:>6e} {TQ_array[k, 2, i]:>6e}')
+
+            sys.stdout = original_stdout # Reset the standard output to its original value
 
     else:
 
