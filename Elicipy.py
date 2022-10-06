@@ -388,6 +388,18 @@ def main():
 
     df_read = pd.read_csv(input_dir + '/' + csv_file, header=0)
     print(df_read)
+    
+    try:
+    
+        from ElicipyDict import idx_list
+        print('idx_list read',idx_list)
+    
+    except ImportError:
+    
+        print('ImportError')    
+        idx_list = list(df_read['IDX'])
+        
+    print('idx_list',idx_list)    
 
     if len(idx_list) > 0:
 
@@ -437,6 +449,17 @@ def main():
             langs.append(string2)
 
     print('Languages:', langs)
+
+    try:
+    
+        from ElicipyDict import language
+    
+    except ImportError:
+    
+        language = ''
+        
+    print('idx_list',idx_list)    
+
 
     # select the columns to use according with the language
     if (len(langs) > 1):
