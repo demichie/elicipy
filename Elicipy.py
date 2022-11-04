@@ -44,7 +44,7 @@ matplotlib.use("TkAgg")
 def create_fig_hist(j, n_sample, n_SQ, hist_type, C, C_erf, C_EW, colors,
                     legends, global_units, Cooke_flag, ERF_flag, EW_flag,
                     global_minVal, global_maxVal, output_dir, elicitation_name,
-                    del_rows, TQ_units):
+                    del_rows, TQ_units,label_indexes):
 
     fig = plt.figure()
     axs_h = fig.add_subplot(111)
@@ -118,7 +118,7 @@ def create_fig_hist(j, n_sample, n_SQ, hist_type, C, C_erf, C_EW, colors,
 
     axs_h2.set_ylim(bottom=0)
     plt.legend(legends)
-    plt.title('Target Question ' + str(j - n_SQ + 1))
+    plt.title('Target Question ' + str(label_indexes[j]))
 
     figname = output_dir + '/' + elicitation_name + \
         '_hist_' + str(j - n_SQ + 1).zfill(2) + '.pdf'
@@ -135,7 +135,7 @@ def create_fig_hist(j, n_sample, n_SQ, hist_type, C, C_erf, C_EW, colors,
 def create_figure(h, n_experts, n_SQ, SQ_array, TQ_array, realization,
                   analysis, Cooke_flag, ERF_flag, EW_flag, global_units,
                   output_dir, q_Cooke, q_erf, q_EW, elicitation_name,
-                  global_log):
+                  global_log,label_indexes):
 
     if (h >= n_SQ):
 
@@ -246,7 +246,7 @@ def create_figure(h, n_experts, n_SQ, SQ_array, TQ_array, realization,
 
     axs.grid(linewidth=0.4)
 
-    plt.title(string + ' Question ' + str(j + 1))
+    plt.title(string + ' Question ' + str(label_indexes[j]))
     figname = output_dir + '/' + elicitation_name + \
         '_'+string+'_' + str(j + 1).zfill(2) + '.pdf'
     fig.savefig(figname)
@@ -368,7 +368,7 @@ def main():
     print('NS_SQ', NS_SQ)
 
     # create a 2D numpy array with the answers to the seed questions
-    cols_as_np = df_SQ[df_SQ.columns[3:]].to_numpy()
+    cols_as_np = df_SQ[df_SQ.columns[4:]].to_numpy()
 
     # we want to work with a 3D array, with the following dimension:
     # n_expert X n_pctl X n_SQ
@@ -391,39 +391,80 @@ def main():
     
     try:
     
-        from ElicipyDict import idx_list
-        print('idx_list read',idx_list)
+        from ElicipyDict import seed_list
+        print('seed_list read',seed_list)
     
     except ImportError:
     
         print('ImportError')    
-        idx_list = list(df_read['IDX'])
+        seed_list = list(df_read['IDX'])
         
-    print('idx_list',idx_list)    
+    print('seed_list',seed_list)    
 
-    if len(idx_list) > 0:
+    if len(seed_list) > 0:
 
-        # extract the questions with index in idx_list (from column IDX)
-        df_quest = df_read[df_read['IDX'].isin(idx_list)]
-        print(df_quest)
-
+        # extract the seed questions with index in seed_list (from column IDX)
+        df_SQ = df_read[df_read['IDX'].isin(seed_list) & df_read.QUEST_TYPE.str.contains('seed')]
+        print('Seed dataframe')
+        print(df_SQ)
+        
         # find the python indexes as rows of the dataframe
-        df_indexes = np.array(
-            [df_read.index[df_read['IDX'] == i][0] for i in idx_list])
-        print('df_indexes', df_indexes)
+        df_indexes = np.asarray(np.where(df_read['IDX'].isin(seed_list) & df_read.QUEST_TYPE.str.contains('seed')))
 
     else:
 
-        df_quest = df_read
+        df_SQ = df_read[df_read['QUEST_TYPE']=='seed']
         df_indexes = np.arange(len(df_quest.index))
 
     # find the indexes of the seed questions (0<idx<n_SQ)
     df_indexes_SQ = df_indexes[(df_indexes < n_SQ)]
     print('df_indexes_SQ', df_indexes_SQ)
 
-    # find the indexes of the target questions (0<idx<n_TQ)
-    df_indexes_TQ = df_indexes[(df_indexes >= n_SQ)] - n_SQ
-    print('df_indexes_TQ', df_indexes_TQ)
+    if target:
+
+        try:
+    
+            from ElicipyDict import target_list
+            print('target_list read',target_list)
+    
+        except ImportError:
+    
+            print('ImportError')    
+            target_list = list(df_read['IDX'])
+        
+        print('target_list',target_list)    
+
+        if len(target_list) > 0:
+
+            # extract the target questions with index in target_list (from column IDX)
+            df_TQ = df_read[df_read['IDX'].isin(target_list) & df_read.QUEST_TYPE.str.contains('target')]
+            print('Target dataframe')
+            print(df_TQ)
+            
+            # find the python indexes as rows of the dataframe
+            df_indexes = np.append(df_indexes,np.asarray(np.where(df_read['IDX'].isin(target_list) & df_read.QUEST_TYPE.str.contains('target'))))
+            print('df_indexes',df_indexes)
+
+        else:
+
+            df_TQ = df_read[df_read['QUEST_TYPE']=='target']
+            
+            df_indexes = np.arange(len(df_quest.index))
+
+        # find the indexes of the target questions (0<idx<n_TQ) in the extracted dataframe
+        df_indexes_TQ = df_indexes[(df_indexes >= n_SQ)] - n_SQ
+        print('df_indexes_TQ', df_indexes_TQ)
+
+        df_quest = df_SQ.append(df_TQ)
+        print('df_quest')
+        print(df_quest)
+
+    else: 
+    
+        df_quest = df_SQ
+
+    label_indexes = np.asarray(df_quest['IDX'])
+    print('label_indexes',label_indexes)
 
     # if we have a subset of the SQ, then extract from SQ_array
     # the correct slice
@@ -458,9 +499,6 @@ def main():
     
         language = ''
         
-    print('idx_list',idx_list)    
-
-
     # select the columns to use according with the language
     if (len(langs) > 1):
 
@@ -469,7 +507,7 @@ def main():
             lang_index = langs.index(language)
             # list of column indexes to use
             index_list = [1, 2, lang_index+3] + \
-                list(range(len(langs)+3, len(langs)+10))
+                list(range(len(langs)+3, len(langs)+13))
 
         else:
 
@@ -479,7 +517,7 @@ def main():
 
         lang_index = 0
         language = ''
-        index_list = list(range(1, 11))
+        index_list = list(range(1, 14))
 
     # list with the short title of the target questions
     SQ_question = []
@@ -500,7 +538,7 @@ def main():
 
     for i in df_quest.itertuples():
 
-        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question, image = [
+        idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question,idxMin,idxMax,sum50,image = [
             i[j] for j in index_list
         ]
 
@@ -638,7 +676,7 @@ def main():
               sorted_idx)
 
         # create a 2D numpy array with the answers to the target questions
-        cols_as_np = df_TQ[df_TQ.columns[3:]].to_numpy()
+        cols_as_np = df_TQ[df_TQ.columns[4:]].to_numpy()
 
         # sort for expert names
         cols_as_np = cols_as_np[sorted_idx, :]
@@ -674,7 +712,7 @@ def main():
 
         for i in df_quest.itertuples():
 
-            idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question, image = [
+            idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question,idxMin,idxMax,sum50,image = [
                 i[j] for j in index_list
             ]
 
@@ -898,7 +936,7 @@ def main():
                                 colors, legends, global_units, Cooke_flag,
                                 ERF_flag, EW_flag, global_minVal,
                                 global_maxVal, output_dir, elicitation_name,
-                                del_rows, TQ_units)
+                                del_rows, TQ_units,label_indexes)
 
     # ----------------------------------------- #
     # ---------- Save samples on csv ---------- #
@@ -947,7 +985,7 @@ def main():
         create_figure(h, n_experts, n_SQ, SQ_array, TQ_array, realization,
                       analysis, Cooke_flag, ERF_flag, EW_flag, global_units,
                       output_dir, q_Cooke, q_erf, q_EW, elicitation_name,
-                      global_log)
+                      global_log,label_indexes)
 
     # ----------------------------------------- #
     # ------- Create .pptx presentation ------- #

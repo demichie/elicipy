@@ -1,15 +1,17 @@
 elicitation_name = 'test'
 
-input_dir = 'DATA3'
+input_dir = 'DATA2'
 csv_file = 'questionnaire.csv'
 
-language = ''
-idx_list = [1,2,4,5]
+output_dir = 'OUTPUT_NEW'
 
-output_dir = 'OUTPUT3'
+language = 'ITA'
 
 analysis = True
-target = False
+target = True
+
+target_list = [2,3]
+seed_list = [1,2]
 
 n_sample = 5000
 n_bins = 10
