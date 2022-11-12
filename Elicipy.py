@@ -32,6 +32,7 @@ from ElicipyDict import *
 from matplotlib import rcParams
 
 max_len_table = 20
+max_len_plot = 10
 
 plt.rcParams.update({'font.size': 8})
 
@@ -132,25 +133,28 @@ def create_fig_hist(j, n_sample, n_SQ, hist_type, C, C_erf, C_EW, colors,
     plt.close()
 
 
-def create_figure(h, n_experts, n_SQ, SQ_array, TQ_array, realization,
+def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, realization,
                   analysis, Cooke_flag, ERF_flag, EW_flag, global_units,
                   output_dir, q_Cooke, q_erf, q_EW, elicitation_name,
                   global_log,label_indexes):
 
+    idx0 = k*max_len_plot
+    idx1 = min((k+1)*max_len_plot,n_experts)
+
     if (h >= n_SQ):
 
         j = h - n_SQ
-        Q_array = TQ_array[:, :, j]
+        Q_array = TQ_array[idx0:idx1, :, j]
         string = 'Target'
 
     else:
 
         j = h
-        Q_array = SQ_array[:, :, j]
+        Q_array = SQ_array[idx0:idx1, :, j]
         string = 'Seed'
 
     x = Q_array[:, 1]
-    y = np.arange(n_experts) + 1
+    y = np.arange(idx1-idx0) + 1
 
     # creating error
     x_errormax = Q_array[:, 2] - Q_array[:, 1]
@@ -171,9 +175,9 @@ def create_figure(h, n_experts, n_SQ, SQ_array, TQ_array, realization,
 
     ytick = []
     for i in y:
-        ytick.append('Exp.' + str(int(i)))
+        ytick.append('Exp.' + str(int(i+idx0)))
 
-    yerror = n_experts
+    yerror = idx1-idx0
     if analysis:
 
         if Cooke_flag > 0:
@@ -227,7 +231,7 @@ def create_figure(h, n_experts, n_SQ, SQ_array, TQ_array, realization,
 
         if (h < n_SQ):
 
-            axs.plot(realization[h], n_experts + 1, 'kx')
+            axs.plot(realization[h], idx1 - idx0 + 1, 'kx')
             axs.annotate(txt, (realization[j] * 1.02, yerror + 0.15))
 
     y = np.arange(len(ytick)) + 1
@@ -248,12 +252,14 @@ def create_figure(h, n_experts, n_SQ, SQ_array, TQ_array, realization,
 
     plt.title(string + ' Question ' + str(label_indexes[j]))
     figname = output_dir + '/' + elicitation_name + \
-        '_'+string+'_' + str(j + 1).zfill(2) + '.pdf'
+        '_'+string+'_' + str(j + 1).zfill(2) + \
+        '_' + str(k + 1).zfill(2) + '.pdf'
     fig.savefig(figname)
 
     images = convert_from_path(figname)
     figname = output_dir + '/' + elicitation_name + \
-        '_'+string+'_' + str(j + 1).zfill(2) + '.png'
+        '_'+string+'_' + str(j + 1).zfill(2)+ \
+        '_' + str(k + 1).zfill(2) + '.png'
     images[0].save(figname, 'PNG')
     plt.close()
 
@@ -980,9 +986,13 @@ def main():
     # --------- Create answ. figures ---------- #
     # ----------------------------------------- #
 
-    for h in np.arange(n_SQ + n_TQ):
+    n_panels = int(np.ceil(n_experts / max_len_plot))
 
-        create_figure(h, n_experts, n_SQ, SQ_array, TQ_array, realization,
+    for h in np.arange(n_SQ + n_TQ):
+    
+        for k in np.arange(n_panels):
+
+            create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, realization,
                       analysis, Cooke_flag, ERF_flag, EW_flag, global_units,
                       output_dir, q_Cooke, q_erf, q_EW, elicitation_name,
                       global_log,label_indexes)
@@ -1087,20 +1097,23 @@ def main():
             j = h
             string = 'Seed'
 
-        slide = prs.slides.add_slide(title_slide_layout)
+        for k in np.arange(n_panels):
 
-        text_title = global_shortQuestion[h]
-        add_title(slide, text_title)
+            slide = prs.slides.add_slide(title_slide_layout)
 
-        text_box = global_longQuestion[h]
-        add_text_box(slide, left, top, text_box)
+            text_title = global_shortQuestion[h]
+            add_title(slide, text_title)
 
-        figname = output_dir + '/' + elicitation_name + \
-            '_'+string+'_' + str(j + 1).zfill(2) + '.png'
-        add_figure(slide, figname, left, top)
+            text_box = global_longQuestion[h]
+            add_text_box(slide, left, top, text_box)
 
-        add_date(slide)
-        add_small_logo(slide, left, top)
+            figname = output_dir + '/' + elicitation_name + \
+                '_'+string+'_' + str(j + 1).zfill(2) + \
+                '_' + str(k + 1).zfill(2) + '.png'
+            add_figure(slide, figname, left, top)
+
+            add_date(slide)
+            add_small_logo(slide, left, top)
 
     # ------------- Pctls slides -------------#
 
