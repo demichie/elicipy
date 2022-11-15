@@ -1,4 +1,5 @@
 import os
+import sys
 import urllib
 import shutil
 import base64
@@ -66,6 +67,9 @@ def saveDataFromGithub(Repository, user,github_token):
 
     os.chdir(Repository)
     
+    print(os.getcwd())
+    
+    sys.path.insert(0, os.getcwd())
     from createWebformDict import input_dir
     from createWebformDict import csv_file
     
