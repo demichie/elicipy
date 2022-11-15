@@ -351,6 +351,7 @@ def main():
     
     os.chdir(path)
     
+    sys.path.insert(0, os.getcwd())
     from createWebformDict import input_dir
     from createWebformDict import csv_file
     
