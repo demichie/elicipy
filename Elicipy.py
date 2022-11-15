@@ -27,6 +27,7 @@ import openpyxl
 import pandas as pd
 import matplotlib
 import matplotlib.pyplot as plt
+from saveFromGithub import saveDataFromGithub
 
 from ElicipyDict import *
 from matplotlib import rcParams
@@ -233,6 +234,7 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, reali
 
             axs.plot(realization[h], idx1 - idx0 + 1, 'kx')
             axs.annotate(txt, (realization[j] * 1.02, yerror + 0.15))
+            ytick.append('Realization')
 
     y = np.arange(len(ytick)) + 1
 
@@ -283,7 +285,7 @@ def add_date(slide):
 
 def add_small_logo(slide, left, top):
 
-    img = slide.shapes.add_picture('logo.png',
+    img = slide.shapes.add_picture('../logo.png',
                                    left + Inches(13.0),
                                    top + Inches(6.8),
                                    width=Inches(0.8))
@@ -327,13 +329,31 @@ def iter_cells(table):
 
 def main():
 
-    from ElicipyDict import output_dir, input_dir
+    from ElicipyDict import output_dir
+    
+    from ElicipyDict import datarepo
+    from ElicipyDict import Repository 
+    
+    # download the data from github repository
+    if datarepo == 'github':
+    
+        from ElicipyDict import user
+        from ElicipyDict import github_token
+           
+        saveDataFromGithub(Repository, user,github_token)
+
 
     # get current path
     path = os.getcwd()
-
+    # change current path to elicitation folder
+    path = path + '/' + Repository
+    print('Path',path)
+    
     os.chdir(path)
-
+    
+    from createWebformDict import input_dir
+    from createWebformDict import csv_file
+    
     # change to full path
     output_dir = path + '/' + output_dir
     input_dir = path + '/' + input_dir
@@ -550,6 +570,8 @@ def main():
 
         minVal = float(minVal)
         maxVal = float(maxVal)
+        realization = float(realization)
+        
         if scale == 'uni':
 
             global_log.append(0)
@@ -629,6 +651,9 @@ def main():
         sys.stdout = f  # Change the standard output to the file we created.
 
         for i in np.arange(n_SQ):
+        
+            
+            print(i+1,str(i+1),SQ_realization[i],SQ_scale[i])
 
             print(
                 f'{i+1:>4d} {"SQ"+str(i+1):>15} {SQ_realization[i]:6e} {SQ_scale[i]:4}'
@@ -1024,7 +1049,7 @@ def main():
     subtitle_para = slide.shapes.placeholders[1].text_frame.paragraphs[0]
     subtitle_para.font.name = "Helvetica"
 
-    img = slide.shapes.add_picture('logo.png',
+    img = slide.shapes.add_picture('../logo.png',
                                    left + Inches(11.3),
                                    top + Inches(5.4),
                                    width=Inches(2.4))
