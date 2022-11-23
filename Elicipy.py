@@ -672,6 +672,10 @@ def main():
     TQ_units = []
     # scale for target question:
     TQ_scale = []
+    
+    idx_list = []
+    parents = []
+    
 
     if target:
 
@@ -767,6 +771,8 @@ def main():
 
                 TQ_minVals.append(minVal)
                 TQ_maxVals.append(maxVal)
+                idx_list.append(int(idx))
+                parents.append(int(parent))
 
         # print on screen the units
         print("Target units = ", TQ_units)
