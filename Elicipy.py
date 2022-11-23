@@ -534,7 +534,7 @@ def main():
             lang_index = langs.index(language)
             # list of column indexes to use
             index_list = [1, 2, lang_index+3] + \
-                list(range(len(langs)+3, len(langs)+13))
+                list(range(len(langs)+3, len(langs)+14))
 
         else:
 
@@ -544,7 +544,7 @@ def main():
 
         lang_index = 0
         language = ''
-        index_list = list(range(1, 14))
+        index_list = list(range(1, 15))
 
     # list with the short title of the target questions
     SQ_question = []
@@ -565,7 +565,7 @@ def main():
 
     for i in df_quest.itertuples():
 
-        idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question,idxMin,idxMax,sum50,image = [
+        idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question,idxMin,idxMax,sum50,parent,image = [
             i[j] for j in index_list
         ]
 
@@ -744,7 +744,7 @@ def main():
 
         for i in df_quest.itertuples():
 
-            idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question,idxMin,idxMax,sum50,image = [
+            idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question,idxMin,idxMax,sum50,parent,image = [
                 i[j] for j in index_list
             ]
 
