@@ -88,8 +88,8 @@ def merge_csv(input_dir, target):
                     print('High similarity (',sim,') found in names of two experts:') 
                     print(flname_seed[previous],',',flname_seed[current])
                     
-                    time0 = datetime.strptime(timestamp[previous], "%Y-%m-%d-%H:%M:%S")
-                    time1 = datetime.strptime(timestamp[current], "%Y-%m-%d-%H:%M:%S")
+                    time0 = datetime.strptime(timestamp[previous], "%Y-%m-%d-%H-%M-%S")
+                    time1 = datetime.strptime(timestamp[current], "%Y-%m-%d-%H-%M-%S")
                 
                     print('Keeping the answers with more recent timestamp:')
                 
@@ -185,8 +185,8 @@ def merge_csv(input_dir, target):
                     print('High similarity (',sim,') found in names of two experts:') 
                     print(flname_target[previous],',',flname_target[current])
                     
-                    time0 = datetime.strptime(timestamp[previous], "%Y-%m-%d-%H:%M:%S")
-                    time1 = datetime.strptime(timestamp[current], "%Y-%m-%d-%H:%M:%S")
+                    time0 = datetime.strptime(timestamp[previous], "%Y-%m-%d-%H-%M-%S")
+                    time1 = datetime.strptime(timestamp[current], "%Y-%m-%d-%H-%M-%S")
                 
                     print('Keeping the answers with more recent timestamp:')
                 
