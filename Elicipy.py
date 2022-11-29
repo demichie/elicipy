@@ -571,7 +571,6 @@ def main():
 
         minVal = float(minVal)
         maxVal = float(maxVal)
-        realization = float(realization)
         
         if scale == 'uni':
 
@@ -588,7 +587,7 @@ def main():
             SQ_units.append(unit)
             SQ_scale.append(scale)
 
-            SQ_realization.append(realization)
+            SQ_realization.append(float(realization))
 
             if minVal.is_integer():
 
