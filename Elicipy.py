@@ -32,7 +32,7 @@ from saveFromGithub import saveDataFromGithub
 from ElicipyDict import *
 from matplotlib import rcParams
 
-max_len_table = 20
+max_len_table = 15
 max_len_plot = 10
 
 plt.rcParams.update({'font.size': 8})
@@ -252,7 +252,7 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, reali
 
     axs.grid(linewidth=0.4)
 
-    plt.title(string + ' Question ' + str(label_indexes[j]))
+    plt.title(string + ' Question ' + str(label_indexes[h]))
     figname = output_dir + '/' + elicitation_name + \
         '_'+string+'_' + str(j + 1).zfill(2) + \
         '_' + str(k + 1).zfill(2) + '.pdf'
@@ -297,17 +297,26 @@ def add_figure(slide, figname, left, top):
                                    left + Inches(3.4),
                                    top,
                                    width=Inches(10))
+                                   
+    slide.shapes._spTree.insert(2, img._element)                                   
 
 
 def add_title(slide, text_title):
 
     title_shape = slide.shapes.title
     title_shape.text = text_title
+    title_shape.top = Inches(0.2)
     title_shape.width = Inches(15)
     title_shape.height = Inches(2)
     title_para = slide.shapes.title.text_frame.paragraphs[0]
     title_para.font.name = "Helvetica"
+    if len(text_title) < 50:
 
+        title_para.font.size = Pt(44)
+
+    else:
+    
+        title_para.font.size = Pt(34)
 
 def add_text_box(slide, left, top, text_box):
 
@@ -1132,9 +1141,6 @@ def main():
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            text_title = global_shortQuestion[h]
-            add_title(slide, text_title)
-
             text_box = global_longQuestion[h]
             add_text_box(slide, left, top, text_box)
 
@@ -1146,6 +1152,9 @@ def main():
             add_date(slide)
             add_small_logo(slide, left, top)
 
+            text_title = global_shortQuestion[h]
+            add_title(slide, text_title)
+
     # ------------- Pctls slides -------------#
 
     if analysis and target:
@@ -1155,9 +1164,6 @@ def main():
         for i_table in range(n_tables):
 
             slide = prs.slides.add_slide(prs.slide_layouts[5])
-
-            text_title = "Percentiles of target questions"
-            add_title(slide, text_title)
 
             fisrt_j = i_table * max_len_table
             last_j = np.minimum((i_table + 1) * max_len_table, n_TQ)
@@ -1211,6 +1217,9 @@ def main():
             add_date(slide)
             add_small_logo(slide, left, top)
 
+            text_title = "Percentiles of target questions"
+            add_title(slide, text_title)
+
     # ------------ Barplot slides ------------#
 
     for j in np.arange(n_SQ + n_TQ):
@@ -1224,15 +1233,16 @@ def main():
                 figname = output_dir + '/' + elicitation_name + \
                     '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
 
-                text_title = TQ_question[j - n_SQ]
-                add_title(slide, text_title)
-
                 text_box = TQ_LongQuestion[j - n_SQ]
                 add_text_box(slide, left, top, text_box)
 
                 add_date(slide)
                 add_small_logo(slide, left, top)
                 add_figure(slide, figname, left - Inches(0.8), top)
+
+                text_title = TQ_question[j - n_SQ]
+                add_title(slide, text_title)
+
 
     prs.save(output_dir + "/" + elicitation_name + ".pptx")  # saving file
 
