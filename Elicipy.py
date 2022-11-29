@@ -710,25 +710,28 @@ def main():
 
             NS_TQ.append(name + surname)
 
-        print('NS_TQ', NS_TQ)
-
+        
         sorted_idx = []
 
         # loop to search for matches between experts in seed and target
-        for TQ_name in NS_TQ:
+        for SQ_name in NS_SQ:
 
-            index = NS_SQ.index(difflib.get_close_matches(TQ_name, NS_SQ)[0])
+            index = NS_TQ.index(difflib.get_close_matches(SQ_name, NS_TQ)[0])
             sorted_idx.append(index)
+            
 
         print('Sorted list of experts to match the order of seeds:',
               sorted_idx)
+              
+        print(NS_SQ)
+        print([NS_TQ[s_idx] for s_idx in sorted_idx])      
 
         # create a 2D numpy array with the answers to the target questions
         cols_as_np = df_TQ[df_TQ.columns[4:]].to_numpy()
 
         # sort for expert names
         cols_as_np = cols_as_np[sorted_idx, :]
-
+        
         # we want to work with a 3D array, with the following dimension:
         # n_expert X n_pctl X n_TQ
         n_experts_TQ = cols_as_np.shape[0]
