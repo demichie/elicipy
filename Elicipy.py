@@ -632,6 +632,10 @@ def main():
         print('')
         print('Seed question ', i)
         print(SQ_array[:, :, i])
+        
+    # ----------------------------------------- #
+    # ------------ Save dtt and rls ----------- #
+    # ----------------------------------------- #
 
     original_stdout = sys.stdout  # Save a reference to the original standard output
 
@@ -649,7 +653,7 @@ def main():
             for i in np.arange(n_SQ):
 
                 print(
-                    f'{k+1:4d} {"Exp"+str(k+1):>10} {i+1:4d} {"SQ"+str(i+1):15} {SQ_scale[i]:4} {SQ_array[k, 0, i]:6e} {SQ_array[k, 1, i]:6e} {SQ_array[k, 2, i]:6e}'
+                    f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} {"SQ"+str(i+1):>13} {SQ_scale[i]:4} {SQ_array[k, 0, i]:6e} {""} {SQ_array[k, 1, i]:6e} {" "}{SQ_array[k, 2, i]:6e}'
                 )
 
         sys.stdout = original_stdout  # Reset the standard output to its original value
@@ -662,10 +666,10 @@ def main():
         for i in np.arange(n_SQ):
         
             
-            print(i+1,str(i+1),SQ_realization[i],SQ_scale[i])
+            # print(i+1,str(i+1),SQ_realization[i],SQ_scale[i])
 
             print(
-                f'{i+1:>4d} {"SQ"+str(i+1):>15} {SQ_realization[i]:6e} {SQ_scale[i]:4}'
+                f'{i+1:>5d} {"SQ"+str(i+1):>13} {""} {SQ_realization[i]:6e} {SQ_scale[i]:4}'
             )
 
         sys.stdout = original_stdout  # Reset the standard output to its original value
@@ -848,6 +852,12 @@ def main():
 
     print("")
     print('Realization', realization)
+    
+   
+    if analysis and target:
+
+        tree = {'IDX': idx_list, 'SHORT_Q': TQ_question}
+        df_tree = pd.DataFrame(data=tree)
 
     # ----------------------------------------- #
     # ------------ Compute weights ------------ #
@@ -989,10 +999,14 @@ def main():
     # ----------------------------------------- #
 
     if analysis and target:
-
+            
         targets = ['target_' + str(i).zfill(2) for i in range(n_TQ)]
 
         if Cooke_flag > 0:
+        
+            df_tree["COOKE_5"] = q_Cooke[n_SQ:, 0]
+            df_tree["COOKE_50"] = q_Cooke[n_SQ:, 1]
+            df_tree["COOKE_95"] = q_Cooke[n_SQ:, 2]
 
             csv_name = output_dir + '/' + elicitation_name + '_samples.csv'
             np.savetxt(csv_name,
@@ -1003,6 +1017,11 @@ def main():
                        fmt='%1.4e')
 
         if ERF_flag > 0:
+
+            df_tree["ERF_5"] = q_erf[n_SQ:, 0]
+            df_tree["ERF_50"] = q_erf[n_SQ:, 1]
+            df_tree["ERF_95"] = q_erf[n_SQ:, 2]
+
 
             csv_name = output_dir + '/' + elicitation_name + '_samples_erf.csv'
             np.savetxt(csv_name,
@@ -1021,6 +1040,10 @@ def main():
                        comments='',
                        delimiter=",",
                        fmt='%1.4e')
+
+    df_tree["parent"] = parents
+    df_tree.to_csv('tree.csv',index=False)
+
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
