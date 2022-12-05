@@ -1044,7 +1044,7 @@ def main():
                        delimiter=",",
                        fmt='%1.4e')
 
-    df_tree["parent"] = parents
+    df_tree["PARENT"] = parents
     df_tree.to_csv('tree.csv',index=False)
 
 
