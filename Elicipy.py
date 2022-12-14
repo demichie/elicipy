@@ -1244,6 +1244,8 @@ def main():
     # ------------- Pctls slides -------------#
 
     if analysis and target:
+
+        slide = prs.slides.add_slide(title_slide_layout)
     
         text_title = "Target Percentiles"
 
@@ -1326,6 +1328,8 @@ def main():
         if analysis:
         
             if j == n_SQ:
+            
+                slide = prs.slides.add_slide(title_slide_layout)
         
                 text_title = "Target Barplots"
 
