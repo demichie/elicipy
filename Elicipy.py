@@ -940,7 +940,7 @@ def main():
     else:
         keep_rows.append(int(2))
 
-    colors = ['orange', 'purple', 'springgreen']
+    colors = ['tomato', 'purple', 'springgreen']
     colors = [colors[index] for index in keep_rows]
 
     legends = ['CM', 'ERF', 'EW']
@@ -1044,8 +1044,8 @@ def main():
                        delimiter=",",
                        fmt='%1.4e')
 
-    df_tree["PARENT"] = parents
-    df_tree.to_csv('tree.csv',index=False)
+        df_tree["PARENT"] = parents
+        df_tree.to_csv('tree.csv',index=False)
 
 
     # ----------------------------------------- #
