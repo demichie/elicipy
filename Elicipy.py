@@ -147,12 +147,23 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, reali
         j = h - n_SQ
         Q_array = TQ_array[idx0:idx1, :, j]
         string = 'Target'
+        
+        xmin = np.amin(TQ_array[:, 0, j])
+        xmax = np.amax(TQ_array[:, 2, j])
 
     else:
 
         j = h
         Q_array = SQ_array[idx0:idx1, :, j]
         string = 'Seed'
+
+        xmin = np.amin(SQ_array[:, 0, j])
+        xmax = np.amax(SQ_array[:, 2, j])
+
+    deltax = 0.05*(xmax - xmin)
+    xmin -= deltax
+    xmax += deltax
+
 
     x = Q_array[:, 1]
     y = np.arange(idx1-idx0) + 1
@@ -249,7 +260,8 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, reali
         axs.set_xscale('log')
 
     axs.set_ylim(0.5, len(ytick) + 1.0)
-
+    axs.set_xlim(xmin,xmax)
+    
     axs.grid(linewidth=0.4)
 
     plt.title(string + ' Question ' + str(label_indexes[h]))
@@ -724,7 +736,15 @@ def main():
               sorted_idx)
               
         print(NS_SQ)
-        print([NS_TQ[s_idx] for s_idx in sorted_idx])      
+        print([NS_TQ[s_idx] for s_idx in sorted_idx])   
+        
+        csv_name = output_dir + '/' + elicitation_name + '_experts.csv'
+        
+        d = {'index':range(1,len(NS_SQ)+1), 'Expert':NS_SQ}
+
+        df = pd.DataFrame(data=d)
+    
+        df.to_csv(csv_name,index=False)
 
         # create a 2D numpy array with the answers to the target questions
         cols_as_np = df_TQ[df_TQ.columns[4:]].to_numpy()
@@ -963,7 +983,7 @@ def main():
 
             quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = createDATA1(
                 DAT, j, W_erf[:, 4].flatten(), n_sample, global_log[j],
-                [global_minVal[j], global_maxVal[j]], True)
+                [global_minVal[j], global_maxVal[j]], ERF_flag)
 
             print("%2i %9.2f %9.2f %9.2f %9.2f" %
                   (j, quan05_erf, quan50_erf, qmean_erf, quan95_erf))
@@ -1146,12 +1166,52 @@ def main():
                     for run in paragraph.runs:
                         run.font.size = Pt(12)
 
+            if EW_flag:
+            
+                text_box = 'Equal weight = '+f"{Weqok[0]*100:.2f}"
+                add_text_box(slide, Inches(12), Inches(2), text_box)
+
+
             add_date(slide)
             add_small_logo(slide, left, top)
 
     # ------------- Answers slides ------------#
 
+    slide = prs.slides.add_slide(title_slide_layout)
+
+    text_title = "Seed Answers"
+
+    title_shape = slide.shapes.title
+    title_shape.text = text_title
+    title_shape.top = Inches(3.0)
+    title_shape.width = Inches(15)
+    title_shape.height = Inches(2)
+    title_para = slide.shapes.title.text_frame.paragraphs[0]
+    title_para.font.name = "Helvetica"
+    title_para.font.size = Pt(54)
+    add_date(slide)
+    add_small_logo(slide, left, top)
+
+
     for h in np.arange(n_SQ + n_TQ):
+    
+        if h == n_SQ:
+        
+            slide = prs.slides.add_slide(title_slide_layout)
+
+            text_title = "Target Answers"
+
+            title_shape = slide.shapes.title
+            title_shape.text = text_title
+            title_shape.top = Inches(3.0)
+            title_shape.width = Inches(15)
+            title_shape.height = Inches(2)
+            title_para = slide.shapes.title.text_frame.paragraphs[0]
+            title_para.font.name = "Helvetica"
+            title_para.font.size = Pt(54)
+            add_date(slide)
+            add_small_logo(slide, left, top)
+
 
         if (h >= n_SQ):
 
@@ -1184,6 +1244,19 @@ def main():
     # ------------- Pctls slides -------------#
 
     if analysis and target:
+    
+        text_title = "Target Percentiles"
+
+        title_shape = slide.shapes.title
+        title_shape.text = text_title
+        title_shape.top = Inches(3.0)
+        title_shape.width = Inches(15)
+        title_shape.height = Inches(2)
+        title_para = slide.shapes.title.text_frame.paragraphs[0]
+        title_para.font.name = "Helvetica"
+        title_para.font.size = Pt(54)
+        add_date(slide)
+        add_small_logo(slide, left, top)
 
         n_tables = int(np.ceil(n_TQ / max_len_table))
 
@@ -1251,6 +1324,21 @@ def main():
     for j in np.arange(n_SQ + n_TQ):
 
         if analysis:
+        
+            if j == n_SQ:
+        
+                text_title = "Target Barplots"
+
+                title_shape = slide.shapes.title
+                title_shape.text = text_title
+                title_shape.top = Inches(3.0)
+                title_shape.width = Inches(15)
+                title_shape.height = Inches(2)
+                title_para = slide.shapes.title.text_frame.paragraphs[0]
+                title_para.font.name = "Helvetica"
+                title_para.font.size = Pt(54)
+                add_date(slide)
+                add_small_logo(slide, left, top)
 
             if (j >= n_SQ):
 
