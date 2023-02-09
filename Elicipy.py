@@ -32,8 +32,10 @@ from saveFromGithub import saveDataFromGithub
 from ElicipyDict import *
 from matplotlib import rcParams
 
-max_len_table = 15
-max_len_plot = 10
+max_len_table = 21
+max_len_tableB = 18
+
+max_len_plot = 21
 
 plt.rcParams.update({'font.size': 8})
 
@@ -43,10 +45,11 @@ rcParams['font.sans-serif'] = ['Helvetica']
 matplotlib.use("TkAgg")
 
 
-def create_fig_hist(j, n_sample, n_SQ, hist_type, C, C_erf, C_EW, colors,
-                    legends, global_units, Cooke_flag, ERF_flag, EW_flag,
-                    global_minVal, global_maxVal, output_dir, elicitation_name,
-                    del_rows, TQ_units,label_indexes):
+def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
+                    colors, legends, legendsPDF, global_units, Cooke_flag,
+                    ERF_flag, EW_flag, global_minVal, global_maxVal,
+                    output_dir, elicitation_name, del_rows, TQ_units,
+                    label_indexes, minval_all, maxval_all):
 
     fig = plt.figure()
     axs_h = fig.add_subplot(111)
@@ -133,21 +136,156 @@ def create_fig_hist(j, n_sample, n_SQ, hist_type, C, C_erf, C_EW, colors,
 
     plt.close()
 
+    # create figure with PDFs only for small inset and groups
+    fig2 = plt.figure()
+    axs_h2 = fig2.add_subplot(111)
 
-def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, realization,
-                  analysis, Cooke_flag, ERF_flag, EW_flag, global_units,
-                  output_dir, q_Cooke, q_erf, q_EW, elicitation_name,
-                  global_log,label_indexes):
+    if (Cooke_flag > 0):
 
-    idx0 = k*max_len_plot
-    idx1 = min((k+1)*max_len_plot,n_experts)
+        axs_h2.plot(lnspc, kdepdf, 'r--', linewidth=2)
+
+    if (ERF_flag > 0):
+
+        axs_h2.plot(lnspc, kdepdf_erf, '--', color='tab:purple', linewidth=2)
+
+    if (EW_flag > 0):
+
+        axs_h2.plot(lnspc, kdepdf_EW, 'g--', linewidth=2)
+
+    if global_units[j] == "%":
+
+        axs_h2.set_xlim(xmin, xmax)
+
+    else:
+
+        axs_h2.set_xlim(minval_all[j], maxval_all[j])
+
+    axs_h2.set_ylabel('PDF', color='b')
+
+    axs_h2.set_ylim(bottom=0)
+    leg = plt.legend(legends, prop={"size": 18})
+
+    if group == 0:
+
+        plt.title('Target Question ' + str(label_indexes[j]), fontsize=18)
+
+    else:
+
+        plt.title('Target Question ' + str(label_indexes[j]) + ' Group ' +
+                  str(group),
+                  fontsize=18)
+
+    figname = output_dir + '/' + elicitation_name + \
+        '_PDF_' + str(j - n_SQ + 1).zfill(2) + '.pdf'
+    fig2.savefig(figname)
+
+    images = convert_from_path(figname)
+    figname = output_dir + '/' + elicitation_name + \
+        '_PDF_group'+str(group) + '_' + str(j - n_SQ + 1).zfill(2) + '.png'
+    images[0].save(figname, 'PNG')
+
+    plt.close()
+
+def create_figure_trend(count,trend_group,n_SQ,q_EW,q_Cooke,q_erf,global_units,
+                        Cooke_flag, ERF_flag, EW_flag, global_log, 
+                        TQ_minVals, TQ_maxVals, 
+                        output_dir):
+                        
+    fig = plt.figure()
+    axs = fig.add_subplot(111)
+    
+    x = np.arange(len(trend_group))+1
+
+    handles = []
+    
+    trend_group = np.array(trend_group)
+    
+    # print(trend_group+n_SQ-1)
+    # print(q_EW[trend_group+n_SQ-1,0])
+    # print(q_EW[trend_group+n_SQ-1,1])
+    # print(q_EW[trend_group+n_SQ-1,2])
+
+    if EW_flag:
+
+        y = q_EW[trend_group+n_SQ-1,1]
+        lower_error = q_EW[trend_group+n_SQ-1,1] - q_EW[trend_group+n_SQ-1,0]
+        upper_error = q_EW[trend_group+n_SQ-1,2] - q_EW[trend_group+n_SQ-1,1]
+        asymmetric_error = [lower_error, upper_error]
+    
+        line1 = axs.errorbar(x-0.1, y, yerr=asymmetric_error, fmt='g-o',label='EW')
+        axs.plot(x-0.1, y - lower_error, 'gx')
+        axs.plot(x-0.1, y + upper_error, 'gx')
+        handles.append(line1)
+
+    if Cooke_flag > 0:
+
+        y = q_Cooke[trend_group+n_SQ-1,1]
+        lower_error = q_Cooke[trend_group+n_SQ-1,1] - q_Cooke[trend_group+n_SQ-1,0]
+        upper_error = q_Cooke[trend_group+n_SQ-1,2] - q_Cooke[trend_group+n_SQ-1,1]
+        asymmetric_error = [lower_error, upper_error]
+    
+        line2 = axs.errorbar(x, y, yerr=asymmetric_error, fmt='r-o',label='CM')
+        axs.plot(x, y - lower_error, 'rx')
+        axs.plot(x, y + upper_error, 'rx')
+        handles.append(line2)
+
+    if ERF_flag > 0:
+    
+        y = q_erf[trend_group+n_SQ-1,1]
+        lower_error = q_erf[trend_group+n_SQ-1,1] - q_erf[trend_group+n_SQ-1,0]
+        upper_error = q_erf[trend_group+n_SQ-1,2] - q_erf[trend_group+n_SQ-1,1]
+        asymmetric_error = [lower_error, upper_error]
+    
+        line3 = axs.errorbar(x+0.1, y, yerr=asymmetric_error, fmt='b-o', label = 'ERF')
+        axs.plot(x+0.1, y - lower_error, 'bx')
+        axs.plot(x+0.1, y + upper_error, 'bx')
+        handles.append(line3)
+
+    axs.set_xticks(x)
+
+    xtick = []
+    for i in x:
+        xtick.append('TQ' + str(trend_group[i-1]))
+
+    axs.set_xticklabels(xtick)
+
+    # ax1.set_yscale('log')
+
+    axs.set_ylim(TQ_minVals[trend_group[0]], TQ_maxVals[trend_group[0]])
+
+    # axs.grid(linewidth=0.4)
+
+    plt.title('Question Group ' + str(count+1))
+
+    axs.legend(handles=handles)
+    
+    figname = output_dir + '/' + elicitation_name + '_trend_'+ \
+              str(count + 1).zfill(2)+'.pdf'
+    fig.savefig(figname)
+
+    images = convert_from_path(figname)
+    figname = output_dir + '/' + elicitation_name + '_trend_'+ \
+              str(count + 1).zfill(2)+'.png'
+    images[0].save(figname, 'PNG')
+    plt.close()
+
+    return
+
+
+def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array,
+                  realization, analysis, Cooke_flag, ERF_flag, EW_flag,
+                  global_units, output_dir, q_Cooke, q_erf, q_EW,
+                  elicitation_name, global_log, label_indexes):
+
+    idx0 = k * max_len_plot
+    idx1 = min((k + 1) * max_len_plot, n_experts)
 
     if (h >= n_SQ):
 
         j = h - n_SQ
         Q_array = TQ_array[idx0:idx1, :, j]
         string = 'Target'
-        
+
         xmin = np.amin(TQ_array[:, 0, j])
         xmax = np.amax(TQ_array[:, 2, j])
 
@@ -160,13 +298,26 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, reali
         xmin = np.amin(SQ_array[:, 0, j])
         xmax = np.amax(SQ_array[:, 2, j])
 
-    deltax = 0.05*(xmax - xmin)
-    xmin -= deltax
-    xmax += deltax
+    if (global_log[h] == 1):
 
+        log_xmin = np.log(xmin)
+        log_xmax = np.log(xmax)
+
+        delta_logx = 0.05 * (log_xmax - log_xmin)
+        log_xmin -= delta_logx
+        log_xmax += delta_logx
+
+        xmin = np.exp(log_xmin)
+        xmax = np.exp(log_xmax)
+
+    else:
+
+        deltax = 0.05 * (xmax - xmin)
+        xmin -= deltax
+        xmax += deltax
 
     x = Q_array[:, 1]
-    y = np.arange(idx1-idx0) + 1
+    y = np.arange(idx1 - idx0) + 1
 
     # creating error
     x_errormax = Q_array[:, 2] - Q_array[:, 1]
@@ -187,9 +338,9 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, reali
 
     ytick = []
     for i in y:
-        ytick.append('Exp.' + str(int(i+idx0)))
+        ytick.append('Exp.' + str(int(i + idx0)))
 
-    yerror = idx1-idx0
+    yerror = idx1 - idx0
     if analysis:
 
         if Cooke_flag > 0:
@@ -260,8 +411,8 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, reali
         axs.set_xscale('log')
 
     axs.set_ylim(0.5, len(ytick) + 1.0)
-    axs.set_xlim(xmin,xmax)
-    
+    axs.set_xlim(xmin, xmax)
+
     axs.grid(linewidth=0.4)
 
     plt.title(string + ' Question ' + str(label_indexes[h]))
@@ -272,7 +423,7 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, reali
 
     images = convert_from_path(figname)
     figname = output_dir + '/' + elicitation_name + \
-        '_'+string+'_' + str(j + 1).zfill(2)+ \
+        '_'+string+'_' + str(j + 1).zfill(2) + \
         '_' + str(k + 1).zfill(2) + '.png'
     images[0].save(figname, 'PNG')
     plt.close()
@@ -309,8 +460,15 @@ def add_figure(slide, figname, left, top):
                                    left + Inches(3.4),
                                    top,
                                    width=Inches(10))
-                                   
-    slide.shapes._spTree.insert(2, img._element)                                   
+
+    slide.shapes._spTree.insert(2, img._element)
+
+
+def add_small_figure(slide, figname, left, top, width):
+
+    img = slide.shapes.add_picture(figname, left, top, width=width)
+
+    slide.shapes._spTree.insert(2, img._element)
 
 
 def add_title(slide, text_title):
@@ -327,10 +485,11 @@ def add_title(slide, text_title):
         title_para.font.size = Pt(44)
 
     else:
-    
+
         title_para.font.size = Pt(34)
 
-def add_text_box(slide, left, top, text_box):
+
+def add_text_box(slide, left, top, text_box,font_size):
 
     txBox = slide.shapes.add_textbox(left - Inches(1),
                                      top + Inches(0.5),
@@ -338,6 +497,7 @@ def add_text_box(slide, left, top, text_box):
                                      height=Inches(5))
     tf = txBox.text_frame
     tf.text = text_box
+    tf.paragraphs[0].font.size = Pt(font_size)
     # tf.text = 'prova'
     tf.word_wrap = True
 
@@ -348,56 +508,26 @@ def iter_cells(table):
             yield cell
 
 
-def main():
-
-    from ElicipyDict import output_dir
-    
-    from ElicipyDict import datarepo
-    from ElicipyDict import Repository 
-    
-    # download the data from github repository
-    if datarepo == 'github':
-    
-        from ElicipyDict import user
-        from ElicipyDict import github_token
-           
-        saveDataFromGithub(Repository, user,github_token)
-
-
-    # get current path
-    path = os.getcwd()
-    # change current path to elicitation folder
-    path = path + '/' + Repository
-    print('Path',path)
-    
-    os.chdir(path)
-    
-    sys.path.insert(0, os.getcwd())
-    from createWebformDict import input_dir
-    from createWebformDict import csv_file
-    
-    # change to full path
-    output_dir = path + '/' + output_dir
-    input_dir = path + '/' + input_dir
+def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
+                 df_indexes_TQ):
 
     # merge the files of the different experts
     # creating one file for seeds and one for tagets
-    merge_csv(input_dir, target)
-
-    # Check whether the specified output path exists or not
-    isExist = os.path.exists(output_dir)
-
-    if not isExist:
-
-        # Create a new directory because it does not exist
-        os.makedirs(output_dir)
-        print('The new directory ' + output_dir + ' is created!')
+    merge_csv(input_dir, target, group)
 
     # seeds file name
     filename = input_dir + '/seed.csv'
 
     # Read a comma-separated values (csv) file into DataFrame df_SQ
     df_SQ = pd.read_csv(filename)
+
+    # create a 2D numpy array with the answers to the seed questions
+    cols_as_np = df_SQ[df_SQ.columns[4:]].to_numpy()
+
+    # we want to work with a 3D array, with the following dimension:
+    # n_expert X n_pctl X n_SQ
+    n_experts = cols_as_np.shape[0]
+    n_SQ = int(cols_as_np.shape[1] / n_pctl)
 
     # The second column (index 1) must contain the first name of the expert
     firstname = df_SQ[df_SQ.columns[1]].astype(str).tolist()
@@ -415,14 +545,13 @@ def main():
 
     print('NS_SQ', NS_SQ)
 
-    # create a 2D numpy array with the answers to the seed questions
-    cols_as_np = df_SQ[df_SQ.columns[4:]].to_numpy()
+    csv_name = output_dir + '/' + elicitation_name + '_experts.csv'
 
-    # we want to work with a 3D array, with the following dimension:
-    # n_expert X n_pctl X n_SQ
-    n_experts = cols_as_np.shape[0]
-    n_pctl = 3
-    n_SQ = int(cols_as_np.shape[1] / n_pctl)
+    d = {'index': range(1, len(NS_SQ) + 1), 'Expert': NS_SQ}
+
+    df = pd.DataFrame(data=d)
+
+    df.to_csv(csv_name, index=False)
 
     # reshaped numpy array with expert answers
     SQ_array = np.reshape(cols_as_np, (n_experts, n_SQ, n_pctl))
@@ -434,34 +563,161 @@ def main():
     # (sometimes the expert give the percentiles in the wrong order)
     SQ_array = np.sort(SQ_array, axis=1)
 
+    # chech and correct for equal percentiles
+    for i in np.arange(n_SQ):
+
+        for k in np.arange(n_experts):
+
+            # if 5% and 50% percentiles are equal, reduce 5%
+            if SQ_array[k, 0, i] == SQ_array[k, 1, i]:
+
+                SQ_array[k, 0, i] = SQ_array[k, 1, i] * 0.99
+
+            # if 50% and 95% percentiles are equal, increase 95%
+            if SQ_array[k, 2, i] == SQ_array[k, 1, i]:
+
+                SQ_array[k, 2, i] = SQ_array[k, 1, i] * 1.01
+
+        print('')
+        print('Seed question ', i)
+        print(SQ_array[:, :, i])
+
+    if target:
+
+        filename = input_dir + '/target.csv'
+
+        # Read a comma-separated values (csv) file into DataFrame df_TQ
+        df_TQ = pd.read_csv(filename)
+
+        # The second column (index 1) must contain the first name of the expert
+        firstname = df_TQ[df_TQ.columns[1]].astype(str).tolist()
+
+        # The third column (index 2) must contain the first name of the expert
+        surname = df_TQ[df_TQ.columns[2]].astype(str).tolist()
+
+        # create a list with firstname+surname
+        # this is needed to search for expert matches between seed and target questions
+        NS_TQ = []
+
+        for name, surname in zip(firstname, surname):
+
+            NS_TQ.append(name + surname)
+
+        sorted_idx = []
+
+        # loop to search for matches between experts in seed and target
+        for SQ_name in NS_SQ:
+
+            index = NS_TQ.index(difflib.get_close_matches(SQ_name, NS_TQ)[0])
+            sorted_idx.append(index)
+
+        print('Sorted list of experts to match the order of seeds:',
+              sorted_idx)
+
+        print(NS_SQ)
+        print([NS_TQ[s_idx] for s_idx in sorted_idx])
+
+        # create a 2D numpy array with the answers to the target questions
+        cols_as_np = df_TQ[df_TQ.columns[4:]].to_numpy()
+
+        # sort for expert names
+        cols_as_np = cols_as_np[sorted_idx, :]
+
+        # we want to work with a 3D array, with the following dimension:
+        # n_expert X n_pctl X n_TQ
+        n_experts_TQ = cols_as_np.shape[0]
+
+        # check if number of experts in seed and target is the same
+        if (n_experts_TQ != n_experts):
+
+            print('Error: number of experts in seeds and targets different')
+            sys.exit()
+
+        n_TQ = int(cols_as_np.shape[1] / n_pctl)
+
+        # reshaped numpy array with expert answers
+        TQ_array = np.reshape(cols_as_np, (n_experts, n_TQ, n_pctl))
+
+        # swap the array to have pctls for the second index
+        TQ_array = np.swapaxes(TQ_array, 1, 2)
+
+        # sort according to the percentile values
+        # (sometimes the expert give the percentiles in the wrong order)
+        TQ_array = np.sort(TQ_array, axis=1)
+
+        for i in np.arange(n_TQ):
+
+            for k in np.arange(n_experts):
+                if TQ_array[k, 0, i] == TQ_array[k, 1, i]:
+                    TQ_array[k, 0, i] = TQ_array[k, 1, i] * 0.99
+                if TQ_array[k, 2, i] == TQ_array[k, 1, i]:
+                    TQ_array[k, 2, i] = TQ_array[k, 1, i] * 1.01
+
+            print('Target question ', i)
+            print(TQ_array[:, :, i])
+
+    # if we have a subset of the SQ, then extract from SQ_array
+    # the correct slice
+    if len(df_indexes_SQ) > 0:
+
+        # print('SQ_array',SQ_array)
+        SQ_array = SQ_array[:, :, df_indexes_SQ]
+        n_SQ = len(df_indexes_SQ)
+        # print('SQ_array',SQ_array)
+
+    if target:
+
+        if len(df_indexes_TQ) > 0:
+
+            # print('TQ_array',TQ_array)
+            TQ_array = TQ_array[:, :, df_indexes_TQ]
+            n_TQ = len(df_indexes_TQ)
+            # print('TQ_array',TQ_array)
+
+    return n_experts, n_SQ, n_TQ, SQ_array, TQ_array
+
+    ########## READ csv question file ############
+
+
+def read_questionnaire(input_dir, csv_file):
+
     df_read = pd.read_csv(input_dir + '/' + csv_file, header=0)
-    print(df_read)
-    
+    # print(df_read)
+
+    quest_type = df_read['QUEST_TYPE'].to_list()
+    n_SQ = quest_type.count('seed')
+    n_TQ = quest_type.count('target')
+
+    print(quest_type)
+
     try:
-    
+
         from ElicipyDict import seed_list
-        print('seed_list read',seed_list)
-    
+        print('seed_list read', seed_list)
+
     except ImportError:
-    
-        print('ImportError')    
+
+        print('ImportError')
         seed_list = list(df_read['IDX'])
-        
-    print('seed_list',seed_list)    
+
+    print('seed_list', seed_list)
 
     if len(seed_list) > 0:
-
+    
         # extract the seed questions with index in seed_list (from column IDX)
-        df_SQ = df_read[df_read['IDX'].isin(seed_list) & df_read.QUEST_TYPE.str.contains('seed')]
+        df_SQ = df_read[df_read['IDX'].isin(seed_list)
+                        & df_read.QUEST_TYPE.str.contains('seed')]
         print('Seed dataframe')
         print(df_SQ)
-        
+
         # find the python indexes as rows of the dataframe
-        df_indexes = np.asarray(np.where(df_read['IDX'].isin(seed_list) & df_read.QUEST_TYPE.str.contains('seed')))
+        df_indexes = np.asarray(
+            np.where(df_read['IDX'].isin(seed_list)
+                     & df_read.QUEST_TYPE.str.contains('seed')))
 
     else:
 
-        df_SQ = df_read[df_read['QUEST_TYPE']=='seed']
+        df_SQ = df_read[df_read['QUEST_TYPE'] == 'seed']
         df_indexes = np.arange(len(df_quest.index))
 
     # find the indexes of the seed questions (0<idx<n_SQ)
@@ -471,32 +727,37 @@ def main():
     if target:
 
         try:
-    
+
             from ElicipyDict import target_list
-            print('target_list read',target_list)
-    
+            print('target_list read', target_list)
+
         except ImportError:
-    
-            print('ImportError')    
+
+            print('ImportError')
             target_list = list(df_read['IDX'])
-        
-        print('target_list',target_list)    
+
+        print('target_list', target_list)
 
         if len(target_list) > 0:
 
             # extract the target questions with index in target_list (from column IDX)
-            df_TQ = df_read[df_read['IDX'].isin(target_list) & df_read.QUEST_TYPE.str.contains('target')]
+            df_TQ = df_read[df_read['IDX'].isin(target_list)
+                            & df_read.QUEST_TYPE.str.contains('target')]
             print('Target dataframe')
             print(df_TQ)
-            
+
             # find the python indexes as rows of the dataframe
-            df_indexes = np.append(df_indexes,np.asarray(np.where(df_read['IDX'].isin(target_list) & df_read.QUEST_TYPE.str.contains('target'))))
-            print('df_indexes',df_indexes)
+            df_indexes = np.append(
+                df_indexes,
+                np.asarray(
+                    np.where(df_read['IDX'].isin(target_list)
+                             & df_read.QUEST_TYPE.str.contains('target'))))
+            print('df_indexes', df_indexes)
 
         else:
 
-            df_TQ = df_read[df_read['QUEST_TYPE']=='target']
-            
+            df_TQ = df_read[df_read['QUEST_TYPE'] == 'target']
+
             df_indexes = np.arange(len(df_quest.index))
 
         # find the indexes of the target questions (0<idx<n_TQ) in the extracted dataframe
@@ -507,21 +768,12 @@ def main():
         print('df_quest')
         print(df_quest)
 
-    else: 
-    
+    else:
+
         df_quest = df_SQ
 
     label_indexes = np.asarray(df_quest['IDX'])
-    print('label_indexes',label_indexes)
-
-    # if we have a subset of the SQ, then extract from SQ_array
-    # the correct slice
-    if len(df_indexes_SQ) > 0:
-
-        # print('SQ_array',SQ_array)
-        SQ_array = SQ_array[:, :, df_indexes_SQ]
-        n_SQ = len(df_indexes_SQ)
-        # print('SQ_array',SQ_array)
+    print('label_indexes', label_indexes)
 
     data_top = df_quest.head()
 
@@ -540,13 +792,13 @@ def main():
     print('Languages:', langs)
 
     try:
-    
+
         from ElicipyDict import language
-    
+
     except ImportError:
-    
+
         language = ''
-        
+
     # select the columns to use according with the language
     if (len(langs) > 1):
 
@@ -583,16 +835,19 @@ def main():
     SQ_realization = []
 
     global_log = []
+    
+    global_idxMin = []
+    global_idxMax = []
+    global_sum50 = []
 
     for i in df_quest.itertuples():
 
-        idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question,idxMin,idxMax,sum50,parent,image = [
-            i[j] for j in index_list
-        ]
+        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question,\
+            idxMin, idxMax, sum50, parent, image = [i[j] for j in index_list]
 
         minVal = float(minVal)
         maxVal = float(maxVal)
-        
+
         if scale == 'uni':
 
             global_log.append(0)
@@ -620,6 +875,10 @@ def main():
 
             SQ_minVals.append(minVal)
             SQ_maxVals.append(maxVal)
+            
+            global_idxMin.append(idxMin)
+            global_idxMax.append(idxMax)
+            global_sum50.append(sum50)
 
     # print on screen the units
     print("Seed_units = ", SQ_units)
@@ -627,24 +886,160 @@ def main():
     # print on screen the units
     print("Seed_scales = ", SQ_scale)
 
-    for i in np.arange(n_SQ):
+    # list with the "title" of the target questions
+    TQ_question = []
+    # list with the long title of the target questions
+    TQ_LongQuestion = []
+    TQ_minVals = []
+    TQ_maxVals = []
+    # list with the units of the target questions
+    TQ_units = []
+    # scale for target question:
+    TQ_scale = []
 
-        for k in np.arange(n_experts):
+    idx_list = []
+    parents = []
 
-            # if 5% and 50% percentiles are equal, reduce 5%
-            if SQ_array[k, 0, i] == SQ_array[k, 1, i]:
+    if target:
 
-                SQ_array[k, 0, i] = SQ_array[k, 1, i] * 0.99
+        for i in df_quest.itertuples():
 
-            # if 50% and 95% percentiles are equal, increase 95%
-            if SQ_array[k, 2, i] == SQ_array[k, 1, i]:
+            idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, \
+                question, idxMin, idxMax, sum50, parent, image = \
+                [i[j] for j in index_list]
 
-                SQ_array[k, 2, i] = SQ_array[k, 1, i] * 1.01
+            minVal = float(minVal)
+            maxVal = float(maxVal)
+            if (question == 'target'):
 
-        print('')
-        print('Seed question ', i)
-        print(SQ_array[:, :, i])
+                TQ_question.append(shortQ)
+                TQ_LongQuestion.append(longQ)
+                TQ_units.append(unit)
+                TQ_scale.append(scale)
+
+                if minVal.is_integer():
+
+                    minVal = int(minVal)
+
+                if maxVal.is_integer():
+
+                    maxVal = int(maxVal)
+
+                TQ_minVals.append(minVal)
+                TQ_maxVals.append(maxVal)
+                idx_list.append(int(idx))
+                parents.append(int(parent))
+
+                global_idxMin.append(idxMin)
+                global_idxMax.append(idxMax)
+                global_sum50.append(sum50)
+
+
+        # print on screen the units
+        print("Target units = ", TQ_units)
+
+        # print on screen the units
+        print("Target scales = ", TQ_scale)
+
+        global_scale = SQ_scale + TQ_scale
+
+    else:
+
+        global_scale = SQ_scale
+
+    return df_indexes_SQ, df_indexes_TQ, SQ_scale, SQ_realization, TQ_scale, \
+        SQ_minVals, SQ_maxVals, TQ_minVals, TQ_maxVals, SQ_units, TQ_units, \
+        SQ_LongQuestion, TQ_LongQuestion, SQ_question, TQ_question, \
+        idx_list, global_scale, global_log, label_indexes, parents, \
+        global_idxMin, global_idxMax, global_sum50
+
+
+
+def analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
+             realization, global_scale, global_log, alpha):
+
+    if analysis:
+
+        W, score, information = global_weights(SQ_array, TQ_array, realization,
+                                               alpha, global_scale, overshoot,
+                                               cal_power)
         
+        W_erf, score_erf = generate_ERF(realization, SQ_array)
+         
+        sensitivity = True                                       
+
+        if sensitivity:
+        
+            for i in range(n_SQ):
+            
+                SQ_temp = np.delete(SQ_array, i, axis=2)
+                realization_temp = np.delete(realization, i)
+                global_scale_temp = np.delete(global_scale,i)
+                
+        
+                W_temp,score_temp,information_temp = global_weights(SQ_temp, TQ_array, realization_temp,
+                                               alpha, global_scale_temp, overshoot,
+                                               cal_power)  
+                 
+                W_reldiff = W[:,3]/np.sum(W[:,3]) - W_temp[:,3]/np.sum(W_temp[:,3])    
+                
+                W_mean = np.mean( np.abs( W_reldiff) )
+                W_std = np.sqrt( np.sum( np.square(W_reldiff) ) / n_experts )                           
+                
+                print(i+1,W_mean,W_std,np.sum(W_temp[:,4]>0))                               
+                                                                                   
+                W_erf_temp, score_erf_temp = generate_ERF(realization_temp, SQ_temp)
+
+                W_reldiff = W_erf[:,4] - W_erf_temp[:,4]    
+                
+                W_mean = np.mean( np.abs( W_reldiff) )
+                W_std = np.sqrt( np.sum( np.square(W_reldiff) ) / n_experts )                           
+                
+                print(i+1,W_mean,W_std,np.sum(W_erf_temp>alpha))                               
+
+
+        Weq = np.ones(n_experts)
+        Weqok = [x / n_experts for x in Weq]
+
+        W_gt0_01 = []
+        Werf_gt0_01 = []
+        expin = []
+
+        k = 1
+        for x, y in zip(W[:, 4], W_erf[:, 4]):
+            if (x > 0) or (y > 0):
+                W_gt0_01.append(x)
+                Werf_gt0_01.append(y)
+                expin.append(k)
+            k += 1
+
+        W_gt0 = [round((x * 100.0), 2) for x in W_gt0_01]
+        Werf_gt0 = [round((x * 100.0), 2) for x in Werf_gt0_01]
+
+        if ERF_flag > 0:
+
+            print("")
+            print('W_erf')
+            print(W_erf[:, -1])
+
+        if Cooke_flag:
+
+            print("")
+            print('W_cooke')
+            print(W[:, -1])
+            print('score', score)
+            print('information', information)
+            print('unNormalized weight', W[:, 3])
+
+        print("")
+        print('Weq')
+        print(Weqok)
+
+    return W, W_erf, Weqok, W_gt0, Werf_gt0, expin
+
+
+def save_dtt_rll(input_dir):
+
     # ----------------------------------------- #
     # ------------ Save dtt and rls ----------- #
     # ----------------------------------------- #
@@ -676,8 +1071,7 @@ def main():
         sys.stdout = f  # Change the standard output to the file we created.
 
         for i in np.arange(n_SQ):
-        
-            
+
             # print(i+1,str(i+1),SQ_realization[i],SQ_scale[i])
 
             print(
@@ -686,147 +1080,7 @@ def main():
 
         sys.stdout = original_stdout  # Reset the standard output to its original value
 
-    # list with the "title" of the target questions
-    TQ_question = []
-    # list with the long title of the target questions
-    TQ_LongQuestion = []
-    TQ_minVals = []
-    TQ_maxVals = []
-    # list with the units of the target questions
-    TQ_units = []
-    # scale for target question:
-    TQ_scale = []
-    
-    idx_list = []
-    parents = []
-    
-
     if target:
-
-        filename = input_dir + '/target.csv'
-
-        # Read a comma-separated values (csv) file into DataFrame df_TQ
-        df_TQ = pd.read_csv(filename)
-
-        # The second column (index 1) must contain the first name of the expert
-        firstname = df_TQ[df_TQ.columns[1]].astype(str).tolist()
-
-        # The third column (index 2) must contain the first name of the expert
-        surname = df_TQ[df_TQ.columns[2]].astype(str).tolist()
-
-        # create a list with firstname+surname
-        # this is needed to search for expert matches between seed and target questions
-        NS_TQ = []
-
-        for name, surname in zip(firstname, surname):
-
-            NS_TQ.append(name + surname)
-
-        
-        sorted_idx = []
-
-        # loop to search for matches between experts in seed and target
-        for SQ_name in NS_SQ:
-
-            index = NS_TQ.index(difflib.get_close_matches(SQ_name, NS_TQ)[0])
-            sorted_idx.append(index)
-            
-
-        print('Sorted list of experts to match the order of seeds:',
-              sorted_idx)
-              
-        print(NS_SQ)
-        print([NS_TQ[s_idx] for s_idx in sorted_idx])   
-        
-        csv_name = output_dir + '/' + elicitation_name + '_experts.csv'
-        
-        d = {'index':range(1,len(NS_SQ)+1), 'Expert':NS_SQ}
-
-        df = pd.DataFrame(data=d)
-    
-        df.to_csv(csv_name,index=False)
-
-        # create a 2D numpy array with the answers to the target questions
-        cols_as_np = df_TQ[df_TQ.columns[4:]].to_numpy()
-
-        # sort for expert names
-        cols_as_np = cols_as_np[sorted_idx, :]
-        
-        # we want to work with a 3D array, with the following dimension:
-        # n_expert X n_pctl X n_TQ
-        n_experts_TQ = cols_as_np.shape[0]
-
-        # check if number of experts in seed and target is the same
-        if (n_experts_TQ != n_experts):
-
-            print('Error: number of experts in seeds and targets different')
-            sys.exit()
-
-        n_TQ = int(cols_as_np.shape[1] / n_pctl)
-
-        # reshaped numpy array with expert answers
-        TQ_array = np.reshape(cols_as_np, (n_experts, n_TQ, n_pctl))
-
-        # swap the array to have pctls for the second index
-        TQ_array = np.swapaxes(TQ_array, 1, 2)
-
-        # sort according to the percentile values
-        # (sometimes the expert give the percentiles in the wrong order)
-        TQ_array = np.sort(TQ_array, axis=1)
-
-        if len(df_indexes_TQ) > 0:
-
-            # print('TQ_array',TQ_array)
-            TQ_array = TQ_array[:, :, df_indexes_TQ]
-            n_TQ = len(df_indexes_TQ)
-            # print('TQ_array',TQ_array)
-
-        for i in df_quest.itertuples():
-
-            idx,shortQ,longQ,unit,scale,minVal,maxVal,realization,question,idxMin,idxMax,sum50,parent,image = [
-                i[j] for j in index_list
-            ]
-
-            minVal = float(minVal)
-            maxVal = float(maxVal)
-            if (question == 'target'):
-
-                TQ_question.append(shortQ)
-                TQ_LongQuestion.append(longQ)
-                TQ_units.append(unit)
-                TQ_scale.append(scale)
-
-                if minVal.is_integer():
-
-                    minVal = int(minVal)
-
-                if maxVal.is_integer():
-
-                    maxVal = int(maxVal)
-
-                TQ_minVals.append(minVal)
-                TQ_maxVals.append(maxVal)
-                idx_list.append(int(idx))
-                parents.append(int(parent))
-
-        # print on screen the units
-        print("Target units = ", TQ_units)
-
-        # print on screen the units
-        print("Target scales = ", TQ_scale)
-
-        global_scale = SQ_scale + TQ_scale
-
-        for i in np.arange(n_TQ):
-
-            for k in np.arange(n_experts):
-                if TQ_array[k, 0, i] == TQ_array[k, 1, i]:
-                    TQ_array[k, 0, i] = TQ_array[k, 1, i] * 0.99
-                if TQ_array[k, 2, i] == TQ_array[k, 1, i]:
-                    TQ_array[k, 2, i] = TQ_array[k, 1, i] * 1.01
-
-            print('Target question ', i)
-            print(TQ_array[:, :, i])
 
         filename = input_dir + '/target.dtt'
 
@@ -848,82 +1102,14 @@ def main():
 
             sys.stdout = original_stdout  # Reset the standard output to its original value
 
-    else:
+    return
 
-        # if we do not read the target questions, set empty array
-        n_TQ = 0
 
-        TQ_array = np.zeros((n_experts, n_pctl, n_TQ))
-        global_scale = SQ_scale
-
-    if target:
-
-        nTot = TQ_array.shape[2] + SQ_array.shape[2]
-
-    else:
-
-        nTot = SQ_array.shape[2]
-
-    realization = np.zeros(TQ_array.shape[2] + SQ_array.shape[2])
-    realization[0:SQ_array.shape[2]] = SQ_realization
-
-    global_minVal = SQ_minVals + TQ_minVals
-    global_maxVal = SQ_maxVals + TQ_maxVals
-    global_units = SQ_units + TQ_units
-    global_longQuestion = SQ_LongQuestion + TQ_LongQuestion
-    global_shortQuestion = SQ_question + TQ_question
-
-    print("")
-    print('Realization', realization)
-    
-   
-    if analysis and target:
-
-        tree = {'IDX': idx_list, 'SHORT_Q': TQ_question}
-        df_tree = pd.DataFrame(data=tree)
-
-    # ----------------------------------------- #
-    # ------------ Compute weights ------------ #
-    # ----------------------------------------- #
-
-    if analysis:
-
-        W = global_weights(SQ_array, TQ_array, realization, alpha,
-                           global_scale, overshoot, cal_power)
-
-        W_erf = generate_ERF(realization, SQ_array)
-
-        Weq = np.ones(n_experts)
-        Weqok = [x / n_experts for x in Weq]
-
-        W_gt0_01 = []
-        Werf_gt0_01 = []
-        expin = []
-
-        k = 1
-        for x, y in zip(W[:, 4], W_erf[:, 4]):
-            if (x > 0) or (y > 0):
-                W_gt0_01.append(x)
-                Werf_gt0_01.append(y)
-                expin.append(k)
-            k += 1
-
-        W_gt0 = [round((x * 100.0), 2) for x in W_gt0_01]
-        Werf_gt0 = [round((x * 100.0), 2) for x in Werf_gt0_01]
-
-        print("")
-        print('W_erf')
-        print(W_erf[:, -1])
-        print("")
-        print('W')
-        print(W[:, -1])
-        print("")
-        print('Weq')
-        print(Weqok)
-
-    # ----------------------------------------- #
-    # ------ Create samples and bar plots ----- #
-    # ----------------------------------------- #
+def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
+                               TQ_array, n_sample, W, W_erf, Weqok, W_gt0,
+                               Werf_gt0, expin, global_log, global_minVal,
+                               global_maxVal, global_units, TQ_units,
+                               label_indexes, minval_all, maxval_all):
 
     DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
 
@@ -970,16 +1156,33 @@ def main():
 
         if analysis:
 
-            quan05, quan50, qmean, quan95, C = createDATA1(
-                DAT, j, W[:, 4].flatten(), n_sample, global_log[j],
+            quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
+                DAT, j, Weqok, n_sample, global_log[j],
                 [global_minVal[j], global_maxVal[j]], False)
 
             print("%2i %9.2f %9.2f %9.2f %9.2f" %
-                  (j, quan05, quan50, qmean, quan95))
+                  (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
 
-            q_Cooke[j, 0] = quan05
-            q_Cooke[j, 1] = quan50
-            q_Cooke[j, 2] = quan95
+            q_EW[j, 0] = quan05_EW
+            q_EW[j, 1] = quan50_EW
+            q_EW[j, 2] = quan95_EW
+
+            if Cooke_flag:
+
+                quan05, quan50, qmean, quan95, C = createDATA1(
+                    DAT, j, W[:, 4].flatten(), n_sample, global_log[j],
+                    [global_minVal[j], global_maxVal[j]], False)
+
+                print("%2i %9.2f %9.2f %9.2f %9.2f" %
+                      (j, quan05, quan50, qmean, quan95))
+
+                q_Cooke[j, 0] = quan05
+                q_Cooke[j, 1] = quan50
+                q_Cooke[j, 2] = quan95
+
+            else:
+
+                C = C_EW
 
             quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = createDATA1(
                 DAT, j, W_erf[:, 4].flatten(), n_sample, global_log[j],
@@ -992,41 +1195,205 @@ def main():
             q_erf[j, 1] = quan50_erf
             q_erf[j, 2] = quan95_erf
 
-            quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
-                DAT, j, Weqok, n_sample, global_log[j],
-                [global_minVal[j], global_maxVal[j]], False)
-
-            print("%2i %9.2f %9.2f %9.2f %9.2f" %
-                  (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
-
-            q_EW[j, 0] = quan05_EW
-            q_EW[j, 1] = quan50_EW
-            q_EW[j, 2] = quan95_EW
-
             if (j >= n_SQ):
 
-                samples[:, j - n_SQ] = C
-                samples_erf[:, j - n_SQ] = C_erf
+                if Cooke_flag:
+
+                    samples[:, j - n_SQ] = C
+
+                if ERF_flag > 0:
+
+                    samples_erf[:, j - n_SQ] = C_erf
+
                 samples_EW[:, j - n_SQ] = C_EW
 
             if (j >= n_SQ):
 
-                create_fig_hist(j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
-                                colors, legends, global_units, Cooke_flag,
-                                ERF_flag, EW_flag, global_minVal,
-                                global_maxVal, output_dir, elicitation_name,
-                                del_rows, TQ_units,label_indexes)
+                legendsPDF = []
+                legendsPDF.append('CM' + '%9.2f' % quan05 + '%9.2f' % quan50 +
+                                  '%9.2f' % quan95)
+                legendsPDF.append('ERF' + '%9.2f' % quan05_erf +
+                                  '%9.2f' % quan50_erf + '%9.2f' % quan95_erf)
+                legendsPDF.append('EW' + '%9.2f' % quan05_EW +
+                                  '%9.2f' % quan50_EW + '%9.2f' % quan95_EW)
+                legendsPDF = [legendsPDF[index] for index in keep_rows]
+
+                create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf,
+                                C_EW, colors, legends, legendsPDF,
+                                global_units, Cooke_flag, ERF_flag, EW_flag,
+                                global_minVal, global_maxVal, output_dir,
+                                elicitation_name, del_rows, TQ_units,
+                                label_indexes, minval_all, maxval_all)
+
+    return q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW
+
+
+def main():
+
+    from ElicipyDict import output_dir
+
+    from ElicipyDict import datarepo
+    from ElicipyDict import Repository
+    from ElicipyDict import group_list
+
+    if len(group_list) > 1 and not (0 in group_list):
+
+        group_list.append(0)
+
+    n_pctl = 3
+
+    # download the data from github repository
+    if datarepo == 'github':
+
+        from ElicipyDict import user
+        from ElicipyDict import github_token
+
+        saveDataFromGithub(Repository, user, github_token)
+
+    # get current path
+    path = os.getcwd()
+    # change current path to elicitation folder
+    path = path + '/' + Repository
+    print('Path', path)
+
+    os.chdir(path)
+
+    sys.path.insert(0, os.getcwd())
+    from createWebformDict import input_dir
+    from createWebformDict import csv_file
+
+    # change to full path
+    output_dir = path + '/' + output_dir
+    input_dir = path + '/' + input_dir
+
+    # Check whether the specified output path exists or not
+    isExist = os.path.exists(output_dir)
+
+    if not isExist:
+
+        # Create a new directory because it does not exist
+        os.makedirs(output_dir)
+        print('The new directory ' + output_dir + ' is created!')
+
+    # Read the questionnaire csv file
+    df_indexes_SQ, df_indexes_TQ, SQ_scale, SQ_realization, TQ_scale, \
+        SQ_minVals, SQ_maxVals, TQ_minVals, TQ_maxVals, SQ_units, TQ_units, \
+        SQ_LongQuestion, TQ_LongQuestion, SQ_question, TQ_question, idx_list, \
+        global_scale, global_log, label_indexes, parents, global_idxMin, \
+        global_idxMax, global_sum50 = \
+        read_questionnaire(input_dir, csv_file)
+
+    # Read the asnwers of all the experts
+    group = 0
+    n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
+        input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ)
+
+    minval_all = np.zeros(n_SQ + n_TQ)
+    minval_all[0:n_SQ] = np.amin(SQ_array[:, 0, :], axis=0)
+    minval_all[n_SQ:] = np.amin(TQ_array[:, 0, :], axis=0)
+
+    maxval_all = np.zeros(n_SQ + n_TQ)
+    maxval_all[0:n_SQ] = np.amax(SQ_array[:, 2, :], axis=0)
+    maxval_all[n_SQ:] = np.amax(TQ_array[:, 2, :], axis=0)
+
+    print('')
+    print('Answer ranges')
+
+    for i in range(n_SQ + n_TQ):
+
+        print(i, minval_all[i], maxval_all[i])
+
+    print('')
+
+    if len(group_list) > 1:
+
+        q_Cooke_groups = np.zeros((len(global_scale), 3, len(group_list)))
+        q_erf_groups = np.zeros((len(global_scale), 3, len(group_list)))
+        q_EW_groups = np.zeros((len(global_scale), 3, len(group_list)))
+
+    for count, group in enumerate(group_list):
+
+        # Read the asnwers of the experts
+        n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
+            input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ)
+
+        if target:
+
+            nTot = TQ_array.shape[2] + SQ_array.shape[2]
+
+        else:
+
+            nTot = SQ_array.shape[2]
+            # if we do not read the target questions, set empty array
+            n_TQ = 0
+            TQ_array = np.zeros((n_experts, n_pctl, n_TQ))
+
+        realization = np.zeros(TQ_array.shape[2] + SQ_array.shape[2])
+        realization[0:SQ_array.shape[2]] = SQ_realization
+
+        global_minVal = SQ_minVals + TQ_minVals
+        global_maxVal = SQ_maxVals + TQ_maxVals
+        global_units = SQ_units + TQ_units
+        global_longQuestion = SQ_LongQuestion + TQ_LongQuestion
+        global_shortQuestion = SQ_question + TQ_question
+
+        print("")
+        print('Realization', realization)
+
+        if analysis and target:
+
+            tree = {'IDX': idx_list, 'SHORT_Q': TQ_question}
+            df_tree = pd.DataFrame(data=tree)
+
+        # ----------------------------------------- #
+        # ------------ Compute weights ------------ #
+        # ----------------------------------------- #
+
+        if group == 0:
+
+            W, W_erf, Weqok, W_gt0, Werf_gt0, expin = analysis(
+                input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
+                realization, global_scale, global_log, alpha)
+
+        else:
+
+            # set alpha to zero
+            W, W_erf, Weqok, W_gt0, Werf_gt0, expin = analysis(
+                input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
+                realization, global_scale, global_log, 0.0)
+
+        # ----------------------------------------- #
+        # ------ Create samples and bar plots ----- #
+        # ----------------------------------------- #
+
+        q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = \
+            create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl,
+                                       SQ_array, TQ_array, n_sample, W, W_erf,
+                                       Weqok, W_gt0, Werf_gt0, expin,
+                                       global_log, global_minVal,
+                                       global_maxVal, global_units, TQ_units,
+                                       label_indexes, minval_all, maxval_all)
+
+        if len(group_list) > 1:
+
+            q_Cooke_groups[:, :, count] = q_Cooke
+            q_erf_groups[:, :, count] = q_erf
+            q_EW_groups[:, :, count] = q_EW
 
     # ----------------------------------------- #
     # ---------- Save samples on csv ---------- #
     # ----------------------------------------- #
 
     if analysis and target:
-            
+
         targets = ['target_' + str(i).zfill(2) for i in range(n_TQ)]
 
+        df_tree["EW_5"] = q_EW[n_SQ:, 0]
+        df_tree["EW_50"] = q_EW[n_SQ:, 1]
+        df_tree["EW_95"] = q_EW[n_SQ:, 2]
+
         if Cooke_flag > 0:
-        
+
             df_tree["COOKE_5"] = q_Cooke[n_SQ:, 0]
             df_tree["COOKE_50"] = q_Cooke[n_SQ:, 1]
             df_tree["COOKE_95"] = q_Cooke[n_SQ:, 2]
@@ -1044,7 +1411,6 @@ def main():
             df_tree["ERF_5"] = q_erf[n_SQ:, 0]
             df_tree["ERF_50"] = q_erf[n_SQ:, 1]
             df_tree["ERF_95"] = q_erf[n_SQ:, 2]
-
 
             csv_name = output_dir + '/' + elicitation_name + '_samples_erf.csv'
             np.savetxt(csv_name,
@@ -1065,7 +1431,18 @@ def main():
                        fmt='%1.4e')
 
         df_tree["PARENT"] = parents
-        df_tree.to_csv('tree.csv',index=False)
+        df_tree.to_csv('tree.csv', index=False)
+
+
+    # ----------------------------------------- #
+    # --------- Create answ. figures ---------- #
+    # ----------------------------------------- #
+
+    for count,trend_group in enumerate(trend_groups):
+
+        create_figure_trend(count,trend_group,n_SQ,q_EW,q_Cooke,q_erf,global_units,
+                        Cooke_flag, ERF_flag, EW_flag, global_log, 
+                        TQ_minVals, TQ_maxVals, output_dir)
 
 
     # ----------------------------------------- #
@@ -1075,13 +1452,14 @@ def main():
     n_panels = int(np.ceil(n_experts / max_len_plot))
 
     for h in np.arange(n_SQ + n_TQ):
-    
+
         for k in np.arange(n_panels):
 
-            create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array, realization,
-                      analysis, Cooke_flag, ERF_flag, EW_flag, global_units,
-                      output_dir, q_Cooke, q_erf, q_EW, elicitation_name,
-                      global_log,label_indexes)
+            create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
+                          TQ_array, realization, analysis, Cooke_flag,
+                          ERF_flag, EW_flag, global_units, output_dir, q_Cooke,
+                          q_erf, q_EW, elicitation_name, global_log,
+                          label_indexes)
 
     # ----------------------------------------- #
     # ------- Create .pptx presentation ------- #
@@ -1121,6 +1499,21 @@ def main():
 
     if analysis:
 
+        slide = prs.slides.add_slide(title_slide_layout)
+
+        text_title = "Experts' weights"
+
+        title_shape = slide.shapes.title
+        title_shape.text = text_title
+        title_shape.top = Inches(3.0)
+        title_shape.width = Inches(15)
+        title_shape.height = Inches(2)
+        title_para = slide.shapes.title.text_frame.paragraphs[0]
+        title_para.font.name = "Helvetica"
+        title_para.font.size = Pt(54)
+        add_date(slide)
+        add_small_logo(slide, left, top)
+
         n_tables = int(np.ceil(len(W_gt0) / max_len_table))
 
         for i_table in range(n_tables):
@@ -1131,13 +1524,22 @@ def main():
             add_title(slide, text_title)
 
             # ---add table weights to slide---
-            x, y, cx, cy = Inches(2), Inches(2), Inches(8), Inches(4)
+            x, y, cx, cy = Inches(2), Inches(1.7), Inches(8), Inches(4)
 
             fisrt_j = i_table * max_len_table
             last_j = np.minimum((i_table + 1) * max_len_table, len(W_gt0))
 
-            shape = slide.shapes.add_table(last_j - fisrt_j + 1, 3, x, y, cx,
-                                           MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+            if ERF_flag > 0:
+
+                shape = slide.shapes.add_table(last_j - fisrt_j + 1, 3, x, y,
+                                               cx,
+                                               MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+
+            else:
+
+                shape = slide.shapes.add_table(last_j - fisrt_j + 1, 2, x, y,
+                                               cx,
+                                               MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
 
             table = shape.table
 
@@ -1147,8 +1549,10 @@ def main():
             cell = table.cell(0, 1)
             cell.text = 'Cooke'
 
-            cell = table.cell(0, 2)
-            cell.text = 'ERF'
+            if ERF_flag > 0:
+
+                cell = table.cell(0, 2)
+                cell.text = 'ERF'
 
             for j in np.arange(fisrt_j, last_j):
                 j_mod = np.remainder(j, max_len_table)
@@ -1156,10 +1560,19 @@ def main():
                 cell.text = 'Exp' + str(expin[j])
 
                 cell = table.cell(j_mod + 1, 1)
-                cell.text = '%6.2f' % W_gt0[j]
 
-                cell = table.cell(j_mod + 1, 2)
-                cell.text = '%6.2f' % Werf_gt0[j]
+                if W_gt0[j] > 0.0:
+
+                    cell.text = '%6.2f' % W_gt0[j]
+
+                else:
+
+                    cell.text = 'Below threshold'
+
+                if ERF_flag > 0:
+
+                    cell = table.cell(j_mod + 1, 2)
+                    cell.text = '%6.2f' % Werf_gt0[j]
 
             for cell in iter_cells(table):
                 for paragraph in cell.text_frame.paragraphs:
@@ -1167,10 +1580,12 @@ def main():
                         run.font.size = Pt(12)
 
             if EW_flag:
-            
-                text_box = 'Equal weight = '+f"{Weqok[0]*100:.2f}"
-                add_text_box(slide, Inches(12), Inches(2), text_box)
 
+                text_box = 'Equal weight = ' + f"{Weqok[0]*100:.2f}"
+                add_text_box(slide, Inches(12), Inches(2), text_box,18)
+
+                text_box = "For Cookes' method, below threshold weight does not mean zero score. It simply means that this expert's knowledge was already contributed by other experts and adding this expert would not change significantly the results."
+                add_text_box(slide, Inches(12), Inches(3), text_box,18)
 
             add_date(slide)
             add_small_logo(slide, left, top)
@@ -1192,11 +1607,10 @@ def main():
     add_date(slide)
     add_small_logo(slide, left, top)
 
-
     for h in np.arange(n_SQ + n_TQ):
-    
+
         if h == n_SQ:
-        
+
             slide = prs.slides.add_slide(title_slide_layout)
 
             text_title = "Target Answers"
@@ -1211,7 +1625,6 @@ def main():
             title_para.font.size = Pt(54)
             add_date(slide)
             add_small_logo(slide, left, top)
-
 
         if (h >= n_SQ):
 
@@ -1228,12 +1641,30 @@ def main():
             slide = prs.slides.add_slide(title_slide_layout)
 
             text_box = global_longQuestion[h]
-            add_text_box(slide, left, top, text_box)
+            add_text_box(slide, left, top, text_box,18)
 
             figname = output_dir + '/' + elicitation_name + \
                 '_'+string+'_' + str(j + 1).zfill(2) + \
                 '_' + str(k + 1).zfill(2) + '.png'
             add_figure(slide, figname, left, top)
+
+            if analysis and (string == 'Target'):
+
+                figname = output_dir + '/' + elicitation_name + \
+                    '_PDF_group0_' + str(j + 1).zfill(2) + '.png'
+
+                width = Inches(3.3)
+                add_small_figure(slide, figname, left - Inches(1),
+                                 top + Inches(4.5), width)
+                                 
+                if global_idxMin[h] < global_idxMax[h]:
+
+                    longQ_NB = "N.B. The sum of 50%iles for questions " + \
+                        str(global_idxMin[h])+"-"+str(global_idxMax[h]) + \
+                        " have to sum to "+str(global_sum50[h])+"."                 
+
+                    add_text_box(slide, left, top+Inches(3.39), longQ_NB,15)
+
 
             add_date(slide)
             add_small_logo(slide, left, top)
@@ -1246,7 +1677,7 @@ def main():
     if analysis and target:
 
         slide = prs.slides.add_slide(title_slide_layout)
-    
+
         text_title = "Target Percentiles"
 
         title_shape = slide.shapes.title
@@ -1260,55 +1691,91 @@ def main():
         add_date(slide)
         add_small_logo(slide, left, top)
 
-        n_tables = int(np.ceil(n_TQ / max_len_table))
+        n_tables = int(np.ceil(n_TQ / max_len_tableB))
 
         for i_table in range(n_tables):
 
             slide = prs.slides.add_slide(prs.slide_layouts[5])
 
-            fisrt_j = i_table * max_len_table
-            last_j = np.minimum((i_table + 1) * max_len_table, n_TQ)
+            fisrt_j = i_table * max_len_tableB
+            last_j = np.minimum((i_table + 1) * max_len_tableB, n_TQ)
+
+            n_columns = 4
+
+            if EW_flag > 0:
+
+                n_columns += 3
+
+            if ERF_flag > 0:
+
+                n_columns += 3
 
             # ---add table to slide---
-            x, y, cx, cy = Inches(2), Inches(2), Inches(12), Inches(4)
-            shape = slide.shapes.add_table(last_j - fisrt_j + 1, 7, x, y, cx,
+            x, y, cx, cy = Inches(1), Inches(2), Inches(14), Inches(4)
+            shape = slide.shapes.add_table(last_j - fisrt_j + 1, n_columns, x,
+                                           y, cx,
                                            MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
             table = shape.table
 
             cell = table.cell(0, 1)
-            cell.text = 'Q05 (Cooke)'
+            cell.text = 'Q05 (EW)'
 
             cell = table.cell(0, 2)
-            cell.text = 'Q50 (Cooke)'
+            cell.text = 'Q50 (EW)'
 
             cell = table.cell(0, 3)
-            cell.text = 'Q95 (Cooke)'
+            cell.text = 'Q95 (EW)'
 
-            cell = table.cell(0, 4)
-            cell.text = 'Q05 (ERF)'
+            j_column = 3
 
-            cell = table.cell(0, 5)
-            cell.text = 'Q50 (ERF)'
+            if EW_flag > 0:
 
-            cell = table.cell(0, 6)
-            cell.text = 'Q95 (ERF)'
+                cell = table.cell(0, j_column + 1)
+                cell.text = 'Q05 (Cooke)'
+
+                cell = table.cell(0, j_column + 2)
+                cell.text = 'Q50 (Cooke)'
+
+                cell = table.cell(0, j_column + 3)
+                cell.text = 'Q95 (Cooke)'
+                j_column += 3
+
+            if ERF_flag > 0:
+
+                cell = table.cell(0, j_column + 1)
+                cell.text = 'Q05 (ERF)'
+
+                cell = table.cell(0, j_column + 2)
+                cell.text = 'Q50 (ERF)'
+
+                cell = table.cell(0, j_column + 3)
+                cell.text = 'Q95 (ERF)'
 
             for h in np.arange(fisrt_j, last_j):
 
-                h_mod = np.remainder(h, max_len_table)
+                h_mod = np.remainder(h, max_len_tableB)
 
                 j = h + n_SQ
 
                 cell = table.cell(h_mod + 1, 0)
-                cell.text = 'Target Question ' + str(h + 1)
+                cell.text = 'TQ' + str(h + 1)
 
                 for l in range(3):
 
                     cell = table.cell(h_mod + 1, l + 1)
-                    cell.text = '%6.2f' % q_Cooke[j, l]
+                    cell.text = '%6.2f' % q_EW[j, l]
+                    j_column = 3
 
-                    cell = table.cell(h_mod + 1, l + 4)
-                    cell.text = '%6.2f' % q_erf[j, l]
+                    if EW_flag > 0:
+
+                        cell = table.cell(h_mod + 1, j_column + l + 1)
+                        cell.text = '%6.2f' % q_Cooke[j, l]
+                        j_column += 3
+
+                    if ERF_flag > 0:
+
+                        cell = table.cell(h_mod + 1, j_column + l + 1)
+                        cell.text = '%6.2f' % q_erf[j, l]
 
             for cell in iter_cells(table):
                 for paragraph in cell.text_frame.paragraphs:
@@ -1321,16 +1788,58 @@ def main():
             text_title = "Percentiles of target questions"
             add_title(slide, text_title)
 
+    # ----------- Trend groups slides --------#
+    
+    if analysis and len(trend_groups) >0:
+    
+        slide = prs.slides.add_slide(title_slide_layout)
+
+        text_title = "Trend plots"
+
+        title_shape = slide.shapes.title
+        title_shape.text = text_title
+        title_shape.top = Inches(3.0)
+        title_shape.width = Inches(15)
+        title_shape.height = Inches(2)
+        title_para = slide.shapes.title.text_frame.paragraphs[0]
+        title_para.font.name = "Helvetica"
+        title_para.font.size = Pt(54)
+        add_date(slide)
+        add_small_logo(slide, left, top)
+    
+        for count,trend_group in enumerate(trend_groups):
+
+            slide = prs.slides.add_slide(title_slide_layout)
+
+            figname = output_dir + '/' + elicitation_name + '_trend_'+ \
+                     str(count + 1).zfill(2)+'.png'
+            
+            text_box = ''
+            for i in trend_group:
+            
+                text_box = text_box + 'TQ' + str(i) + '. ' + TQ_question[i-1] + '.\n\n'
+            
+            
+            add_text_box(slide, left, top, text_box,18)
+
+            add_date(slide)
+            add_small_logo(slide, left, top)
+            add_figure(slide, figname, left - Inches(0.8), top)
+
+            text_title = 'Target questions Group ' +str(count+1)
+            add_title(slide, text_title)
+    
+
     # ------------ Barplot slides ------------#
 
     for j in np.arange(n_SQ + n_TQ):
 
         if analysis:
-        
+
             if j == n_SQ:
-            
+
                 slide = prs.slides.add_slide(title_slide_layout)
-        
+
                 text_title = "Target Barplots"
 
                 title_shape = slide.shapes.title
@@ -1352,7 +1861,7 @@ def main():
                     '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
 
                 text_box = TQ_LongQuestion[j - n_SQ]
-                add_text_box(slide, left, top, text_box)
+                add_text_box(slide, left, top, text_box,18)
 
                 add_date(slide)
                 add_small_logo(slide, left, top)
@@ -1361,6 +1870,230 @@ def main():
                 text_title = TQ_question[j - n_SQ]
                 add_title(slide, text_title)
 
+                # ---add table to slide---
+
+                n_rows = 2
+
+                if EW_flag > 0:
+
+                    n_rows += 1
+
+                if ERF_flag > 0:
+
+                    n_rows += 1
+                x, y, cx, cy = Inches(1), Inches(6), Inches(3.5), Inches(3)
+                shape = slide.shapes.add_table(n_rows, 4, x, y, cx,
+                                               MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+                table = shape.table
+
+                cell = table.cell(0, 1)
+                cell.text = 'Q05'
+
+                cell = table.cell(0, 2)
+                cell.text = 'Q50'
+
+                cell = table.cell(0, 3)
+                cell.text = 'Q95'
+
+                j_row = 0
+
+                if EW_flag > 0:
+
+                    cell = table.cell(j_row + 1, 0)
+                    cell.text = 'Cooke'
+
+                    for l in range(3):
+
+                        cell = table.cell(j_row + 1, l + 1)
+                        cell.text = '%6.2f' % q_Cooke[j, l]
+
+                    j_row += 1
+
+                if ERF_flag > 0:
+
+                    cell = table.cell(j_row + 1, 0)
+                    cell.text = 'ERF'
+
+                    for l in range(3):
+
+                        cell = table.cell(j_row + 1, l + 1)
+                        cell.text = '%6.2f' % q_erf[j, l]
+
+                    j_row += 1
+
+                if EW_flag > 0:
+
+                    cell = table.cell(j_row + 1, 0)
+                    cell.text = 'EW'
+
+                    for l in range(3):
+
+                        cell = table.cell(j_row + 1, l + 1)
+                        cell.text = '%6.2f' % q_EW[j, l]
+
+                    j_row += 1
+
+                for cell in iter_cells(table):
+                    for paragraph in cell.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.size = Pt(14)
+
+    # ------------ Group slides ------------#
+
+    for j in np.arange(n_SQ + n_TQ):
+
+        if analysis and len(group_list) > 1:
+
+            if j == n_SQ:
+
+                slide = prs.slides.add_slide(title_slide_layout)
+
+                text_title = "Groups PDFs"
+
+                title_shape = slide.shapes.title
+                title_shape.text = text_title
+                title_shape.top = Inches(3.0)
+                title_shape.width = Inches(15)
+                title_shape.height = Inches(2)
+                title_para = slide.shapes.title.text_frame.paragraphs[0]
+                title_para.font.name = "Helvetica"
+                title_para.font.size = Pt(54)
+                add_date(slide)
+                add_small_logo(slide, left, top)
+
+            if (j >= n_SQ):
+
+                slide = prs.slides.add_slide(title_slide_layout)
+
+                for count, group in enumerate(group_list):
+
+                    figname = output_dir + '/' + elicitation_name + \
+                        '_PDF_group' + str(group) + '_' + \
+                        str(j - n_SQ + 1).zfill(2) + '.png'
+                    if group == 0:
+
+                        width = Inches(6.0)
+                        add_small_figure(slide, figname, Inches(5.5),
+                                         Inches(2.0), width)
+
+                    else:
+
+                        width = Inches(4.22)
+                        add_small_figure(
+                            slide, figname, Inches(11.18),
+                            Inches(2.2) + (group - 1) * Inches(3.02), width)
+
+                text_box = TQ_LongQuestion[j - n_SQ]
+                add_text_box(slide, left, top, text_box,18)
+
+                add_date(slide)
+                add_small_logo(slide, left, top)
+
+                text_title = TQ_question[j - n_SQ]
+                add_title(slide, text_title)
+
+                n_rows = 4
+
+                if EW_flag > 0:
+
+                    n_rows += 3
+
+                if ERF_flag > 0:
+
+                    n_rows += 3
+
+                x, y, cx, cy = Inches(1), Inches(5.5), Inches(3.5), Inches(3)
+                shape = slide.shapes.add_table(n_rows, 4, x, y, cx,
+                                               MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+
+                table = shape.table
+
+                cell = table.cell(0, 1)
+                cell.text = 'Q05'
+
+                cell = table.cell(0, 2)
+                cell.text = 'Q50'
+
+                cell = table.cell(0, 3)
+                cell.text = 'Q95'
+
+                j_row = 0
+
+                if EW_flag > 0:
+
+                    for count, group in enumerate(group_list):
+
+                        cell = table.cell(j_row + 1 + group, 0)
+
+                        if group == 0:
+                            cell.text = 'Cooke'
+
+                        else:
+                            cell.text = 'Cooke ' + str(group)
+
+                        for l in range(3):
+
+                            cell = table.cell(j_row + 1 + group, l + 1)
+
+                            if global_units[j] == "%":
+                                cell.text = '%6.2f' % q_Cooke_groups[j, l,
+                                                                     count]
+                            else:
+                                cell.text = '%.2E' % q_Cooke_groups[j, l,
+                                                                    count]
+
+                    j_row += len(group_list)
+
+                if ERF_flag > 0:
+
+                    for count, group in enumerate(group_list):
+
+                        cell = table.cell(j_row + 1 + group, 0)
+
+                        if group == 0:
+                            cell.text = 'ERF'
+
+                        else:
+                            cell.text = 'ERF ' + str(group)
+
+                        for l in range(3):
+
+                            cell = table.cell(j_row + 1 + group, l + 1)
+
+                            if global_units[j] == "%":
+                                cell.text = '%6.2f' % q_erf_groups[j, l, count]
+                            else:
+                                cell.text = '%.2E' % q_erf_groups[j, l, count]
+
+                    j_row += len(group_list)
+
+                if EW_flag > 0:
+
+                    for count, group in enumerate(group_list):
+
+                        cell = table.cell(j_row + 1 + group, 0)
+
+                        if group == 0:
+                            cell.text = 'EW'
+
+                        else:
+                            cell.text = 'EW ' + str(group)
+
+                        for l in range(3):
+
+                            cell = table.cell(j_row + 1 + group, l + 1)
+
+                            if global_units[j] == "%":
+                                cell.text = '%6.2f' % q_EW_groups[j, l, count]
+                            else:
+                                cell.text = '%.2E' % q_EW_groups[j, l, count]
+
+                    j_row += len(group_list)
+
+                for cell in iter_cells(table):
+                    for paragraph in cell.text_frame.paragraphs:
+                        for run in paragraph.runs:
+                            run.font.size = Pt(12)
 
     prs.save(output_dir + "/" + elicitation_name + ".pptx")  # saving file
 

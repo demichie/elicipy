@@ -4,7 +4,7 @@ def similar(a, b):
 
     return SequenceMatcher(None, a, b).ratio()
     
-def merge_csv(input_dir, target):
+def merge_csv(input_dir, target,group):
 
     import os
     import glob
@@ -12,7 +12,7 @@ def merge_csv(input_dir, target):
     import numpy as np
     from itertools import combinations
     from datetime import datetime
-    
+        
     current_path = os.getcwd()
 
     foldername = 'seed'
@@ -28,6 +28,42 @@ def merge_csv(input_dir, target):
 
         extension = 'csv'
         all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
+        
+        seedfiles_to_remove = []
+        
+        for f in all_filenames:
+
+            seed_df = pd.read_csv(f)
+            fgroup = seed_df['Group(s)'].to_list()[0]
+            
+            if type(fgroup) == str:
+            
+                fgroup = fgroup.split(';')
+                fgroup = [eval(i) for i in fgroup]
+                
+            else:
+            
+                fgroup = [fgroup]  
+                
+
+            print('')
+            print(f)
+            print(seed_df['Last Name'].to_list()[0],'Group ',fgroup)
+            
+            if (group in fgroup) or (group == 0):
+            
+                print('Check ok')
+                
+            else:
+            
+                seedfiles_to_remove.append(f)
+                    
+        for f in seedfiles_to_remove:
+        
+            all_filenames.remove(f)
+            
+        print('All seed filenames',len(all_filenames))                
+
 
         timestamp = []
         for f in all_filenames:
@@ -39,6 +75,8 @@ def merge_csv(input_dir, target):
         combined_seed_csv = pd.concat([pd.read_csv(f) for f in all_filenames], ignore_index=True)
 
         combined_seed_csv.insert(loc=0, column='timestamp', value=timestamp)
+        
+        combined_seed_csv.drop('Group(s)', axis=1, inplace=True)
 
         # print('combined_seed_csv',combined_seed_csv)
         
@@ -138,18 +176,63 @@ def merge_csv(input_dir, target):
         os.chdir(path)
 
         extension = 'csv'
-        all_filenames = [i for i in glob.glob('*.{}'.format(extension))]
+        target_filenames = [i for i in glob.glob('*.{}'.format(extension))]
+        
+        print('Number of target files',len(target_filenames))
+        
+        targetfiles_to_remove = []
 
+        for f in target_filenames:
+
+            print('')
+            print(f)
+
+            
+            target_df = pd.read_csv(f)
+            
+            fgroup = target_df['Group(s)'].to_list()[0]
+            
+            if type(fgroup) == str:
+            
+                fgroup = fgroup.split(';')
+                fgroup = [eval(i) for i in fgroup]
+                
+            else:
+            
+                fgroup = [fgroup]  
+                
+
+            print('')
+            print(f)
+            print(seed_df['Last Name'].to_list()[0],'Group ',fgroup)
+            
+            if (group in fgroup) or (group == 0):
+            
+                print('Check ok')
+                
+            else:
+            
+                targetfiles_to_remove.append(f)
+                    
+        for f in targetfiles_to_remove:
+        
+            target_filenames.remove(f)
+            
+        print('All target filenames',len(target_filenames))                
+            
+   
         timestamp = []
-        for f in all_filenames:
+        for f in target_filenames:
 
             split_f = f.split('_')
             timestamp.append('-'.join(split_f[1:-1]))
 
         # combine all files in the list
-        combined_target_csv = pd.concat([pd.read_csv(f) for f in all_filenames])
+        combined_target_csv = pd.concat([pd.read_csv(f) for f in target_filenames])
 
         combined_target_csv.insert(loc=0, column='timestamp', value=timestamp)
+
+        combined_target_csv.drop('Group(s)', axis=1, inplace=True)
 
         # print('combined_target_csv',combined_target_csv)
             
@@ -187,6 +270,10 @@ def merge_csv(input_dir, target):
                     
                     time0 = datetime.strptime(timestamp[previous], "%Y-%m-%d-%H-%M-%S")
                     time1 = datetime.strptime(timestamp[current], "%Y-%m-%d-%H-%M-%S")
+                    
+                    print(time0)
+                    print(time1)
+                            
                 
                     print('Keeping the answers with more recent timestamp:')
                 
@@ -205,15 +292,17 @@ def merge_csv(input_dir, target):
             
             if check_sim:
             
+                combined_target_csv = combined_target_csv.reset_index(drop=True)                
                 break  
                 
             else:
             
+                combined_target_csv = combined_target_csv.reset_index(drop=True)
                 print('Remove duplicate expert from target:',flname_target[disc]) 
                 combined_target_csv = combined_target_csv.drop([combined_target_csv.index[disc]])    
                 combined_target_csv = combined_target_csv.reset_index(drop=True)
                 # print('new',combined_target_csv)  
-
+                
         if seedExists:
         
             print('')
@@ -256,6 +345,8 @@ def merge_csv(input_dir, target):
             merged_file = '../' + 'seed' + '.csv'
 
             combined_seed_csv.to_csv(merged_file, index=False, encoding='utf-8-sig')
+            print(combined_target_csv)
+            print(disc_target)
             combined_target_csv = combined_target_csv.drop(disc_target)    
 
         # export to csv

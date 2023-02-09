@@ -210,7 +210,7 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
     E = SQ_array.shape[0]
     # number of realization in every bin
     M = np.zeros((E, 4))
-	# score
+    # score
     C = np.zeros((E))
     # unNormalized weight
     w = np.zeros((E))
@@ -221,13 +221,35 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
     # expert's bin that is formed by the provided quantiles
     for ex in np.arange(E):
         for i in np.arange(N):
-            if realization[i] <= SQ_array[ex, 0, i]:
+            if realization[i] < SQ_array[ex, 0, i]:
+            
                 M[ex, 0] = M[ex, 0] + 1
-            elif realization[i] <= SQ_array[ex, 1, i]:
+                
+            elif realization[i] == SQ_array[ex, 0, i]:
+            
+                M[ex, 0] = M[ex, 0] + 0.5
+                M[ex, 1] = M[ex, 1] + 0.5
+                
+            elif realization[i] < SQ_array[ex, 1, i]:
+            
                 M[ex, 1] = M[ex, 1] + 1
-            elif realization[i] <= SQ_array[ex, 2, i]:
+                
+            elif realization[i] == SQ_array[ex, 1, i]:
+            
+                M[ex, 1] = M[ex, 1] + 0.5
+                M[ex, 2] = M[ex, 2] + 0.5
+                
+            elif realization[i] < SQ_array[ex, 2, i]:
+            
                 M[ex, 2] = M[ex, 2] + 1
+                
+            elif realization[i] == SQ_array[ex, 2, i]:
+            
+                M[ex, 2] = M[ex, 2] + 0.5
+                M[ex, 3] = M[ex, 3] + 0.5
+                
             else:
+            
                 M[ex, 3] = M[ex, 3] + 1
 
     # calculate calibration and information score for every expert
@@ -237,23 +259,26 @@ def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
     for ex in np.arange(E):
     
         C[ex] = calscore(M[ex, :], cal_power)
-
+        
         W[ex, 0] = C[ex]
         W[ex, 1] = I_tot[ex]
         W[ex, 2] = I_real[ex]
 
-        if C[ex] < alpha:
+        w[ex] = C[ex] * I_real[ex]
         
-            w[ex] = 0
-            
-        else:
-        
-            w[ex] = C[ex] * I_real[ex]
-
+   
+                   
     # unNormalized weight
     W[:, 3] = w.T
 
+    # set to zero based on calibration score
+    w[C < alpha] = 0.0
+    
+    # set to zero based on weight
+    # w[ (w/np.sum(w)) < alpha] = 0.0
+
+    
     # Normalized weight
     W[:, 4] = w / np.sum(w)
 
-    return W
+    return W,C,I_real

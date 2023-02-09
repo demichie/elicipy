@@ -325,7 +325,7 @@ def generate_ERF(true_seed, SQ_array):
     W = np.zeros((Ne, 5))
     W[:, 4] = pERF / np.sum(pERF)
 
-    return W
+    return W,pERF
 
 
 def ERFweight(x, a, b, c):
