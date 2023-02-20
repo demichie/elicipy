@@ -1,36 +1,29 @@
 import datetime
 import copy
-from pptx.parts.chart import ChartPart
-from pptx.parts.embeddedpackage import EmbeddedXlsxPart
-from difflib import SequenceMatcher
-from pptx.enum.dml import MSO_THEME_COLOR
+import numpy as np
+import os
+import sys
+from pdf2image import convert_from_path
+from pathlib import Path
+import pandas as pd
+
+import matplotlib
+import matplotlib.pyplot as plt
+from matplotlib import rcParams
+from matplotlib.ticker import PercentFormatter
+
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
 from pptx.enum.text import MSO_AUTO_SIZE
 from pptx import Presentation
-import difflib
-from scipy import stats
-from matplotlib.ticker import PercentFormatter
-from ERFweights import createDATA1
-from global_weights import global_weights
-from ERFweights import generate_ERF
-from merge_csv import merge_csv
-import numpy as np
-import pkg_resources
-import re
-import os
-import sys
-from pdf2image import convert_from_path
-from pathlib import Path
-import openpyxl
-import pandas as pd
-import matplotlib
-import matplotlib.pyplot as plt
-from saveFromGithub import saveDataFromGithub
 
+from saveFromGithub import saveDataFromGithub
+from createSamples import createSamples
+from COOKEweights import COOKEweights
+from ERFweights import ERFweights
+from merge_csv import merge_csv
 from ElicipyDict import *
-from matplotlib import rcParams
 
 max_len_table = 21
 max_len_tableB = 18
@@ -50,6 +43,8 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
                     ERF_flag, EW_flag, global_minVal, global_maxVal,
                     output_dir, elicitation_name, del_rows, TQ_units,
                     label_indexes, minval_all, maxval_all):
+
+    from scipy import stats
 
     fig = plt.figure()
     axs_h = fig.add_subplot(111)
@@ -511,6 +506,8 @@ def iter_cells(table):
 def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
                  df_indexes_TQ):
 
+    import difflib
+
     # merge the files of the different experts
     # creating one file for seeds and one for tagets
     merge_csv(input_dir, target, group)
@@ -960,11 +957,11 @@ def analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
 
     if analysis:
 
-        W, score, information = global_weights(SQ_array, TQ_array, realization,
+        W, score, information = COOKEweights(SQ_array, TQ_array, realization,
                                                alpha, global_scale, overshoot,
                                                cal_power)
         
-        W_erf, score_erf = generate_ERF(realization, SQ_array)
+        W_erf, score_erf = ERFweights(realization, SQ_array)
          
         sensitivity = True                                       
 
@@ -977,7 +974,7 @@ def analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
                 global_scale_temp = np.delete(global_scale,i)
                 
         
-                W_temp,score_temp,information_temp = global_weights(SQ_temp, TQ_array, realization_temp,
+                W_temp,score_temp,information_temp = COOKEweights(SQ_temp, TQ_array, realization_temp,
                                                alpha, global_scale_temp, overshoot,
                                                cal_power)  
                  
@@ -988,7 +985,7 @@ def analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
                 
                 print(i+1,W_mean,W_std,np.sum(W_temp[:,4]>0))                               
                                                                                    
-                W_erf_temp, score_erf_temp = generate_ERF(realization_temp, SQ_temp)
+                W_erf_temp, score_erf_temp = ERFweights(realization_temp, SQ_temp)
 
                 W_reldiff = W_erf[:,4] - W_erf_temp[:,4]    
                 
@@ -1156,9 +1153,9 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
         if analysis:
 
-            quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createDATA1(
+            quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createSamples(
                 DAT, j, Weqok, n_sample, global_log[j],
-                [global_minVal[j], global_maxVal[j]], False)
+                [global_minVal[j], global_maxVal[j]], 0)
 
             print("%2i %9.2f %9.2f %9.2f %9.2f" %
                   (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
@@ -1169,9 +1166,9 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
             if Cooke_flag:
 
-                quan05, quan50, qmean, quan95, C = createDATA1(
+                quan05, quan50, qmean, quan95, C = createSamples(
                     DAT, j, W[:, 4].flatten(), n_sample, global_log[j],
-                    [global_minVal[j], global_maxVal[j]], False)
+                    [global_minVal[j], global_maxVal[j]], 0)
 
                 print("%2i %9.2f %9.2f %9.2f %9.2f" %
                       (j, quan05, quan50, qmean, quan95))
@@ -1184,7 +1181,7 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
                 C = C_EW
 
-            quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = createDATA1(
+            quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = createSamples(
                 DAT, j, W_erf[:, 4].flatten(), n_sample, global_log[j],
                 [global_minVal[j], global_maxVal[j]], ERF_flag)
 
@@ -1386,6 +1383,26 @@ def main():
 
     if analysis and target:
 
+        csv_name = output_dir + '/' + elicitation_name + '_weights.csv'
+
+        Weqok_100 = [ 100.0*elem for elem in Weqok ]
+
+        Weqok_formatted = [ '%.2f' % elem for elem in Weqok_100 ]
+
+        d = {'index': range(1, n_experts + 1), 'Weq': Weqok_formatted}
+        df = pd.DataFrame(data=d)
+
+        if Cooke_flag > 0:
+
+            df.insert(loc=2, column='WCooke', value=W_gt0)
+
+        if ERF_flag > 0:
+
+            df.insert(loc=2, column='WERF', value=Werf_gt0)
+            
+        df.to_csv(csv_name, index=False)
+
+
         targets = ['target_' + str(i).zfill(2) for i in range(n_TQ)]
 
         df_tree["EW_5"] = q_EW[n_SQ:, 0]
@@ -1433,10 +1450,27 @@ def main():
         df_tree["PARENT"] = parents
         df_tree.to_csv('tree.csv', index=False)
 
+    
+    if not postprocessing:
+    
+        print('Analysis completed!')
+        sys.exit()
+    
+    
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
     # ----------------------------------------- #
+
+    try:
+
+        from ElicipyDict import trend_groups
+        print('trend_groups read', trend_groups)
+
+    except ImportError:
+
+        print('No trend group defined')
+        trend_groups = []
 
     for count,trend_group in enumerate(trend_groups):
 

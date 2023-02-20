@@ -1,3 +1,114 @@
+def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
+                   overshoot, cal_power):
+
+    """Compute the weights with Cooke formulation
+    
+    Parameters
+    ----------
+    SQ_array : numpy array
+        Array with answers to seed questions
+    TQ_array : numpy array
+        Array with answers to seed questions
+    realization : list
+        Python list with realization of the seed questions
+    alpha : float
+        Significance
+    background_measure:
+        Python list
+    overshoot : float
+    cal_power : float
+    
+    Returns
+    -------
+    W : numpy array
+        an array with weights
+         
+    This function is based on the Matlab package 
+    ANDURIL (Authors:  Georgios Leontaris and 
+    Oswaldo Morales-Napoles)
+    """
+
+    import numpy as np
+
+    # number of Seed questions    
+    N = SQ_array.shape[2]
+    # number of experts
+    E = SQ_array.shape[0]
+    # number of realization in every bin
+    M = np.zeros((E, 4))
+    # score
+    C = np.zeros((E))
+    # unNormalized weight
+    w = np.zeros((E))
+    # array with information, score and normalized weight for each expert 
+    W = np.zeros((E, 5))
+
+    # create numpy array M with the number of realizations captured in every
+    # expert's bin that is formed by the provided quantiles
+    for ex in np.arange(E):
+        for i in np.arange(N):
+            if realization[i] < SQ_array[ex, 0, i]:
+            
+                M[ex, 0] = M[ex, 0] + 1
+                
+            elif realization[i] == SQ_array[ex, 0, i]:
+            
+                M[ex, 0] = M[ex, 0] + 0.5
+                M[ex, 1] = M[ex, 1] + 0.5
+                
+            elif realization[i] < SQ_array[ex, 1, i]:
+            
+                M[ex, 1] = M[ex, 1] + 1
+                
+            elif realization[i] == SQ_array[ex, 1, i]:
+            
+                M[ex, 1] = M[ex, 1] + 0.5
+                M[ex, 2] = M[ex, 2] + 0.5
+                
+            elif realization[i] < SQ_array[ex, 2, i]:
+            
+                M[ex, 2] = M[ex, 2] + 1
+                
+            elif realization[i] == SQ_array[ex, 2, i]:
+            
+                M[ex, 2] = M[ex, 2] + 0.5
+                M[ex, 3] = M[ex, 3] + 0.5
+                
+            else:
+            
+                M[ex, 3] = M[ex, 3] + 1
+
+    # calculate calibration and information score for every expert
+    [I_real, I_tot] = calculate_information(SQ_array, TQ_array, realization, overshoot,
+                                            background_measure)
+    
+    for ex in np.arange(E):
+    
+        C[ex] = calscore(M[ex, :], cal_power)
+        
+        W[ex, 0] = C[ex]
+        W[ex, 1] = I_tot[ex]
+        W[ex, 2] = I_real[ex]
+
+        w[ex] = C[ex] * I_real[ex]
+        
+   
+                   
+    # unNormalized weight
+    W[:, 3] = w.T
+
+    # set to zero based on calibration score
+    w[C < alpha] = 0.0
+    
+    # set to zero based on weight
+    # w[ (w/np.sum(w)) < alpha] = 0.0
+
+    
+    # Normalized weight
+    W[:, 4] = w / np.sum(w)
+
+    return W,C,I_real
+
 def calscore(M, cal_power):
 
     """Compute single expert score
@@ -172,113 +283,4 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
     return Info_score_real, Info_score_tot
 
     
-def global_weights(SQ_array, TQ_array, realization, alpha, background_measure,
-                   overshoot, cal_power):
 
-    """Compute the weights with Cooke formulation
-    
-    Parameters
-    ----------
-    SQ_array : numpy array
-        Array with answers to seed questions
-    TQ_array : numpy array
-        Array with answers to seed questions
-    realization : list
-        Python list with realization of the seed questions
-    alpha : float
-        Significance
-    background_measure:
-        Python list
-    overshoot : float
-    cal_power : float
-    
-    Returns
-    -------
-    W : numpy array
-        an array with weights
-         
-    This function is based on the Matlab package 
-    ANDURIL (Authors:  Georgios Leontaris and 
-    Oswaldo Morales-Napoles)
-    """
-
-    import numpy as np
-
-    # number of Seed questions    
-    N = SQ_array.shape[2]
-    # number of experts
-    E = SQ_array.shape[0]
-    # number of realization in every bin
-    M = np.zeros((E, 4))
-    # score
-    C = np.zeros((E))
-    # unNormalized weight
-    w = np.zeros((E))
-    # array with information, score and normalized weight for each expert 
-    W = np.zeros((E, 5))
-
-    # create numpy array M with the number of realizations captured in every
-    # expert's bin that is formed by the provided quantiles
-    for ex in np.arange(E):
-        for i in np.arange(N):
-            if realization[i] < SQ_array[ex, 0, i]:
-            
-                M[ex, 0] = M[ex, 0] + 1
-                
-            elif realization[i] == SQ_array[ex, 0, i]:
-            
-                M[ex, 0] = M[ex, 0] + 0.5
-                M[ex, 1] = M[ex, 1] + 0.5
-                
-            elif realization[i] < SQ_array[ex, 1, i]:
-            
-                M[ex, 1] = M[ex, 1] + 1
-                
-            elif realization[i] == SQ_array[ex, 1, i]:
-            
-                M[ex, 1] = M[ex, 1] + 0.5
-                M[ex, 2] = M[ex, 2] + 0.5
-                
-            elif realization[i] < SQ_array[ex, 2, i]:
-            
-                M[ex, 2] = M[ex, 2] + 1
-                
-            elif realization[i] == SQ_array[ex, 2, i]:
-            
-                M[ex, 2] = M[ex, 2] + 0.5
-                M[ex, 3] = M[ex, 3] + 0.5
-                
-            else:
-            
-                M[ex, 3] = M[ex, 3] + 1
-
-    # calculate calibration and information score for every expert
-    [I_real, I_tot] = calculate_information(SQ_array, TQ_array, realization, overshoot,
-                                            background_measure)
-    
-    for ex in np.arange(E):
-    
-        C[ex] = calscore(M[ex, :], cal_power)
-        
-        W[ex, 0] = C[ex]
-        W[ex, 1] = I_tot[ex]
-        W[ex, 2] = I_real[ex]
-
-        w[ex] = C[ex] * I_real[ex]
-        
-   
-                   
-    # unNormalized weight
-    W[:, 3] = w.T
-
-    # set to zero based on calibration score
-    w[C < alpha] = 0.0
-    
-    # set to zero based on weight
-    # w[ (w/np.sum(w)) < alpha] = 0.0
-
-    
-    # Normalized weight
-    W[:, 4] = w / np.sum(w)
-
-    return W,C,I_real
