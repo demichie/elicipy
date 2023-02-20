@@ -8,18 +8,21 @@ datarepo = 'local'
 # github_token = ''
 
 # folder or repository with data
-Repository = 'createWebform'
+Repository = 'testWebform'
 
 output_dir = 'OUTPUT'
 
 # comment if there is ony one language
-#language = 'ITA'
+language = 'ITA'
 
 analysis = True
-target = True
+target = False
+postprocessing = True
 
-target_list = [2,3]
-seed_list = [1,2]
+# target_list = [2,3]
+# seed_list = [1,2]
+
+group_list = [0]
 
 n_sample = 5000
 n_bins = 10
@@ -52,6 +55,13 @@ overshoot = 0.1
 
 # global cal_power
 # this value should be between [0.1, 1]. The default is 1.
-cal_power = 1  
+cal_power = 1
+
+# tree parameters
+first_node_list = [1]
+first_node_str_list = ['']
+
+# groups for trend plots
+# trend_groups = [ [2,3] ]
 
 

@@ -670,6 +670,10 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
             TQ_array = TQ_array[:, :, df_indexes_TQ]
             n_TQ = len(df_indexes_TQ)
             # print('TQ_array',TQ_array)
+            
+    else:
+        n_TQ = 0
+        TQ_array = np.zeros((n_experts,n_pctl,n_TQ))   
 
     return n_experts, n_SQ, n_TQ, SQ_array, TQ_array
 
@@ -894,6 +898,8 @@ def read_questionnaire(input_dir, csv_file):
     # scale for target question:
     TQ_scale = []
 
+    df_indexes_TQ = []
+    
     idx_list = []
     parents = []
 
@@ -952,85 +958,83 @@ def read_questionnaire(input_dir, csv_file):
 
 
 
-def analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
+def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
              realization, global_scale, global_log, alpha):
 
-    if analysis:
-
-        W, score, information = COOKEweights(SQ_array, TQ_array, realization,
-                                               alpha, global_scale, overshoot,
-                                               cal_power)
+    W, score, information = COOKEweights(SQ_array, TQ_array, realization,
+                                           alpha, global_scale, overshoot,
+                                           cal_power)
         
-        W_erf, score_erf = ERFweights(realization, SQ_array)
+    W_erf, score_erf = ERFweights(realization, SQ_array)
          
-        sensitivity = True                                       
+    sensitivity = True                                       
 
-        if sensitivity:
+    if sensitivity:
         
-            for i in range(n_SQ):
+        for i in range(n_SQ):
             
-                SQ_temp = np.delete(SQ_array, i, axis=2)
-                realization_temp = np.delete(realization, i)
-                global_scale_temp = np.delete(global_scale,i)
+            SQ_temp = np.delete(SQ_array, i, axis=2)
+            realization_temp = np.delete(realization, i)
+            global_scale_temp = np.delete(global_scale,i)
                 
         
-                W_temp,score_temp,information_temp = COOKEweights(SQ_temp, TQ_array, realization_temp,
-                                               alpha, global_scale_temp, overshoot,
-                                               cal_power)  
+            W_temp,score_temp,information_temp = COOKEweights(SQ_temp, TQ_array, realization_temp,
+                                           alpha, global_scale_temp, overshoot,
+                                           cal_power)  
                  
-                W_reldiff = W[:,3]/np.sum(W[:,3]) - W_temp[:,3]/np.sum(W_temp[:,3])    
+            W_reldiff = W[:,3]/np.sum(W[:,3]) - W_temp[:,3]/np.sum(W_temp[:,3])    
                 
-                W_mean = np.mean( np.abs( W_reldiff) )
-                W_std = np.sqrt( np.sum( np.square(W_reldiff) ) / n_experts )                           
+            W_mean = np.mean( np.abs( W_reldiff) )
+            W_std = np.sqrt( np.sum( np.square(W_reldiff) ) / n_experts )                           
                 
-                print(i+1,W_mean,W_std,np.sum(W_temp[:,4]>0))                               
+            print(i+1,W_mean,W_std,np.sum(W_temp[:,4]>0))                               
                                                                                    
-                W_erf_temp, score_erf_temp = ERFweights(realization_temp, SQ_temp)
+            W_erf_temp, score_erf_temp = ERFweights(realization_temp, SQ_temp)
 
-                W_reldiff = W_erf[:,4] - W_erf_temp[:,4]    
+            W_reldiff = W_erf[:,4] - W_erf_temp[:,4]    
                 
-                W_mean = np.mean( np.abs( W_reldiff) )
-                W_std = np.sqrt( np.sum( np.square(W_reldiff) ) / n_experts )                           
+            W_mean = np.mean( np.abs( W_reldiff) )
+            W_std = np.sqrt( np.sum( np.square(W_reldiff) ) / n_experts )                           
                 
-                print(i+1,W_mean,W_std,np.sum(W_erf_temp>alpha))                               
+            print(i+1,W_mean,W_std,np.sum(W_erf_temp>alpha))                               
 
 
-        Weq = np.ones(n_experts)
-        Weqok = [x / n_experts for x in Weq]
+    Weq = np.ones(n_experts)
+    Weqok = [x / n_experts for x in Weq]
 
-        W_gt0_01 = []
-        Werf_gt0_01 = []
-        expin = []
+    W_gt0_01 = []
+    Werf_gt0_01 = []
+    expin = []
 
-        k = 1
-        for x, y in zip(W[:, 4], W_erf[:, 4]):
-            if (x > 0) or (y > 0):
-                W_gt0_01.append(x)
-                Werf_gt0_01.append(y)
-                expin.append(k)
-            k += 1
+    k = 1
+    for x, y in zip(W[:, 4], W_erf[:, 4]):
+        if (x > 0) or (y > 0):
+            W_gt0_01.append(x)
+            Werf_gt0_01.append(y)
+            expin.append(k)
+        k += 1
 
-        W_gt0 = [round((x * 100.0), 2) for x in W_gt0_01]
-        Werf_gt0 = [round((x * 100.0), 2) for x in Werf_gt0_01]
+    W_gt0 = [round((x * 100.0), 2) for x in W_gt0_01]
+    Werf_gt0 = [round((x * 100.0), 2) for x in Werf_gt0_01]
 
-        if ERF_flag > 0:
-
-            print("")
-            print('W_erf')
-            print(W_erf[:, -1])
-
-        if Cooke_flag:
-
-            print("")
-            print('W_cooke')
-            print(W[:, -1])
-            print('score', score)
-            print('information', information)
-            print('unNormalized weight', W[:, 3])
+    if ERF_flag > 0:
 
         print("")
-        print('Weq')
-        print(Weqok)
+        print('W_erf')
+        print(W_erf[:, -1])
+
+    if Cooke_flag:
+
+        print("")
+        print('W_cooke')
+        print(W[:, -1])
+        print('score', score)
+        print('information', information)
+        print('unNormalized weight', W[:, 3])
+
+    print("")
+    print('Weq')
+    print(Weqok)
 
     return W, W_erf, Weqok, W_gt0, Werf_gt0, expin
 
@@ -1257,8 +1261,8 @@ def main():
     os.chdir(path)
 
     sys.path.insert(0, os.getcwd())
-    from createWebformDict import input_dir
-    from createWebformDict import csv_file
+    input_dir = 'DATA'
+    csv_file = 'questionnaire.csv'
 
     # change to full path
     output_dir = path + '/' + output_dir
@@ -1302,6 +1306,10 @@ def main():
         print(i, minval_all[i], maxval_all[i])
 
     print('')
+    
+    q_Cooke= np.zeros((len(global_scale), 3))
+    q_erf = np.zeros((len(global_scale), 3))
+    q_EW = np.zeros((len(global_scale), 3))
 
     if len(group_list) > 1:
 
@@ -1338,52 +1346,52 @@ def main():
         print("")
         print('Realization', realization)
 
-        if analysis and target:
+        if analysis:
 
             tree = {'IDX': idx_list, 'SHORT_Q': TQ_question}
             df_tree = pd.DataFrame(data=tree)
 
-        # ----------------------------------------- #
-        # ------------ Compute weights ------------ #
-        # ----------------------------------------- #
+            # ----------------------------------------- #
+            # ------------ Compute weights ------------ #
+            # ----------------------------------------- #
 
-        if group == 0:
+            if group == 0:
 
-            W, W_erf, Weqok, W_gt0, Werf_gt0, expin = analysis(
-                input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
-                realization, global_scale, global_log, alpha)
+                W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
+                    input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
+                    realization, global_scale, global_log, alpha)
 
-        else:
+            else:
+    
+                # set alpha to zero
+                W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
+                    input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
+                    realization, global_scale, global_log, 0.0)
 
-            # set alpha to zero
-            W, W_erf, Weqok, W_gt0, Werf_gt0, expin = analysis(
-                input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
-                realization, global_scale, global_log, 0.0)
+            # ----------------------------------------- #
+            # ------ Create samples and bar plots ----- #
+            # ----------------------------------------- #
 
-        # ----------------------------------------- #
-        # ------ Create samples and bar plots ----- #
-        # ----------------------------------------- #
+            q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = \
+                create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl,
+                                           SQ_array, TQ_array, n_sample, W, W_erf,
+                                           Weqok, W_gt0, Werf_gt0, expin,
+                                           global_log, global_minVal,
+                                           global_maxVal, global_units, TQ_units,
+                                           label_indexes, minval_all, maxval_all,
+                                           postprocessing)
 
-        q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = \
-            create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl,
-                                       SQ_array, TQ_array, n_sample, W, W_erf,
-                                       Weqok, W_gt0, Werf_gt0, expin,
-                                       global_log, global_minVal,
-                                       global_maxVal, global_units, TQ_units,
-                                       label_indexes, minval_all, maxval_all,
-                                       postprocessing)
-
-        if len(group_list) > 1:
-
-            q_Cooke_groups[:, :, count] = q_Cooke
-            q_erf_groups[:, :, count] = q_erf
-            q_EW_groups[:, :, count] = q_EW
+            if len(group_list) > 1:
+    
+                q_Cooke_groups[:, :, count] = q_Cooke
+                q_erf_groups[:, :, count] = q_erf
+                q_EW_groups[:, :, count] = q_EW
 
     # ----------------------------------------- #
     # ---------- Save samples on csv ---------- #
     # ----------------------------------------- #
 
-    if analysis and target:
+    if analysis:
 
         csv_name = output_dir + '/' + elicitation_name + '_weights.csv'
 
@@ -1404,6 +1412,7 @@ def main():
             
         df.to_csv(csv_name, index=False)
 
+    if analysis and target:
 
         targets = ['target_' + str(i).zfill(2) for i in range(n_TQ)]
 
@@ -1458,27 +1467,27 @@ def main():
         print('Analysis completed!')
         sys.exit()
     
-    
+    if analysis:
 
-    # ----------------------------------------- #
-    # --------- Create answ. figures ---------- #
-    # ----------------------------------------- #
+        # ------------------------------------------ #
+        # --------- Create trend. figures ---------- #
+        # ------------------------------------------ #
 
-    try:
+        try:
 
-        from ElicipyDict import trend_groups
-        print('trend_groups read', trend_groups)
+            from ElicipyDict import trend_groups
+            print('trend_groups read', trend_groups)
 
-    except ImportError:
+        except ImportError:
 
-        print('No trend group defined')
-        trend_groups = []
+            print('No trend group defined')
+            trend_groups = []
 
-    for count,trend_group in enumerate(trend_groups):
+        for count,trend_group in enumerate(trend_groups):
 
-        create_figure_trend(count,trend_group,n_SQ,q_EW,q_Cooke,q_erf,global_units,
-                        Cooke_flag, ERF_flag, EW_flag, global_log, 
-                        TQ_minVals, TQ_maxVals, output_dir)
+            create_figure_trend(count,trend_group,n_SQ,q_EW,q_Cooke,q_erf,global_units,
+                            Cooke_flag, ERF_flag, EW_flag, global_log, 
+                            TQ_minVals, TQ_maxVals, output_dir)
 
 
     # ----------------------------------------- #
