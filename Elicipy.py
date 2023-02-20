@@ -1106,7 +1106,8 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
                                TQ_array, n_sample, W, W_erf, Weqok, W_gt0,
                                Werf_gt0, expin, global_log, global_minVal,
                                global_maxVal, global_units, TQ_units,
-                               label_indexes, minval_all, maxval_all):
+                               label_indexes, minval_all, maxval_all,
+                               postprocessing):
 
     DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
 
@@ -1204,7 +1205,7 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
                 samples_EW[:, j - n_SQ] = C_EW
 
-            if (j >= n_SQ):
+            if (j >= n_SQ) and postprocessing:
 
                 legendsPDF = []
                 legendsPDF.append('CM' + '%9.2f' % quan05 + '%9.2f' % quan50 +
@@ -1369,7 +1370,8 @@ def main():
                                        Weqok, W_gt0, Werf_gt0, expin,
                                        global_log, global_minVal,
                                        global_maxVal, global_units, TQ_units,
-                                       label_indexes, minval_all, maxval_all)
+                                       label_indexes, minval_all, maxval_all,
+                                       postprocessing)
 
         if len(group_list) > 1:
 
