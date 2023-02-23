@@ -1,14 +1,44 @@
-def createSamples(DAT, j, W, N, logSCALE, dominion, ERF_flag):
+def createSamples(DAT, j, W, N, logSCALE, domain, ERF_flag):
 
-    # input:
-    # DAT risposte a seed e target questions
-    # W vettore dei pesi di Cooke per target
-    # j indice della domanda
-    # N non si cambia mai
-    # logscale si potrebbe anche prendere dal file DAT
-    # dominion dice che campioni eliminare
+    """Compute the quantiles and samples for question j from weights and answers
+    
+    Parameters
+    ----------
+    DAT : float numpy array [ n_experts * (n_SQ + n_TQ), n_pctl + 2 ]
+        Numpy array with experts' answers to seed and target questions
+    j : int
+        Integer for question index  
+    W : float numpy array [ n_experts ]
+        Numpy array with experts'weights
+    N : int
+        Integer for size of sample array    
+    logSCALE : float
+        scale of question (0 for uni; 1 for log)
+    domain : float list [ 2 ]
+        domain for asnwer (domain[0] = minVal; domain[1] = maxVal)
+    ERF_flag : int
+        integer for method (1 for ERF; 2 for ERF mod; 0 for Cooke)
+    
+    Returns
+    -------
+    quan05 : float
+        5%ile computed from array sample
+     quan50 : float
+        50%ile computed from array sample
+    qmean : float
+        mean computed from array sample
+    quan95 : float
+        95%ile computed from array sample
+    C : float numpy array
+        array with samples (size N)
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
 
     import numpy as np
+
+n_experts * (n_SQ + n_TQ), n_pctl + 2
 
     n = int(np.amax(DAT[:, 0]))
     nn = int(len(DAT[:, 0]) / n)
@@ -20,17 +50,17 @@ def createSamples(DAT, j, W, N, logSCALE, dominion, ERF_flag):
     if ERF_flag ==1:
 
         quan05, quan50, qmean, quan95, C = createSamplesERF_original(
-            incm, mid, incM, W, N, logSCALE, dominion)
+            incm, mid, incM, W, N, logSCALE, domain)
             
     elif ERF_flag ==2:
 
         quan05, quan50, qmean, quan95, C = createSamplesERF(
-            incm, mid, incM, W, N, logSCALE, dominion)
+            incm, mid, incM, W, N, logSCALE, domain)
 
     else:
 
         quan05, quan50, qmean, quan95, C = createSamplesUCA2(
-            incm, mid, incM, W, N, logSCALE, dominion)
+            incm, mid, incM, W, N, logSCALE, domain)
 
     return quan05, quan50, qmean, quan95, C
 
@@ -90,12 +120,12 @@ def sampleDISCR(P, N):
     return a
 
 
-def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, dominion):
+def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain):
 
     import numpy as np
 
     W = W / np.sum(W)
-    DDD = dominion
+    DDD = domain
 
     if (logSCALE):
 
@@ -155,14 +185,14 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, dominion):
 
 #sampler quantile averaging
 
-def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, dominion):
+def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, domain):
 
     import numpy as np
     from ERFweights import NewRap
 
     W = W / np.sum(W)
 
-    DDD = dominion
+    DDD = domain
 
     if (logSCALE):
 
@@ -234,13 +264,13 @@ def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, dominion):
 
     return quan05, quan50, qmean, quan95, C1
 
-def createSamplesERF(incm, mid, incM, W, N, logSCALE, dominion):
+def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
 
     import numpy as np
 
     W = W / np.sum(W)
 
-    DDD = dominion
+    DDD = domain
 
     if (logSCALE):
 

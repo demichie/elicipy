@@ -4,14 +4,14 @@ def ERFweights(true_seed, SQ_array):
     
     Parameters
     ----------
-    true_seed : list
+    true_seed : float list [ Nquestions ]
         Python list with realization of the seed questions
-    SQ_array : numpy array
+    SQ_array : float numpy array [ Nexperts, Npercentiles, Nquestions ] 
         Array with answers to seed questions
     
     Returns
     -------
-    W : numpy array
+    W : float numpy array
         an array with weights
          
     This function is based on the R scripts
