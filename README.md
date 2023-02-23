@@ -24,12 +24,12 @@ The webform can run locally or at streamlit.io.
 
 Here there are steps to install and run the webapp from streamlit.io.
 
-On Github, you need two repositories, one hosting the webapp (streamlit_app.py) and the other to collect the answers.
+On Github, you need two repositories, one hosting the webapp streamlit_app.py (fork this repository) and the other to collect the answers (create a new repository).
 
 GITHUB STREAMLIT REPOSITORY
 
 1) Fork this repository
-2) Edit in the input file createWebformDict.py the fields datarepo (with the github repository of the webapp) and the RepositoryData (with the github repository for the answers)
+2) Edit in the input file createWebformDict.py the fields datarepo (with the forked repository) and the RepositoryData (with the new github repository for the answers)
 3) Set in the input file createWebformDict.py the quest_type variable to "seed" of "target"
 4) Edit the csv file with your questions in the DATA folder of the github repository for the webapp (see the questionnaire.csv file for an example of the format)
 5) Click on the top-right (on your github user icon), and from the menu click on "Settings"
