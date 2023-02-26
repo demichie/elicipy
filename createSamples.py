@@ -12,9 +12,9 @@ def createSamples(DAT, j, W, N, logSCALE, domain, ERF_flag):
         Numpy array with experts'weights
     N : int
         Integer for size of sample array    
-    logSCALE : float
+    logSCALE : int
         scale of question (0 for uni; 1 for log)
-    domain : float list [ 2 ]
+    domain : int list [ 2 ]
         domain for asnwer (domain[0] = minVal; domain[1] = maxVal)
     ERF_flag : int
         integer for method (1 for ERF; 2 for ERF mod; 0 for Cooke)
@@ -23,7 +23,7 @@ def createSamples(DAT, j, W, N, logSCALE, domain, ERF_flag):
     -------
     quan05 : float
         5%ile computed from array sample
-     quan50 : float
+    quan50 : float
         50%ile computed from array sample
     qmean : float
         mean computed from array sample
@@ -67,6 +67,30 @@ n_experts * (n_SQ + n_TQ), n_pctl + 2
 
 def max_entropy(incm, mid, incM, rA, rB):
 
+    """Produces a random sample from a maximum entropy distribution
+    
+    Parameters
+    ----------
+    incm : float
+        5th percentile of the distribution
+    mid : float
+        50th percentile of the distribution
+    incM : float
+        95th percentile of the distribution
+    rA : float
+        minimum value of the distribution
+    rB : float
+        maximum value of the distribution
+    
+    Returns
+    -------
+    y : float 
+        random sample
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
+
     import numpy as np
 
     rng = np.random.default_rng()
@@ -89,6 +113,24 @@ def max_entropy(incm, mid, incM, rA, rB):
 
 
 def sampleDISCR(P, N):
+
+    """Produces an array of random samples from a discrete distribution
+    
+    Parameters
+    ----------
+    P : float numpy array [ n_experts ]
+        discrete probability values
+    N : int
+        number of samples
+    
+    Returns
+    -------
+    a : float numpy array [ N ]
+        random samples
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
 
     import numpy as np
 
@@ -121,6 +163,42 @@ def sampleDISCR(P, N):
 
 
 def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain):
+
+    """Produces an array of random samples from weights and answers by using max. entropy distributions and linear pooling
+    
+    Parameters
+    ----------
+    incm : float numpy array [ n_experts ]
+        5th percentiles of all the experts
+    mid : float numpy array [ n_experts ]
+        50th percentiles of all the experts
+    incM : float numpy array [ n_experts ]
+        95th percentiles of all the experts
+    W : float numpy array [ n_experts ]
+        experts' scores
+    N : integer
+        number of samples
+    logSCALE : int
+        scale of question (0 for uni; 1 for log)
+    domain : int list [ 2 ]
+        domain for asnwer (domain[0] = minVal; domain[1] = maxVal)
+    
+    Returns
+    -------
+    quan05 : float
+        5%ile computed from array sample
+    quan50 : float
+        50%ile computed from array sample
+    qmean : float
+        mean computed from array sample
+    quan95 : float
+        95%ile computed from array sample
+    C : float numpy array
+        array with samples (size N)
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
 
     import numpy as np
 
@@ -183,9 +261,45 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain):
     return quan05, quan50, qmean, quan95, C1
 
 
-#sampler quantile averaging
+#sampler ERF method (original formulation from Flandoli et al., 2011)
 
 def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, domain):
+
+    """Produces an array of random samples from weights and answers by using triangular distributions and quantile pooling
+    
+    Parameters
+    ----------
+    incm : float numpy array [ n_experts ]
+        5th percentiles of all the experts
+    mid : float numpy array [ n_experts ]
+        50th percentiles of all the experts
+    incM : float numpy array [ n_experts ]
+        95th percentiles of all the experts
+    W : float numpy array [ n_experts ]
+        experts' scores
+    N : integer
+        number of samples
+    logSCALE : int
+        scale of question (0 for uni; 1 for log)
+    domain : int list [ 2 ]
+        domain for asnwer (domain[0] = minVal; domain[1] = maxVal)
+    
+    Returns
+    -------
+    quan05 : float
+        5%ile computed from array sample
+    quan50 : float
+        50%ile computed from array sample
+    qmean : float
+        mean computed from array sample
+    quan95 : float
+        95%ile computed from array sample
+    C : float numpy array
+        array with samples (size N)
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
 
     import numpy as np
     from ERFweights import NewRap
@@ -264,7 +378,46 @@ def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, domain):
 
     return quan05, quan50, qmean, quan95, C1
 
+
+#sampler ERF method (modified formulation used in Tadini et al., 2021)
+
 def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
+
+    """Produces an array of random samples from weights and answers by using triangular distributions and linear pooling
+    
+    Parameters
+    ----------
+    incm : float numpy array [ n_experts ]
+        5th percentiles of all the experts
+    mid : float numpy array [ n_experts ]
+        50th percentiles of all the experts
+    incM : float numpy array [ n_experts ]
+        95th percentiles of all the experts
+    W : float numpy array [ n_experts ]
+        experts' scores
+    N : integer
+        number of samples
+    logSCALE : int
+        scale of question (0 for uni; 1 for log)
+    domain : int list [ 2 ]
+        domain for asnwer (domain[0] = minVal; domain[1] = maxVal)
+    
+    Returns
+    -------
+    quan05 : float
+        5%ile computed from array sample
+    quan50 : float
+        50%ile computed from array sample
+    qmean : float
+        mean computed from array sample
+    quan95 : float
+        95%ile computed from array sample
+    C : float numpy array
+        array with samples (size N)
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
 
     import numpy as np
 
