@@ -44,7 +44,27 @@ def ERFweights(true_seed, SQ_array):
 
 def ERFcompute(x, a, b, c):
 
-    # ERF calculation, given a true answer and its elicitated percentiles.
+    """Compute the ERF weight from a triangular distribution and a seed realization
+    
+    Parameters
+    ----------
+    x : float
+        realization of the seed question
+    a : float
+        5th percentile of the distribution
+    b : float
+        modal value of the distribution
+    c : float
+        95th percentile value of the distribution
+    
+    Returns
+    -------
+    p : float 
+        ERF weight
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
 
     import numpy as np
 
@@ -79,6 +99,26 @@ def ERFcompute(x, a, b, c):
 
 def NewRap(a, b, c):
 
+    """Compute the minimum and maximum values from a triangular distribution given its 5th and 95th percentiles and its modal value
+    
+    Parameters
+    ----------   
+    a : float
+        5th percentile of the distribution
+    b : float
+        modal value of the distribution
+    c : float
+        95th percentile value of the distribution
+    
+    Returns
+    -------
+    x : float numpy array [ 2 ] 
+        minimum and maximum values of the distribution
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
+
     import numpy as np
 
     x0 = a - (c - a) / 6
@@ -96,6 +136,28 @@ def NewRap(a, b, c):
 
 
 def InvJac(x, y, a, b, c):
+
+    """Compute the Jacobian Matrix inverse in the Newton-Raphson method
+    
+    Parameters
+    ----------   
+    x : float numpy array [ 2 ]
+        input array of the nth Newton-Raphson iteration
+    a : float
+        5th percentile of the distribution
+    b : float
+        modal value of the distribution
+    c : float
+        95th percentile value of the distribution
+    
+    Returns
+    -------
+    x : float numpy array [ 2 ] 
+        input array of the (n+1)th Newton-Raphson iteration
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
 
     import numpy as np
 
@@ -117,6 +179,30 @@ def InvJac(x, y, a, b, c):
 
 def FunRap(x, y, a, b, c):
 
+    """Compute the array variable in the iterative step the Newton-Raphson method
+    
+    Parameters
+    ----------   
+    x : float 
+        first component of the input of the nth Newton-Raphson iteration
+    y : float 
+        second component of the input of the nth Newton-Raphson iteration
+    a : float
+        5th percentile of the distribution
+    b : float
+        modal value of the distribution
+    c : float
+        95th percentile value of the distribution
+    
+    Returns
+    -------
+    v : float numpy array [ 2 ] 
+        array variable in the (n+1)th Newton-Raphson iteration
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
+
     import numpy as np
 
     A1 = (a - x)**2 - 0.05 * (y - x) * (b - x)
@@ -128,9 +214,27 @@ def FunRap(x, y, a, b, c):
 
 def rtrian(a, b, c):
 
-    import numpy as np
+    """Produces a random sample from a triangular distribution given its 5th and 95th percentiles and its modal value
+    
+    Parameters
+    ----------   
+    a : float
+        5th percentile of the distribution
+    b : float
+        modal value of the distribution
+    c : float
+        95th percentile value of the distribution
+    
+    Returns
+    -------
+    R : float 
+        random sample
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
 
-    # Random sample assuming a triangular distribution, given mode and 5th, 95th percentiles.
+    import numpy as np
 
     if (a == c):
 
@@ -145,9 +249,28 @@ def rtrian(a, b, c):
 
 def rtrian_inner(a, b, c):
 
+    """Produces a random sample from a triangular distribution given its minimum, modal and maximum values
+    
+    Parameters
+    ----------   
+    a : float
+        minimum value of the distribution
+    b : float
+        modal value of the distribution
+    c : float
+        maximum value of the distribution
+    
+    Returns
+    -------
+    x : float 
+        random sample
+         
+    This function is based on the R scripts
+    written by A.Bevilacqua
+    """
+
     import numpy as np
 
-    # Random sample assuming a triangular distribution, given mode and range.
     rng = np.random.default_rng()
     u = rng.random(1)
 

@@ -144,7 +144,6 @@ def sampleDISCR(P, N):
         PP[i] = PP[i - 1] + P[i]
 
     PP[n - 1] = 1
-    # print(PP)
 
     rng = np.random.default_rng(12345)
     u = rng.random(N)
@@ -156,8 +155,6 @@ def sampleDISCR(P, N):
         B = B[B <= 0]
         b = len(B)
         a[i] = n - b + 1
-
-        # print(c(u[i],a[i]))
 
     return a
 
@@ -261,8 +258,6 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain):
     return quan05, quan50, qmean, quan95, C1
 
 
-#sampler ERF method (original formulation from Flandoli et al., 2011)
-
 def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, domain):
 
     """Produces an array of random samples from weights and answers by using triangular distributions and quantile pooling
@@ -272,7 +267,7 @@ def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, domain):
     incm : float numpy array [ n_experts ]
         5th percentiles of all the experts
     mid : float numpy array [ n_experts ]
-        50th percentiles of all the experts
+        modal values of all the experts
     incM : float numpy array [ n_experts ]
         95th percentiles of all the experts
     W : float numpy array [ n_experts ]
@@ -379,8 +374,6 @@ def createSamplesERF_original(incm,mid,incM,W,N, logSCALE, domain):
     return quan05, quan50, qmean, quan95, C1
 
 
-#sampler ERF method (modified formulation used in Tadini et al., 2021)
-
 def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
 
     """Produces an array of random samples from weights and answers by using triangular distributions and linear pooling
@@ -390,7 +383,7 @@ def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
     incm : float numpy array [ n_experts ]
         5th percentiles of all the experts
     mid : float numpy array [ n_experts ]
-        50th percentiles of all the experts
+        modal values of all the experts
     incM : float numpy array [ n_experts ]
         95th percentiles of all the experts
     W : float numpy array [ n_experts ]
