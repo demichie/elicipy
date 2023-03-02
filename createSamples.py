@@ -38,8 +38,6 @@ def createSamples(DAT, j, W, N, logSCALE, domain, ERF_flag):
 
     import numpy as np
 
-n_experts * (n_SQ + n_TQ), n_pctl + 2
-
     n = int(np.amax(DAT[:, 0]))
     nn = int(len(DAT[:, 0]) / n)
 
