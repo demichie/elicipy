@@ -1,23 +1,22 @@
 def ERFweights(true_seed, SQ_array):
-
     """Compute the weights with ERF formulation
-    
+
     Parameters
     ----------
     true_seed : float list [ Nquestions ]
         Python list with realization of the seed questions
-    SQ_array : float numpy array [ Nexperts, Npercentiles, Nquestions ] 
+    SQ_array : float numpy array [ Nexperts, Npercentiles, Nquestions ]
         Array with answers to seed questions
-    
+
     Returns
     -------
     W : float numpy array
         an array with weights
-         
+
     This function is based on the R scripts
     written by A.Bevilacqua
     """
-    
+
     import numpy as np
     import itertools
 
@@ -32,20 +31,20 @@ def ERFweights(true_seed, SQ_array):
         for j in range(Nq):
 
             p_single[j] = ERFcompute(true_seed[j], SQ_array[i, 0, j],
-                                    SQ_array[i, 1, j], SQ_array[i, 2, j])
+                                     SQ_array[i, 1, j], SQ_array[i, 2, j])
 
         pERF[i] = np.mean(p_single)
 
     W = np.zeros((Ne, 5))
     W[:, 4] = pERF / np.sum(pERF)
 
-    return W,pERF
+    return W, pERF
 
 
 def ERFcompute(x, a, b, c):
+    """Compute the ERF weight from a triangular distribution and a seed
+       realization
 
-    """Compute the ERF weight from a triangular distribution and a seed realization
-    
     Parameters
     ----------
     x : float
@@ -56,12 +55,12 @@ def ERFcompute(x, a, b, c):
         modal value of the distribution
     c : float
         95th percentile value of the distribution
-    
+
     Returns
     -------
-    p : float 
+    p : float
         ERF weight
-         
+
     This function is based on the R scripts
     written by A.Bevilacqua
     """
@@ -98,23 +97,23 @@ def ERFcompute(x, a, b, c):
 
 
 def NewRap(a, b, c):
+    """Compute the minimum and maximum values from a triangular distribution
+       given its 5th and 95th percentiles and its modal value
 
-    """Compute the minimum and maximum values from a triangular distribution given its 5th and 95th percentiles and its modal value
-    
     Parameters
-    ----------   
+    ----------
     a : float
         5th percentile of the distribution
     b : float
         modal value of the distribution
     c : float
         95th percentile value of the distribution
-    
+
     Returns
     -------
-    x : float numpy array [ 2 ] 
+    x : float numpy array [ 2 ]
         minimum and maximum values of the distribution
-         
+
     This function is based on the R scripts
     written by A.Bevilacqua
     """
@@ -136,11 +135,10 @@ def NewRap(a, b, c):
 
 
 def InvJac(x, y, a, b, c):
-
     """Compute the Jacobian Matrix inverse in the Newton-Raphson method
-    
+
     Parameters
-    ----------   
+    ----------
     x : float numpy array [ 2 ]
         input array of the nth Newton-Raphson iteration
     a : float
@@ -149,12 +147,12 @@ def InvJac(x, y, a, b, c):
         modal value of the distribution
     c : float
         95th percentile value of the distribution
-    
+
     Returns
     -------
-    x : float numpy array [ 2 ] 
+    x : float numpy array [ 2 ]
         input array of the (n+1)th Newton-Raphson iteration
-         
+
     This function is based on the R scripts
     written by A.Bevilacqua
     """
@@ -178,14 +176,14 @@ def InvJac(x, y, a, b, c):
 
 
 def FunRap(x, y, a, b, c):
+    """Compute the array variable in the iterative step the Newton-Raphson
+       method
 
-    """Compute the array variable in the iterative step the Newton-Raphson method
-    
     Parameters
-    ----------   
-    x : float 
+    ----------
+    x : float
         first component of the input of the nth Newton-Raphson iteration
-    y : float 
+    y : float
         second component of the input of the nth Newton-Raphson iteration
     a : float
         5th percentile of the distribution
@@ -193,12 +191,12 @@ def FunRap(x, y, a, b, c):
         modal value of the distribution
     c : float
         95th percentile value of the distribution
-    
+
     Returns
     -------
-    v : float numpy array [ 2 ] 
+    v : float numpy array [ 2 ]
         array variable in the (n+1)th Newton-Raphson iteration
-         
+
     This function is based on the R scripts
     written by A.Bevilacqua
     """
@@ -213,23 +211,23 @@ def FunRap(x, y, a, b, c):
 
 
 def rtrian(a, b, c):
+    """Produces a random sample from a triangular distribution given its
+       5th and 95th percentiles and its modal value
 
-    """Produces a random sample from a triangular distribution given its 5th and 95th percentiles and its modal value
-    
     Parameters
-    ----------   
+    ----------
     a : float
         5th percentile of the distribution
     b : float
         modal value of the distribution
     c : float
         95th percentile value of the distribution
-    
+
     Returns
     -------
-    R : float 
+    R : float
         random sample
-         
+
     This function is based on the R scripts
     written by A.Bevilacqua
     """
@@ -248,23 +246,23 @@ def rtrian(a, b, c):
 
 
 def rtrian_inner(a, b, c):
+    """Produces a random sample from a triangular distribution given
+       its minimum, modal and maximum values
 
-    """Produces a random sample from a triangular distribution given its minimum, modal and maximum values
-    
     Parameters
-    ----------   
+    ----------
     a : float
         minimum value of the distribution
     b : float
         modal value of the distribution
     c : float
         maximum value of the distribution
-    
+
     Returns
     -------
-    x : float 
+    x : float
         random sample
-         
+
     This function is based on the R scripts
     written by A.Bevilacqua
     """
