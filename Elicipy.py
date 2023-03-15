@@ -2201,6 +2201,7 @@ def main():
                     figname = output_dir + '/' + elicitation_name + \
                         '_PDF_group' + str(group) + '_' + \
                         str(j - n_SQ + 1).zfill(2) + '.png'
+                                                
                     if group == 0:
 
                         width = Inches(6.0)
@@ -2212,7 +2213,7 @@ def main():
                         width = Inches(4.22)
                         add_small_figure(
                             slide, figname, Inches(11.18),
-                            Inches(2.2) + (group - 1) * Inches(3.02), width)
+                            Inches(2.2) + (count - 1) * Inches(3.02), width)
 
                 text_box = TQ_LongQuestion[j - n_SQ]
 
@@ -2242,7 +2243,7 @@ def main():
 
                     n_rows += 3
 
-                x, y, cx, cy = Inches(1), Inches(5.5), Inches(3.5), Inches(3)
+                x, y, cx, cy = Inches(1), Inches(5.5), Inches(4.0), Inches(3)
                 shape = slide.shapes.add_table(n_rows, 4, x, y, cx,
                                                MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
 
@@ -2263,7 +2264,7 @@ def main():
 
                     for count, group in enumerate(group_list):
 
-                        cell = table.cell(j_row + 1 + group, 0)
+                        cell = table.cell(j_row + 1 + count, 0)
 
                         if group == 0:
                             cell.text = 'Cooke'
@@ -2273,7 +2274,7 @@ def main():
 
                         for li in range(3):
 
-                            cell = table.cell(j_row + 1 + group, li + 1)
+                            cell = table.cell(j_row + 1 + count, li + 1)
 
                             if global_units[j] == "%":
                                 cell.text = '%6.2f' % q_Cooke_groups[j, li,
@@ -2288,7 +2289,7 @@ def main():
 
                     for count, group in enumerate(group_list):
 
-                        cell = table.cell(j_row + 1 + group, 0)
+                        cell = table.cell(j_row + 1 + count, 0)
 
                         if group == 0:
                             cell.text = 'ERF'
@@ -2298,7 +2299,7 @@ def main():
 
                         for li in range(3):
 
-                            cell = table.cell(j_row + 1 + group, li + 1)
+                            cell = table.cell(j_row + 1 + count, li + 1)
 
                             if global_units[j] == "%":
                                 cell.text = '%6.2f' % q_erf_groups[j,
@@ -2312,7 +2313,7 @@ def main():
 
                     for count, group in enumerate(group_list):
 
-                        cell = table.cell(j_row + 1 + group, 0)
+                        cell = table.cell(j_row + 1 + count, 0)
 
                         if group == 0:
                             cell.text = 'EW'
@@ -2322,7 +2323,7 @@ def main():
 
                         for li in range(3):
 
-                            cell = table.cell(j_row + 1 + group, li + 1)
+                            cell = table.cell(j_row + 1 + count, li + 1)
 
                             if global_units[j] == "%":
                                 cell.text = '%6.2f' % q_EW_groups[j, li, count]
@@ -2334,7 +2335,7 @@ def main():
                 for cell in iter_cells(table):
                     for paragraph in cell.text_frame.paragraphs:
                         for run in paragraph.runs:
-                            run.font.size = Pt(12)
+                            run.font.size = Pt(10)
 
     prs.save(output_dir + "/" + elicitation_name + ".pptx")  # saving file
 
