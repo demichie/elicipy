@@ -249,7 +249,7 @@ def calculate_information(SQ_array, TQ_array, realization, k,
 
                 elif background_measure[i] == 'log':
 
-                    if l(i) < 0 or h(i) < 0:
+                    if lowval[i] < 0 or highval[i] < 0:
 
                         raise ValueError(
                             'Log-Uniform background measure cannot be used '
@@ -258,7 +258,7 @@ def calculate_information(SQ_array, TQ_array, realization, k,
 
                     x_o[i] = np.log(lowval[i]) - k * \
                         (np.log(highval[i]) - np.log(lowval[i]))
-                    x_n[i] = np.log(h(i)) + k * \
+                    x_n[i] = np.log(highval[i]) + k * \
                         (np.log(highval[i]) - np.log(lowval[i]))
 
                     tmp = np.insert(
