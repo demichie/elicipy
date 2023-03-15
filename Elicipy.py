@@ -1802,22 +1802,41 @@ def main():
             add_date(slide)
             add_small_logo(slide, left, top)
 
+        text_box = global_longQuestion[h]
+
         if (h >= n_SQ):
 
             j = h - n_SQ
             string = 'Target'
+
+            if len(text_box) < 250:
+
+                fontsize = 18
+
+            else:
+
+                fontsize = 18.0*np.sqrt(250.0/len(text_box))                            
 
         else:
 
             j = h
             string = 'Seed'
 
+            if len(text_box) < 500:
+
+                fontsize = 18
+
+            else:
+
+                fontsize = 18.0*np.sqrt(500.0/len(text_box))                            
+
         for k in np.arange(n_panels):
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            text_box = global_longQuestion[h]
-            add_text_box(slide, left, top, text_box, 18)
+            
+            add_text_box(slide, left, top, text_box, fontsize)
+            
 
             figname = output_dir + '/' + elicitation_name + \
                 '_'+string+'_' + str(j + 1).zfill(2) + \
@@ -1938,19 +1957,30 @@ def main():
                 for li in range(3):
 
                     cell = table.cell(h_mod + 1, li + 1)
-                    cell.text = '%6.2f' % q_EW[j, li]
+                    if global_units[j] == "%":
+                        cell.text = '%6.2f' % q_EW[j, li]
+                    else:
+                        cell.text = '%.2E' % q_EW[j, li]
+
                     j_column = 3
 
                     if EW_flag > 0:
 
                         cell = table.cell(h_mod + 1, j_column + li + 1)
-                        cell.text = '%6.2f' % q_Cooke[j, li]
+                        if global_units[j] == "%":
+                            cell.text = '%6.2f' % q_Cooke[j, li]
+                        else:
+                            cell.text = '%.2E' % q_Cooke[j, li]
+
                         j_column += 3
 
                     if ERF_flag > 0:
 
                         cell = table.cell(h_mod + 1, j_column + li + 1)
-                        cell.text = '%6.2f' % q_erf[j, li]
+                        if global_units[j] == "%":
+                            cell.text = '%6.2f' % q_erf[j, li]
+                        else:
+                            cell.text = '%.2E' % q_erf[j, li]
 
             for cell in iter_cells(table):
                 for paragraph in cell.text_frame.paragraphs:
@@ -1995,7 +2025,15 @@ def main():
                 text_box = text_box + 'TQ' + \
                     str(i) + '. ' + TQ_question[i-1] + '.\n\n'
 
-            add_text_box(slide, left, top, text_box, 18)
+            if len(text_box) < 500:
+
+                fontsize = 18
+
+            else:
+
+                fontsize = 20.0*np.sqrt(500.0/len(text_box))                            
+
+            add_text_box(slide, left, top, text_box, fontsize)
 
             add_date(slide)
             add_small_logo(slide, left, top)
@@ -2035,7 +2073,16 @@ def main():
                     '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
 
                 text_box = TQ_LongQuestion[j - n_SQ]
-                add_text_box(slide, left, top, text_box, 18)
+
+                if len(text_box) < 400:
+
+                    fontsize = 18
+
+                else:
+
+                    fontsize = 18.0*np.sqrt(400.0/len(text_box))                            
+
+                add_text_box(slide, left, top, text_box, fontsize)
 
                 add_date(slide)
                 add_small_logo(slide, left, top)
@@ -2055,7 +2102,7 @@ def main():
                 if ERF_flag > 0:
 
                     n_rows += 1
-                x, y, cx, cy = Inches(1), Inches(6), Inches(3.5), Inches(3)
+                x, y, cx, cy = Inches(1), Inches(6.5), Inches(4.0), Inches(3)
                 shape = slide.shapes.add_table(n_rows, 4, x, y, cx,
                                                MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
                 table = shape.table
@@ -2079,7 +2126,10 @@ def main():
                     for li in range(3):
 
                         cell = table.cell(j_row + 1, li + 1)
-                        cell.text = '%6.2f' % q_Cooke[j, li]
+                        if global_units[j] == "%":
+                            cell.text = '%6.2f' % q_Cooke[j, li]
+                        else:
+                            cell.text = '%.2E' % q_Cooke[j, li]
 
                     j_row += 1
 
@@ -2091,7 +2141,10 @@ def main():
                     for li in range(3):
 
                         cell = table.cell(j_row + 1, li + 1)
-                        cell.text = '%6.2f' % q_erf[j, li]
+                        if global_units[j] == "%":
+                            cell.text = '%6.2f' % q_erf[j, li]
+                        else:
+                            cell.text = '%.2E' % q_erf[j, li]
 
                     j_row += 1
 
@@ -2103,14 +2156,18 @@ def main():
                     for li in range(3):
 
                         cell = table.cell(j_row + 1, li + 1)
-                        cell.text = '%6.2f' % q_EW[j, li]
+                        if global_units[j] == "%":
+                            cell.text = '%6.2f' % q_EW[j, li]
+                        else:
+                            cell.text = '%.2E' % q_EW[j, li]
+
 
                     j_row += 1
 
                 for cell in iter_cells(table):
                     for paragraph in cell.text_frame.paragraphs:
                         for run in paragraph.runs:
-                            run.font.size = Pt(14)
+                            run.font.size = Pt(10)
 
     # ------------ Group slides ------------#
 
@@ -2158,7 +2215,16 @@ def main():
                             Inches(2.2) + (group - 1) * Inches(3.02), width)
 
                 text_box = TQ_LongQuestion[j - n_SQ]
-                add_text_box(slide, left, top, text_box, 18)
+
+                if len(text_box) < 500:
+
+                    fontsize = 18
+
+                else:
+
+                    fontsize = 20.0*np.sqrt(500.0/len(text_box))                            
+
+                add_text_box(slide, left, top, text_box, fontsize)
 
                 add_date(slide)
                 add_small_logo(slide, left, top)
