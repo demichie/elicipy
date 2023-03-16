@@ -135,7 +135,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
     if hist_type == 'step':
 
         
-        axs_h.hist(C_stack.T,
+        (n, bins, patches) = axs_h.hist(C_stack.T,
                    bins=bins,
                    weights=wg,
                    histtype='step',
@@ -147,7 +147,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
     elif hist_type == 'bar':
 
         
-        axs_h.hist(C_stack.T,
+        (n, bins, patches) = axs_h.hist(C_stack.T,
                    bins=bins,
                    weights=wg,
                    histtype='bar',
@@ -231,16 +231,19 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     axs_h.set_xlim(xmin, xmax)
     axs_h2.set_xlim(xmin, xmax)
+    axs_h2.set_ylabel('PDF', color='b')
+    axs_h2.set_ylim(bottom=0)
+
+    [ymin,ymax] = axs_h2.get_ylim()
+    for xbin in bins:
+    
+        axs_h2.plot([xbin,xbin],[ymin,ymax],'k-',linewidth=0.2,alpha=0.1)
 
     if (global_log[j] == 1):
 
         axs_h.set_xscale('log')
         axs_h2.set_xscale('log')
     
-    axs_h2.set_ylabel('PDF', color='b')
-
-
-    axs_h2.set_ylim(bottom=0)
     plt.legend(legends)
     plt.title('Target Question ' + str(label_indexes[j]))
 
