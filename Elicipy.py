@@ -40,9 +40,9 @@ matplotlib.use("TkAgg")
 
 def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
                     colors, legends, legendsPDF, global_units, Cooke_flag,
-                    ERF_flag, EW_flag, global_minVal, global_maxVal,
-                    output_dir, elicitation_name, del_rows, TQ_units,
-                    label_indexes, minval_all, maxval_all):
+                    ERF_flag, EW_flag, global_log, global_minVal, 
+                    global_maxVal, output_dir, elicitation_name, del_rows, 
+                    TQ_units, label_indexes, minval_all, maxval_all):
     """Create figure with histrogram and fit and small figure
        with PDFs only
 
@@ -78,6 +78,8 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
         ERF_flag > 0 => plot the ERF method results
     EW_flag : int
         EW_flag > 0 => plot the equal weights results
+    global_log : list of int
+        1: log scale; 0: linear scale
     global_minVal : list of float
         minimum allowed value for answer to question j
     global_maxVal : list of float
@@ -112,10 +114,28 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
     C_stack = np.delete(C_stack, del_rows, 0)
     wg = np.ones_like(C_stack.T) / n_sample
 
+    if global_units[j] == "%":
+
+        xmin = 0.0
+        xmax = 100.0
+
+    else:
+
+        xmin = minval_all[j]
+        xmax = maxval_all[j]
+
+    if (global_log[j] == 1):
+    
+        bins = np.geomspace(xmin, xmax, n_bins)
+    
+    else:
+    
+        bins = n_bins
+
     if hist_type == 'step':
 
         axs_h.hist(C_stack.T,
-                   bins=n_bins,
+                   bins=bins,
                    weights=wg,
                    histtype='step',
                    fill=False,
@@ -125,7 +145,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
     elif hist_type == 'bar':
 
         axs_h.hist(C_stack.T,
-                   bins=n_bins,
+                   bins=bins,
                    weights=wg,
                    histtype='bar',
                    rwidth=0.95,
@@ -139,42 +159,59 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     axs_h2 = axs_h.twinx()
 
-    if global_units[j] == "%":
 
-        xmin = 0.0
-        xmax = 100.0
+    
+    if (global_log[j] == 1):
 
+        pdf_min = np.log10(minval_all[j])
+        pdf_max = np.log10(maxval_all[j])
+        pdf_C = np.log10(C)
+        pdf_C_erf = np.log10(C_erf)
+        pdf_C_EW = np.log10(C_EW)
+        pdf_spc = np.geomspace(pdf_min, pdf_max, 1000)
+        pdf_scale = ( pdf_max - pdf_min ) / ( maxval_all[j] - minval_all[j] )
+        lnspc = 10**pdf_spc
+        
     else:
 
-        xmin = np.amin(C_stack)
-        xmax = np.amax(C_stack)
+        pdf_min = global_minVal[j]
+        pdf_max = global_maxVal[j]
+        pdf_C = C
+        pdf_C_erf = C_erf
+        pdf_C_EW = C_EW
+        pdf_spc = np.linspace(pdf_min, pdf_max, 1000)  
+        pdf_scale = 1.0  
+        lnspc = pdf_spc
 
-    lnspc = np.linspace(xmin, xmax, 1000)
 
     if (Cooke_flag > 0):
-        gkde = stats.gaussian_kde(C)
-        gkde_norm = gkde.integrate_box_1d(global_minVal[j], global_maxVal[j])
-        kdepdf = gkde.evaluate(lnspc) / gkde_norm
+        gkde = stats.gaussian_kde(pdf_C)
+        gkde_norm = gkde.integrate_box_1d(pdf_min, pdf_max)
+        kdepdf = gkde.evaluate(pdf_spc) / gkde_norm * pdf_scale
         axs_h2.plot(lnspc, kdepdf, 'r--')
 
     if (ERF_flag > 0):
-        gkde_erf = stats.gaussian_kde(C_erf)
-        gkde_erf_norm = gkde_erf.integrate_box_1d(global_minVal[j],
-                                                  global_maxVal[j])
-        kdepdf_erf = gkde_erf.evaluate(lnspc) / gkde_erf_norm
+        gkde_erf = stats.gaussian_kde(pdf_C_erf)
+        gkde_erf_norm = gkde_erf.integrate_box_1d(pdf_min,pdf_max)
+        kdepdf_erf = gkde_erf.evaluate(pdf_spc) / gkde_erf_norm * pdf_scale
         axs_h2.plot(lnspc, kdepdf_erf, '--', color='tab:purple')
 
     if (EW_flag > 0):
-        gkde_EW = stats.gaussian_kde(C_EW)
-        gkde_EW_norm = gkde_EW.integrate_box_1d(global_minVal[j],
-                                                global_maxVal[j])
-        kdepdf_EW = gkde_EW.evaluate(lnspc) / gkde_EW_norm
+        gkde_EW = stats.gaussian_kde(pdf_C_EW)
+        gkde_EW_norm = gkde_EW.integrate_box_1d(pdf_min,pdf_max)
+        kdepdf_EW = gkde_EW.evaluate(pdf_spc) / gkde_EW_norm * pdf_scale
         axs_h2.plot(lnspc, kdepdf_EW, 'g--')
 
     axs_h.set_xlim(xmin, xmax)
     axs_h2.set_xlim(xmin, xmax)
 
+    if (global_log[j] == 1):
+
+        axs_h.set_xscale('log')
+        axs_h2.set_xscale('log')
+    
     axs_h2.set_ylabel('PDF', color='b')
+
 
     axs_h2.set_ylim(bottom=0)
     plt.legend(legends)
@@ -207,13 +244,11 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
         axs_h2.plot(lnspc, kdepdf_EW, 'g--', linewidth=2)
 
-    if global_units[j] == "%":
+    axs_h2.set_xlim(xmin, xmax)
 
-        axs_h2.set_xlim(xmin, xmax)
+    if (global_log[j] == 1):
 
-    else:
-
-        axs_h2.set_xlim(minval_all[j], maxval_all[j])
+        axs_h2.set_xscale('log')
 
     axs_h2.set_ylabel('PDF', color='b')
 
@@ -1351,9 +1386,10 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
                 create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf,
                                 C_EW, colors, legends, legendsPDF,
                                 global_units, Cooke_flag, ERF_flag, EW_flag,
-                                global_minVal, global_maxVal, output_dir,
-                                elicitation_name, del_rows, TQ_units,
-                                label_indexes, minval_all, maxval_all)
+                                global_log, global_minVal, global_maxVal, 
+                                output_dir, elicitation_name, del_rows, 
+                                TQ_units, label_indexes, minval_all, 
+                                maxval_all)
 
     return q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW
 
