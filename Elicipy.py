@@ -2249,7 +2249,7 @@ def main():
                         width = Inches(4.22)
                         add_small_figure(
                             slide, figname, Inches(11.18),
-                            Inches(2.2) + (count - 1) * Inches(3.02), width)
+                            Inches(2.2) + count * Inches(3.02), width)
 
                 text_box = TQ_LongQuestion[j - n_SQ]
 
