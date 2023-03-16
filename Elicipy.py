@@ -134,6 +134,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     if hist_type == 'step':
 
+        
         axs_h.hist(C_stack.T,
                    bins=bins,
                    weights=wg,
@@ -141,16 +142,42 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
                    fill=False,
                    rwidth=0.95,
                    color=colors)
+        
 
     elif hist_type == 'bar':
 
+        
         axs_h.hist(C_stack.T,
                    bins=bins,
                    weights=wg,
                    histtype='bar',
-                   rwidth=0.95,
+                   rwidth=0.50,
                    ec="k",
                    color=colors)
+        """
+        wg = np.ones_like(C) / n_sample
+ 
+        axs_h.hist(C,
+                   bins=bins,
+                   weights=wg,
+                   histtype='bar',
+                   alpha=0.25,
+                   color=colors[0])
+
+        axs_h.hist(C_erf,
+                   bins=bins,
+                   weights=wg,
+                   histtype='bar',
+                   alpha=0.25,
+                   color=colors[1])
+
+        axs_h.hist(C_EW,
+                   bins=bins,
+                   weights=wg,
+                   histtype='bar',
+                   alpha=0.25,
+                   color=colors[2])
+        """
 
     axs_h.set_xlabel(TQ_units[j - n_SQ])
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
