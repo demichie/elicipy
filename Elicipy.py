@@ -2155,13 +2155,13 @@ def main():
 
                 text_box = TQ_LongQuestion[j - n_SQ]
 
-                if len(text_box) < 350:
+                if len(text_box) < 400:
 
                     fontsize = 18
 
                 else:
 
-                    fontsize = 18.0*np.sqrt(350.0/len(text_box))                            
+                    fontsize = 18.0*np.sqrt(400.0/len(text_box))                            
 
                 add_text_box(slide, left, top, text_box, fontsize)
 
@@ -2298,13 +2298,13 @@ def main():
 
                 text_box = TQ_LongQuestion[j - n_SQ]
 
-                if len(text_box) < 500:
+                if len(text_box) < 200:
 
                     fontsize = 18
 
                 else:
 
-                    fontsize = 20.0*np.sqrt(500.0/len(text_box))                            
+                    fontsize = 18.0*np.sqrt(200.0/len(text_box))                            
 
                 add_text_box(slide, left, top, text_box, fontsize)
 
