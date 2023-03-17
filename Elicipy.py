@@ -1492,11 +1492,26 @@ def main():
     maxval_all[0:n_SQ] = np.amax(SQ_array[:, 2, :], axis=0)
     maxval_all[n_SQ:] = np.amax(TQ_array[:, 2, :], axis=0)
 
+    
+    
+
     print('')
     print('Answer ranges')
 
     for i in range(n_SQ + n_TQ):
 
+        if global_log[i]:
+         
+            deltalogval_all = np.log10(maxval_all[i]) - np.log10(minval_all[i])
+            minval_all[i] = 10**( np.log10(minval_all[i]) - 0.1*deltalogval_all )
+            maxval_all[i] = 10**( np.log10(maxval_all[i]) + 0.1*deltalogval_all )
+         
+        else:
+         
+            deltaval_all = maxval_all[i] - minval_all[i]
+            minval_all[i] = minval_all[i] - 0.1 * deltaval_all
+            maxval_all[i] = maxval_all[i] + 0.1 * deltaval_all
+            
         print(i, minval_all[i], maxval_all[i])
 
     print('')
@@ -2140,13 +2155,13 @@ def main():
 
                 text_box = TQ_LongQuestion[j - n_SQ]
 
-                if len(text_box) < 400:
+                if len(text_box) < 350:
 
                     fontsize = 18
 
                 else:
 
-                    fontsize = 18.0*np.sqrt(400.0/len(text_box))                            
+                    fontsize = 18.0*np.sqrt(350.0/len(text_box))                            
 
                 add_text_box(slide, left, top, text_box, fontsize)
 
