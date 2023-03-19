@@ -162,8 +162,6 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     axs_h2 = axs_h.twinx()
 
-
-    
     if (global_log[j] == 1):
 
         pdf_min = np.log10(minval_all[j])
@@ -171,7 +169,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
         pdf_C = np.log10(C)
         pdf_C_erf = np.log10(C_erf)
         pdf_C_EW = np.log10(C_EW)
-        pdf_spc = np.geomspace(pdf_min, pdf_max, 1000)
+        pdf_spc = np.linspace(pdf_min, pdf_max, 1000)
         pdf_scale = ( pdf_max - pdf_min ) / ( maxval_all[j] - minval_all[j] )
         lnspc = 10**pdf_spc
         
@@ -188,6 +186,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
 
     if (Cooke_flag > 0):
+
         gkde = stats.gaussian_kde(pdf_C)
         gkde_norm = gkde.integrate_box_1d(pdf_min, pdf_max)
         kdepdf = gkde.evaluate(pdf_spc) / gkde_norm * pdf_scale
@@ -282,6 +281,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     plt.close()
 
+    return
 
 def create_figure_trend(count, trend_group, n_SQ, q_EW, q_Cooke, q_erf,
                         global_units, Cooke_flag, ERF_flag, EW_flag,
@@ -1307,10 +1307,12 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
         del_rows.append(int(0))
     else:
         keep_rows.append(int(0))
+        
     if (ERF_flag == 0):
         del_rows.append(int(1))
     else:
         keep_rows.append(int(1))
+        
     if (EW_flag == 0):
         del_rows.append(int(2))
     else:
@@ -1328,7 +1330,7 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
             quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createSamples(
                 DAT, j, Weqok, n_sample, global_log[j],
-                [global_minVal[j], global_maxVal[j]], 0)
+                [global_minVal[j], global_maxVal[j]], overshoot, 0)
 
             print("%2i %9.2f %9.2f %9.2f %9.2f" %
                   (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
@@ -1341,7 +1343,7 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
                 quan05, quan50, qmean, quan95, C = createSamples(
                     DAT, j, W[:, 4].flatten(), n_sample, global_log[j],
-                    [global_minVal[j], global_maxVal[j]], 0)
+                    [global_minVal[j], global_maxVal[j]], overshoot , 0)
 
                 print("%2i %9.2f %9.2f %9.2f %9.2f" %
                       (j, quan05, quan50, qmean, quan95))
@@ -1354,17 +1356,24 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
                 C = C_EW
 
-            quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = \
-                createSamples(DAT, j, W_erf[:, 4].flatten(), n_sample,
-                              global_log[j], [global_minVal[j],
-                                              global_maxVal[j]], ERF_flag)
+            if ERF_flag > 0:
 
-            print("%2i %9.2f %9.2f %9.2f %9.2f" %
-                  (j, quan05_erf, quan50_erf, qmean_erf, quan95_erf))
+                quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = \
+                    createSamples(DAT, j, W_erf[:, 4].flatten(), n_sample,
+                                  global_log[j], [global_minVal[j],
+                                                  global_maxVal[j]], 
+                                                  overshoot, ERF_flag)
 
-            q_erf[j, 0] = quan05_erf
-            q_erf[j, 1] = quan50_erf
-            q_erf[j, 2] = quan95_erf
+                print("%2i %9.2f %9.2f %9.2f %9.2f" %
+                      (j, quan05_erf, quan50_erf, qmean_erf, quan95_erf))
+
+                q_erf[j, 0] = quan05_erf
+                q_erf[j, 1] = quan50_erf
+                q_erf[j, 2] = quan95_erf
+                
+            else:
+            
+                C_erf = C_EW    
 
             if (j >= n_SQ):
 
@@ -1381,13 +1390,20 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
             if (j >= n_SQ) and postprocessing:
 
                 legendsPDF = []
-                legendsPDF.append('CM' + '%9.2f' % quan05 + '%9.2f' % quan50 +
+                
+                if Cooke_flag:
+
+                    legendsPDF.append('CM' + '%9.2f' % quan05 + '%9.2f' % quan50 +
                                   '%9.2f' % quan95)
-                legendsPDF.append('ERF' + '%9.2f' % quan05_erf +
+                if ERF_flag > 0:
+                
+                    legendsPDF.append('ERF' + '%9.2f' % quan05_erf +
                                   '%9.2f' % quan50_erf + '%9.2f' % quan95_erf)
+                                  
                 legendsPDF.append('EW' + '%9.2f' % quan05_EW +
                                   '%9.2f' % quan50_EW + '%9.2f' % quan95_EW)
-                legendsPDF = [legendsPDF[index] for index in keep_rows]
+                                  
+                # legendsPDF = [legendsPDF[index] for index in keep_rows]
 
                 create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf,
                                 C_EW, colors, legends, legendsPDF,
@@ -1406,11 +1422,19 @@ def main():
 
     from ElicipyDict import datarepo
     from ElicipyDict import Repository
-    from ElicipyDict import group_list
+ 
+    try: 
+
+        from ElicipyDict import group_list
+
+    except ImportError:
+
+        group_list = [0]
 
     if len(group_list) > 1 and not (0 in group_list):
 
         group_list.append(0)
+        
 
     n_pctl = 3
 
@@ -1533,7 +1557,9 @@ def main():
         global_shortQuestion = SQ_question + TQ_question
 
         print("")
-        print('Realization', realization)
+        print('Realization')
+        print(realization)
+        print()
 
         if analysis:
 

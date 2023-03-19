@@ -1,4 +1,4 @@
-def createSamples(DAT, j, W, N, logSCALE, domain, ERF_flag):
+def createSamples(DAT, j, W, N, logSCALE, domain, overshoot, ERF_flag):
 
     """Compute the quantiles and samples for question j from weights and answers
     
@@ -58,7 +58,7 @@ def createSamples(DAT, j, W, N, logSCALE, domain, ERF_flag):
     else:
 
         quan05, quan50, qmean, quan95, C = createSamplesUCA2(
-            incm, mid, incM, W, N, logSCALE, domain)
+            incm, mid, incM, W, N, logSCALE, domain, overshoot)
 
     return quan05, quan50, qmean, quan95, C
 
@@ -157,7 +157,7 @@ def sampleDISCR(P, N):
     return a
 
 
-def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain):
+def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
 
     """Produces an array of random samples from weights and answers by using max. entropy distributions and linear pooling
     
@@ -223,8 +223,8 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain):
     rA = np.amin(incm[W > 0])
     rB = np.amax(incM[W > 0])
     R = rB - rA
-    rA = rA - R / 10.0
-    rB = rB + R / 10.0
+    rA = rA - overshoot * R
+    rB = rB + overshoot * R 
 
     sV = sampleDISCR(W, N)
 
@@ -237,8 +237,6 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain):
         while ((C[j] < DDD[0]) or (C[j] > DDD[1])):
 
             C[j] = max_entropy(incm[s], mid[s], incM[s], rA, rB)
-
-    s = np
 
     if (logSCALE):
 
