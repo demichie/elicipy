@@ -126,11 +126,11 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     if (global_log[j] == 1):
     
-        bins = np.geomspace(xmin, xmax, n_bins)
+        bins = np.geomspace(minval_all[j], maxval_all[j], n_bins+1)
     
     else:
     
-        bins = n_bins
+        bins = np.linspace(minval_all[j], maxval_all[j], n_bins+1)
 
     if hist_type == 'step':
 
@@ -154,30 +154,6 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
                    rwidth=0.50,
                    ec="k",
                    color=colors)
-        """
-        wg = np.ones_like(C) / n_sample
- 
-        axs_h.hist(C,
-                   bins=bins,
-                   weights=wg,
-                   histtype='bar',
-                   alpha=0.25,
-                   color=colors[0])
-
-        axs_h.hist(C_erf,
-                   bins=bins,
-                   weights=wg,
-                   histtype='bar',
-                   alpha=0.25,
-                   color=colors[1])
-
-        axs_h.hist(C_EW,
-                   bins=bins,
-                   weights=wg,
-                   histtype='bar',
-                   alpha=0.25,
-                   color=colors[2])
-        """
 
     axs_h.set_xlabel(TQ_units[j - n_SQ])
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
@@ -1492,8 +1468,7 @@ def main():
     maxval_all[0:n_SQ] = np.amax(SQ_array[:, 2, :], axis=0)
     maxval_all[n_SQ:] = np.amax(TQ_array[:, 2, :], axis=0)
 
-    
-    
+    global_units = SQ_units + TQ_units
 
     print('')
     print('Answer ranges')
@@ -1511,6 +1486,11 @@ def main():
             deltaval_all = maxval_all[i] - minval_all[i]
             minval_all[i] = minval_all[i] - 0.1 * deltaval_all
             maxval_all[i] = maxval_all[i] + 0.1 * deltaval_all
+            
+            if global_units[i] == "%":
+            
+                minval_all[i] = np.maximum( minval_all[i] , 0 )
+                maxval_all[i] = np.minimum( maxval_all[i] , 100 )
             
         print(i, minval_all[i], maxval_all[i])
 

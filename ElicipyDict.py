@@ -13,10 +13,10 @@ Repository = 'testWebform'
 output_dir = 'OUTPUT'
 
 # comment if there is ony one language
-language = 'ITA'
+language = 'ENG'
 
 analysis = True
-target = False
+target = True
 postprocessing = True
 
 # target_list = [2,3]
