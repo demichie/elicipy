@@ -15,6 +15,7 @@ The script will create a new folder with .csv files and a .pptx presentation
 of the results of the elicitation.
 
 Authors:
+
 * Mattia de' Michieli Vitturi.
 * Andrea Bevilacqua.
 * Alessandro Tadini.
