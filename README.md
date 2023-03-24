@@ -15,9 +15,9 @@ The script will create a new folder with .csv files and a .pptx presentation
 of the results of the elicitation.
 
 Authors:
-- Mattia de' Michieli Vitturi
-- Andrea Bevilacqua
-- Alessandro Tadini
+* Mattia de' Michieli Vitturi.
+* Andrea Bevilacqua.
+* Alessandro Tadini.
 
 Some of the functions are based on the scripts of the Matlab package Anduril
 (authors:  Georgios Leontaris and Oswaldo Morales-Napoles).
