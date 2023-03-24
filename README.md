@@ -19,7 +19,7 @@ Authors:
 - Andrea Bevilacqua
 - Alessandro Tadini
 
-Some of the functions are based on the scripts of the Matlab package Anduril 
+Some of the functions are based on the scripts of the Matlab package Anduril
 (authors:  Georgios Leontaris and Oswaldo Morales-Napoles).
 
 ## Webform
@@ -28,22 +28,22 @@ The webform can run locally or at streamlit.io.
 
 Here there are steps to install and run the webapp from streamlit.io.
 
-On Github, you need two repositories, one hosting the webapp streamlit_app.py 
-(fork this repository) and the other to collect the answers (create a new 
+On Github, you need two repositories, one hosting the webapp streamlit_app.py
+(fork this repository) and the other to collect the answers (create a new
 repository).
 
 GITHUB STREAMLIT REPOSITORY
 
 1) Fork this repository
-2) Edit in the input file createWebformDict.py the fields datarepo (with the 
-forked repository) and the RepositoryData (with the new github repository for 
+2) Edit in the input file createWebformDict.py the fields datarepo (with the
+forked repository) and the RepositoryData (with the new github repository for
 the answers)
-3) Set in the input file createWebformDict.py the quest_type variable to 
+3) Set in the input file createWebformDict.py the quest_type variable to
 "seed" of "target"
-4) Edit the csv file with your questions in the DATA folder of the github 
-repository for the webapp (see the questionnaire.csv file for an example of 
+4) Edit the csv file with your questions in the DATA folder of the github
+repository for the webapp (see the questionnaire.csv file for an example of
 the format)
-5) Click on the top-right (on your github user icon), and from the menu click 
+5) Click on the top-right (on your github user icon), and from the menu click
 on "Settings"
 6) At the bottom of the left panel, click on "Developer settings"
 7) On the left, click on "Personal access tokens"
@@ -68,5 +68,5 @@ STREAMLIT
 
 You can share this link for the form:
 
-https://share.streamlit.io/YOUR_GITHUB_PAGE/createwebform/main
+<https://share.streamlit.io/YOUR_GITHUB_PAGE/createwebform/main>
 
