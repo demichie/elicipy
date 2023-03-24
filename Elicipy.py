@@ -1,10 +1,8 @@
 import datetime
-import copy
 import numpy as np
 import os
 import sys
 from pdf2image import convert_from_path
-from pathlib import Path
 import pandas as pd
 
 import matplotlib
@@ -23,7 +21,7 @@ from createSamples import createSamples
 from COOKEweights import COOKEweights
 from ERFweights import ERFweights
 from merge_csv import merge_csv
-from ElicipyDict import *
+# from ElicipyDict import *
 
 max_len_table = 21
 max_len_tableB = 18
@@ -40,9 +38,9 @@ matplotlib.use("TkAgg")
 
 def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
                     colors, legends, legendsPDF, global_units, Cooke_flag,
-                    ERF_flag, EW_flag, global_log, global_minVal, 
-                    global_maxVal, output_dir, elicitation_name, del_rows, 
-                    TQ_units, label_indexes, minval_all, maxval_all):
+                    ERF_flag, EW_flag, global_log, global_minVal,
+                    global_maxVal, output_dir, elicitation_name, del_rows,
+                    TQ_units, label_indexes, minval_all, maxval_all, n_bins):
     """Create figure with histrogram and fit and small figure
        with PDFs only
 
@@ -125,40 +123,29 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
         xmax = maxval_all[j]
 
     if (global_log[j] == 1):
-    
+
         bins = np.geomspace(minval_all[j], maxval_all[j], n_bins+1)
-    
+
     else:
-    
+
         bins = np.linspace(minval_all[j], maxval_all[j], n_bins+1)
 
     if hist_type == 'step':
 
-        
-        (n, bins, patches) = axs_h.hist(C_stack.T,
-                   bins=bins,
-                   weights=wg,
-                   histtype='step',
-                   fill=False,
-                   rwidth=0.95,
-                   color=colors)
-        
+        (n, bins, patches) = axs_h.hist(C_stack.T, bins=bins, weights=wg,
+                                        histtype='step', fill=False,
+                                        rwidth=0.95, color=colors)
 
     elif hist_type == 'bar':
 
-        
-        (n, bins, patches) = axs_h.hist(C_stack.T,
-                   bins=bins,
-                   weights=wg,
-                   histtype='bar',
-                   rwidth=0.50,
-                   ec="k",
-                   color=colors)
+        (n, bins, patches) = axs_h.hist(C_stack.T, bins=bins, weights=wg,
+                                        histtype='bar', rwidth=0.50, ec="k",
+                                        color=colors)
 
     axs_h.set_xlabel(TQ_units[j - n_SQ])
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
 
-    xt = plt.xticks()[0]
+    plt.xticks()[0]
 
     axs_h2 = axs_h.twinx()
 
@@ -170,9 +157,9 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
         pdf_C_erf = np.log10(C_erf)
         pdf_C_EW = np.log10(C_EW)
         pdf_spc = np.linspace(pdf_min, pdf_max, 1000)
-        pdf_scale = ( pdf_max - pdf_min ) / ( maxval_all[j] - minval_all[j] )
+        pdf_scale = (pdf_max - pdf_min) / (maxval_all[j] - minval_all[j])
         lnspc = 10**pdf_spc
-        
+
     else:
 
         pdf_min = global_minVal[j]
@@ -180,10 +167,9 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
         pdf_C = C
         pdf_C_erf = C_erf
         pdf_C_EW = C_EW
-        pdf_spc = np.linspace(pdf_min, pdf_max, 1000)  
-        pdf_scale = 1.0  
+        pdf_spc = np.linspace(pdf_min, pdf_max, 1000)
+        pdf_scale = 1.0
         lnspc = pdf_spc
-
 
     if (Cooke_flag > 0):
 
@@ -194,13 +180,13 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     if (ERF_flag > 0):
         gkde_erf = stats.gaussian_kde(pdf_C_erf)
-        gkde_erf_norm = gkde_erf.integrate_box_1d(pdf_min,pdf_max)
+        gkde_erf_norm = gkde_erf.integrate_box_1d(pdf_min, pdf_max)
         kdepdf_erf = gkde_erf.evaluate(pdf_spc) / gkde_erf_norm * pdf_scale
         axs_h2.plot(lnspc, kdepdf_erf, '--', color='tab:purple')
 
     if (EW_flag > 0):
         gkde_EW = stats.gaussian_kde(pdf_C_EW)
-        gkde_EW_norm = gkde_EW.integrate_box_1d(pdf_min,pdf_max)
+        gkde_EW_norm = gkde_EW.integrate_box_1d(pdf_min, pdf_max)
         kdepdf_EW = gkde_EW.evaluate(pdf_spc) / gkde_EW_norm * pdf_scale
         axs_h2.plot(lnspc, kdepdf_EW, 'g--')
 
@@ -209,16 +195,17 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
     axs_h2.set_ylabel('PDF', color='b')
     axs_h2.set_ylim(bottom=0)
 
-    [ymin,ymax] = axs_h2.get_ylim()
+    [ymin, ymax] = axs_h2.get_ylim()
     for xbin in bins:
-    
-        axs_h2.plot([xbin,xbin],[ymin,ymax],'k-',linewidth=0.2,alpha=0.1)
+
+        axs_h2.plot([xbin, xbin], [ymin, ymax], 'k-', linewidth=0.2,
+                    alpha=0.1)
 
     if (global_log[j] == 1):
 
         axs_h.set_xscale('log')
         axs_h2.set_xscale('log')
-    
+
     plt.legend(legends)
     plt.title('Target Question ' + str(label_indexes[j]))
 
@@ -258,7 +245,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
     axs_h2.set_ylabel('PDF', color='b')
 
     axs_h2.set_ylim(bottom=0)
-    leg = plt.legend(legends, prop={"size": 18})
+    plt.legend(legends, prop={"size": 18})
 
     if group == 0:
 
@@ -283,9 +270,11 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     return
 
+
 def create_figure_trend(count, trend_group, n_SQ, q_EW, q_Cooke, q_erf,
                         global_units, Cooke_flag, ERF_flag, EW_flag,
-                        global_log, TQ_minVals, TQ_maxVals, output_dir):
+                        global_log, TQ_minVals, TQ_maxVals, output_dir,
+                        elicitation_name):
     """Create figure for trend group (subset of target qustions)
 
     Parameters
@@ -581,12 +570,12 @@ def add_date(slide):
     shape_para.font.size = Pt(17)
 
 
-def add_small_logo(slide, left, top):
+def add_small_logo(slide, left, top, logofile):
 
-    img = slide.shapes.add_picture('../logo.png',
-                                   left + Inches(13.0),
-                                   top + Inches(6.8),
-                                   width=Inches(0.8))
+    slide.shapes.add_picture(logofile,
+                             left + Inches(13.0),
+                             top + Inches(6.8),
+                             width=Inches(0.8))
 
 
 def add_figure(slide, figname, left, top):
@@ -644,7 +633,7 @@ def iter_cells(table):
 
 
 def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
-                 df_indexes_TQ):
+                 df_indexes_TQ, target, output_dir, elicitation_name):
 
     import difflib
 
@@ -820,7 +809,7 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
     return n_experts, n_SQ, n_TQ, SQ_array, TQ_array
 
 
-def read_questionnaire(input_dir, csv_file):
+def read_questionnaire(input_dir, csv_file, target):
     """Read .csv questionnaire file
 
     Parameters
@@ -829,6 +818,8 @@ def read_questionnaire(input_dir, csv_file):
         name of input folder
     csv_file : string
         name of csv_file
+    target : boolean
+        True to read targets
 
     Returns
     -------
@@ -845,7 +836,6 @@ def read_questionnaire(input_dir, csv_file):
 
     quest_type = df_read['QUEST_TYPE'].to_list()
     n_SQ = quest_type.count('seed')
-    n_TQ = quest_type.count('target')
 
     print(quest_type)
 
@@ -877,7 +867,7 @@ def read_questionnaire(input_dir, csv_file):
     else:
 
         df_SQ = df_read[df_read['QUEST_TYPE'] == 'seed']
-        df_indexes = np.arange(len(df_quest.index))
+        df_indexes = np.arange(len(df_SQ.index))
 
     # find the indexes of the seed questions (0<idx<n_SQ)
     df_indexes_SQ = df_indexes[(df_indexes < n_SQ)]
@@ -917,8 +907,7 @@ def read_questionnaire(input_dir, csv_file):
         else:
 
             df_TQ = df_read[df_read['QUEST_TYPE'] == 'target']
-
-            df_indexes = np.arange(len(df_quest.index))
+            df_indexes = np.arange(len(df_TQ.index))
 
         # find the indexes of the target questions (0<idx<n_TQ)
         # in the extracted dataframe
@@ -931,6 +920,7 @@ def read_questionnaire(input_dir, csv_file):
 
     else:
 
+        df_indexes_TQ = []
         df_quest = df_SQ
 
     label_indexes = np.asarray(df_quest['IDX'])
@@ -1059,8 +1049,6 @@ def read_questionnaire(input_dir, csv_file):
     # scale for target question:
     TQ_scale = []
 
-    df_indexes_TQ = []
-
     idx_list = []
     parents = []
 
@@ -1118,7 +1106,8 @@ def read_questionnaire(input_dir, csv_file):
 
 
 def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
-                    TQ_array, realization, global_scale, global_log, alpha):
+                    TQ_array, realization, global_scale, global_log, alpha,
+                    overshoot, cal_power, ERF_flag, Cooke_flag):
 
     W, score, information = COOKEweights(SQ_array, TQ_array, realization,
                                          alpha, global_scale, overshoot,
@@ -1197,7 +1186,8 @@ def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
     return W, W_erf, Weqok, W_gt0, Werf_gt0, expin
 
 
-def save_dtt_rll(input_dir):
+def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
+                 SQ_realization):
 
     # ----------------------------------------- #
     # ------------ Save dtt and rls ----------- #
@@ -1220,9 +1210,9 @@ def save_dtt_rll(input_dir):
             for i in np.arange(n_SQ):
 
                 print(
-                    f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} {"SQ"+str(i+1):>13}'
-                    '{SQ_scale[i]:4} {SQ_array[k, 0, i]:6e} {""} '
-                    '{SQ_array[k, 1, i]:6e} {" "}{SQ_array[k, 2, i]:6e}'
+                   f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} {"SQ"+str(i+1):>13}'
+                   '{SQ_scale[i]:4} {SQ_array[k, 0, i]:6e} {""} '
+                   '{SQ_array[k, 1, i]:6e} {" "}{SQ_array[k, 2, i]:6e}'
                 )
 
         # Reset the standard output to its original value
@@ -1279,7 +1269,9 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
                                Werf_gt0, expin, global_log, global_minVal,
                                global_maxVal, global_units, TQ_units,
                                label_indexes, minval_all, maxval_all,
-                               postprocessing):
+                               postprocessing, analysis, ERF_flag, Cooke_flag,
+                               EW_flag, overshoot, hist_type, output_dir,
+                               elicitation_name, n_bins):
 
     DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
 
@@ -1307,12 +1299,12 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
         del_rows.append(int(0))
     else:
         keep_rows.append(int(0))
-        
+
     if (ERF_flag == 0):
         del_rows.append(int(1))
     else:
         keep_rows.append(int(1))
-        
+
     if (EW_flag == 0):
         del_rows.append(int(2))
     else:
@@ -1343,7 +1335,7 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
                 quan05, quan50, qmean, quan95, C = createSamples(
                     DAT, j, W[:, 4].flatten(), n_sample, global_log[j],
-                    [global_minVal[j], global_maxVal[j]], overshoot , 0)
+                    [global_minVal[j], global_maxVal[j]], overshoot, 0)
 
                 print("%2i %9.2f %9.2f %9.2f %9.2f" %
                       (j, quan05, quan50, qmean, quan95))
@@ -1361,8 +1353,7 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
                 quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = \
                     createSamples(DAT, j, W_erf[:, 4].flatten(), n_sample,
                                   global_log[j], [global_minVal[j],
-                                                  global_maxVal[j]], 
-                                                  overshoot, ERF_flag)
+                                  global_maxVal[j]], overshoot, ERF_flag)
 
                 print("%2i %9.2f %9.2f %9.2f %9.2f" %
                       (j, quan05_erf, quan50_erf, qmean_erf, quan95_erf))
@@ -1370,10 +1361,10 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
                 q_erf[j, 0] = quan05_erf
                 q_erf[j, 1] = quan50_erf
                 q_erf[j, 2] = quan95_erf
-                
+
             else:
-            
-                C_erf = C_EW    
+
+                C_erf = C_EW
 
             if (j >= n_SQ):
 
@@ -1390,40 +1381,106 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
             if (j >= n_SQ) and postprocessing:
 
                 legendsPDF = []
-                
+
                 if Cooke_flag:
 
-                    legendsPDF.append('CM' + '%9.2f' % quan05 + '%9.2f' % quan50 +
-                                  '%9.2f' % quan95)
+                    legendsPDF.append('CM' + '%9.2f' % quan05 +
+                                      '%9.2f' % quan50 +
+                                      '%9.2f' % quan95)
                 if ERF_flag > 0:
-                
+
                     legendsPDF.append('ERF' + '%9.2f' % quan05_erf +
-                                  '%9.2f' % quan50_erf + '%9.2f' % quan95_erf)
-                                  
+                                      '%9.2f' % quan50_erf +
+                                      '%9.2f' % quan95_erf)
+
                 legendsPDF.append('EW' + '%9.2f' % quan05_EW +
                                   '%9.2f' % quan50_EW + '%9.2f' % quan95_EW)
-                                  
-                # legendsPDF = [legendsPDF[index] for index in keep_rows]
 
                 create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf,
                                 C_EW, colors, legends, legendsPDF,
                                 global_units, Cooke_flag, ERF_flag, EW_flag,
-                                global_log, global_minVal, global_maxVal, 
-                                output_dir, elicitation_name, del_rows, 
-                                TQ_units, label_indexes, minval_all, 
-                                maxval_all)
+                                global_log, global_minVal, global_maxVal,
+                                output_dir, elicitation_name, del_rows,
+                                TQ_units, label_indexes, minval_all,
+                                maxval_all, n_bins)
 
     return q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW
 
 
-def main():
+def main(argv):
+
+    current_path = os.getcwd()
+
+    if isinstance(argv, str):
+
+        print(argv)
+        repository = argv
+        path = current_path + '/ELICITATIONS/' + repository
+
+        # Check whether the specified path exists or not
+        repoExists = os.path.exists(path)
+
+    else:
+
+        repoExists = False
+
+    if repoExists:
+
+        print('')
+        print(repository+' found')
+        os.chdir(path)
+
+    else:
+
+        elicitation_list = next(os.walk(current_path + '/ELICITATIONS/'))
+        print('List of elicitations:')
+
+        if len(elicitation_list[1]) == 1:
+
+            userinput = 0
+            cond = False
+
+        else:
+
+            for count, elicitation in enumerate(elicitation_list[1]):
+
+                print(count, elicitation)
+
+            print('')
+            cond = True
+
+        while cond:
+
+            userinput = int(input("Enter Elicitation Number\n"))
+            cond = not (userinput in range(len(elicitation_list[1])))
+            if cond:
+                print('Integer between 0 and ', len(elicitation_list[1])-1)
+
+        repository = elicitation_list[1][userinput]
+        print('repository', repository)
+        path = current_path + '/ELICITATIONS/' + repository
+
+    os.chdir(path)
+    print('Path: ', path)
+    sys.path.append(path)
 
     from ElicipyDict import output_dir
-
     from ElicipyDict import datarepo
-    from ElicipyDict import Repository
- 
-    try: 
+    from ElicipyDict import target
+    from ElicipyDict import elicitation_name
+    from ElicipyDict import analysis
+    from ElicipyDict import alpha
+    from ElicipyDict import overshoot
+    from ElicipyDict import cal_power
+    from ElicipyDict import EW_flag
+    from ElicipyDict import ERF_flag
+    from ElicipyDict import Cooke_flag
+    from ElicipyDict import n_sample
+    from ElicipyDict import postprocessing
+    from ElicipyDict import hist_type
+    from ElicipyDict import n_bins
+
+    try:
 
         from ElicipyDict import group_list
 
@@ -1434,25 +1491,17 @@ def main():
     if len(group_list) > 1 and not (0 in group_list):
 
         group_list.append(0)
-        
 
     n_pctl = 3
 
     # download the data from github repository
-    if datarepo == 'github':
+    if datarepo == 'github' or datarepo == 'local_github':
 
         from ElicipyDict import user
         from ElicipyDict import github_token
+        from ElicipyDict import RepositoryData
 
-        saveDataFromGithub(Repository, user, github_token)
-
-    # get current path
-    path = os.getcwd()
-    # change current path to elicitation folder
-    path = path + '/' + Repository
-    print('Path', path)
-
-    os.chdir(path)
+        saveDataFromGithub(RepositoryData, user, github_token)
 
     sys.path.insert(0, os.getcwd())
     input_dir = 'DATA'
@@ -1477,12 +1526,13 @@ def main():
         SQ_LongQuestion, TQ_LongQuestion, SQ_question, TQ_question, idx_list, \
         global_scale, global_log, label_indexes, parents, global_idxMin, \
         global_idxMax, global_sum50 = \
-        read_questionnaire(input_dir, csv_file)
+        read_questionnaire(input_dir, csv_file, target)
 
     # Read the asnwers of all the experts
     group = 0
     n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
-        input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ)
+        input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ,
+        target, output_dir, elicitation_name)
 
     minval_all = np.zeros(n_SQ + n_TQ)
     minval_all[0:n_SQ] = np.amin(SQ_array[:, 0, :], axis=0)
@@ -1494,28 +1544,40 @@ def main():
 
     global_units = SQ_units + TQ_units
 
+    global_minVal = SQ_minVals + TQ_minVals
+    global_maxVal = SQ_maxVals + TQ_maxVals
+    global_units = SQ_units + TQ_units
+    global_longQuestion = SQ_LongQuestion + TQ_LongQuestion
+    global_shortQuestion = SQ_question + TQ_question
+
     print('')
     print('Answer ranges')
+
+    print(df_indexes_SQ, df_indexes_TQ)
 
     for i in range(n_SQ + n_TQ):
 
         if global_log[i]:
-         
+
             deltalogval_all = np.log10(maxval_all[i]) - np.log10(minval_all[i])
-            minval_all[i] = 10**( np.log10(minval_all[i]) - 0.1*deltalogval_all )
-            maxval_all[i] = 10**( np.log10(maxval_all[i]) + 0.1*deltalogval_all )
-         
+
+            minval_all[i] = 10**(np.log10(minval_all[i]) - 0.1*deltalogval_all)
+            maxval_all[i] = 10**(np.log10(maxval_all[i]) + 0.1*deltalogval_all)
+
         else:
-         
+
             deltaval_all = maxval_all[i] - minval_all[i]
             minval_all[i] = minval_all[i] - 0.1 * deltaval_all
             maxval_all[i] = maxval_all[i] + 0.1 * deltaval_all
-            
+
             if global_units[i] == "%":
-            
-                minval_all[i] = np.maximum( minval_all[i] , 0 )
-                maxval_all[i] = np.minimum( maxval_all[i] , 100 )
-            
+
+                minval_all[i] = np.maximum(minval_all[i], 0)
+                maxval_all[i] = np.minimum(maxval_all[i], 100)
+
+        minval_all[i] = np.maximum(minval_all[i], global_minVal[i])
+        maxval_all[i] = np.minimum(maxval_all[i], global_maxVal[i])
+
         print(i, minval_all[i], maxval_all[i])
 
     print('')
@@ -1534,27 +1596,17 @@ def main():
 
         # Read the asnwers of the experts
         n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
-            input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ)
+            input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ,
+            target, output_dir, elicitation_name)
 
-        if target:
+        if not target:
 
-            nTot = TQ_array.shape[2] + SQ_array.shape[2]
-
-        else:
-
-            nTot = SQ_array.shape[2]
             # if we do not read the target questions, set empty array
             n_TQ = 0
             TQ_array = np.zeros((n_experts, n_pctl, n_TQ))
 
         realization = np.zeros(TQ_array.shape[2] + SQ_array.shape[2])
         realization[0:SQ_array.shape[2]] = SQ_realization
-
-        global_minVal = SQ_minVals + TQ_minVals
-        global_maxVal = SQ_maxVals + TQ_maxVals
-        global_units = SQ_units + TQ_units
-        global_longQuestion = SQ_LongQuestion + TQ_LongQuestion
-        global_shortQuestion = SQ_question + TQ_question
 
         print("")
         print('Realization')
@@ -1574,14 +1626,16 @@ def main():
 
                 W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
                     input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
-                    TQ_array, realization, global_scale, global_log, alpha)
+                    TQ_array, realization, global_scale, global_log, alpha,
+                    overshoot, cal_power, ERF_flag, Cooke_flag)
 
             else:
 
                 # set alpha to zero
                 W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
                     input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
-                    TQ_array, realization, global_scale, global_log, 0.0)
+                    TQ_array, realization, global_scale, global_log, 0.0,
+                    overshoot, cal_power, ERF_flag, Cooke_flag)
 
             # ----------------------------------------- #
             # ------ Create samples and bar plots ----- #
@@ -1595,7 +1649,11 @@ def main():
                                            global_minVal, global_maxVal,
                                            global_units, TQ_units,
                                            label_indexes, minval_all,
-                                           maxval_all, postprocessing)
+                                           maxval_all, postprocessing,
+                                           analysis, ERF_flag, Cooke_flag,
+                                           EW_flag, overshoot, hist_type,
+                                           output_dir, elicitation_name,
+                                           n_bins)
 
             if len(group_list) > 1:
 
@@ -1702,7 +1760,8 @@ def main():
 
             create_figure_trend(count, trend_group, n_SQ, q_EW, q_Cooke, q_erf,
                                 global_units, Cooke_flag, ERF_flag, EW_flag,
-                                global_log, TQ_minVals, TQ_maxVals, output_dir)
+                                global_log, TQ_minVals, TQ_maxVals, output_dir,
+                                elicitation_name)
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
@@ -1747,10 +1806,10 @@ def main():
     subtitle_para = slide.shapes.placeholders[1].text_frame.paragraphs[0]
     subtitle_para.font.name = "Helvetica"
 
-    img = slide.shapes.add_picture('../logo.png',
-                                   left + Inches(11.3),
-                                   top + Inches(5.4),
-                                   width=Inches(2.4))
+    logofile = current_path+'/logo.png'
+
+    slide.shapes.add_picture(logofile, left + Inches(11.3), top + Inches(5.4),
+                             width=Inches(2.4))
 
     title_slide_layout = prs.slide_layouts[5]
 
@@ -1771,7 +1830,7 @@ def main():
         title_para.font.name = "Helvetica"
         title_para.font.size = Pt(54)
         add_date(slide)
-        add_small_logo(slide, left, top)
+        add_small_logo(slide, left, top, logofile)
 
         n_tables = int(np.ceil(len(W_gt0) / max_len_table))
 
@@ -1783,7 +1842,7 @@ def main():
             add_title(slide, text_title)
 
             # ---add table weights to slide---
-            x, y, cx, cy = Inches(2), Inches(1.7), Inches(8), Inches(4)
+            x, y, cx = Inches(2), Inches(1.7), Inches(8)
 
             fisrt_j = i_table * max_len_table
             last_j = np.minimum((i_table + 1) * max_len_table, len(W_gt0))
@@ -1851,7 +1910,7 @@ def main():
                 add_text_box(slide, Inches(12), Inches(3), text_box, 18)
 
             add_date(slide)
-            add_small_logo(slide, left, top)
+            add_small_logo(slide, left, top, logofile)
 
     # ------------- Answers slides ------------#
 
@@ -1868,7 +1927,7 @@ def main():
     title_para.font.name = "Helvetica"
     title_para.font.size = Pt(54)
     add_date(slide)
-    add_small_logo(slide, left, top)
+    add_small_logo(slide, left, top, logofile)
 
     for h in np.arange(n_SQ + n_TQ):
 
@@ -1887,7 +1946,7 @@ def main():
             title_para.font.name = "Helvetica"
             title_para.font.size = Pt(54)
             add_date(slide)
-            add_small_logo(slide, left, top)
+            add_small_logo(slide, left, top, logofile)
 
         text_box = global_longQuestion[h]
 
@@ -1902,7 +1961,7 @@ def main():
 
             else:
 
-                fontsize = 18.0*np.sqrt(250.0/len(text_box))                            
+                fontsize = 18.0*np.sqrt(250.0/len(text_box))
 
         else:
 
@@ -1915,15 +1974,13 @@ def main():
 
             else:
 
-                fontsize = 18.0*np.sqrt(500.0/len(text_box))                            
+                fontsize = 18.0*np.sqrt(500.0/len(text_box))
 
         for k in np.arange(n_panels):
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            
             add_text_box(slide, left, top, text_box, fontsize)
-            
 
             figname = output_dir + '/' + elicitation_name + \
                 '_'+string+'_' + str(j + 1).zfill(2) + \
@@ -1948,7 +2005,7 @@ def main():
                     add_text_box(slide, left, top+Inches(3.39), longQ_NB, 15)
 
             add_date(slide)
-            add_small_logo(slide, left, top)
+            add_small_logo(slide, left, top, logofile)
 
             text_title = global_shortQuestion[h]
             add_title(slide, text_title)
@@ -1970,7 +2027,7 @@ def main():
         title_para.font.name = "Helvetica"
         title_para.font.size = Pt(54)
         add_date(slide)
-        add_small_logo(slide, left, top)
+        add_small_logo(slide, left, top, logofile)
 
         n_tables = int(np.ceil(n_TQ / max_len_tableB))
 
@@ -1992,7 +2049,7 @@ def main():
                 n_columns += 3
 
             # ---add table to slide---
-            x, y, cx, cy = Inches(1), Inches(2), Inches(14), Inches(4)
+            x, y, cx = Inches(1), Inches(2), Inches(14)
             shape = slide.shapes.add_table(last_j - fisrt_j + 1, n_columns, x,
                                            y, cx,
                                            MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
@@ -2075,7 +2132,7 @@ def main():
                         run.font.size = Pt(14)
 
             add_date(slide)
-            add_small_logo(slide, left, top)
+            add_small_logo(slide, left, top, logofile)
 
             text_title = "Percentiles of target questions"
             add_title(slide, text_title)
@@ -2097,7 +2154,7 @@ def main():
         title_para.font.name = "Helvetica"
         title_para.font.size = Pt(54)
         add_date(slide)
-        add_small_logo(slide, left, top)
+        add_small_logo(slide, left, top, logofile)
 
         for count, trend_group in enumerate(trend_groups):
 
@@ -2118,12 +2175,12 @@ def main():
 
             else:
 
-                fontsize = 20.0*np.sqrt(500.0/len(text_box))                            
+                fontsize = 20.0*np.sqrt(500.0/len(text_box))
 
             add_text_box(slide, left, top, text_box, fontsize)
 
             add_date(slide)
-            add_small_logo(slide, left, top)
+            add_small_logo(slide, left, top, logofile)
             add_figure(slide, figname, left - Inches(0.8), top)
 
             text_title = 'Target questions Group ' + str(count+1)
@@ -2150,7 +2207,7 @@ def main():
                 title_para.font.name = "Helvetica"
                 title_para.font.size = Pt(54)
                 add_date(slide)
-                add_small_logo(slide, left, top)
+                add_small_logo(slide, left, top, logofile)
 
             if (j >= n_SQ):
 
@@ -2167,12 +2224,12 @@ def main():
 
                 else:
 
-                    fontsize = 18.0*np.sqrt(400.0/len(text_box))                            
+                    fontsize = 18.0*np.sqrt(400.0/len(text_box))
 
                 add_text_box(slide, left, top, text_box, fontsize)
 
                 add_date(slide)
-                add_small_logo(slide, left, top)
+                add_small_logo(slide, left, top, logofile)
                 add_figure(slide, figname, left - Inches(0.8), top)
 
                 text_title = TQ_question[j - n_SQ]
@@ -2189,7 +2246,7 @@ def main():
                 if ERF_flag > 0:
 
                     n_rows += 1
-                x, y, cx, cy = Inches(1), Inches(6.5), Inches(4.0), Inches(3)
+                x, y, cx = Inches(1), Inches(6.5), Inches(4.0)
                 shape = slide.shapes.add_table(n_rows, 4, x, y, cx,
                                                MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
                 table = shape.table
@@ -2248,7 +2305,6 @@ def main():
                         else:
                             cell.text = '%.2E' % q_EW[j, li]
 
-
                     j_row += 1
 
                 for cell in iter_cells(table):
@@ -2277,7 +2333,7 @@ def main():
                 title_para.font.name = "Helvetica"
                 title_para.font.size = Pt(54)
                 add_date(slide)
-                add_small_logo(slide, left, top)
+                add_small_logo(slide, left, top, logofile)
 
             if (j >= n_SQ):
 
@@ -2288,7 +2344,7 @@ def main():
                     figname = output_dir + '/' + elicitation_name + \
                         '_PDF_group' + str(group) + '_' + \
                         str(j - n_SQ + 1).zfill(2) + '.png'
-                                                
+
                     if group == 0:
 
                         width = Inches(6.0)
@@ -2310,12 +2366,12 @@ def main():
 
                 else:
 
-                    fontsize = 18.0*np.sqrt(200.0/len(text_box))                            
+                    fontsize = 18.0*np.sqrt(200.0/len(text_box))
 
                 add_text_box(slide, left, top, text_box, fontsize)
 
                 add_date(slide)
-                add_small_logo(slide, left, top)
+                add_small_logo(slide, left, top, logofile)
 
                 text_title = TQ_question[j - n_SQ]
                 add_title(slide, text_title)
@@ -2330,7 +2386,7 @@ def main():
 
                     n_rows += 3
 
-                x, y, cx, cy = Inches(1), Inches(5.5), Inches(4.0), Inches(3)
+                x, y, cx = Inches(1), Inches(5.5), Inches(4.0)
                 shape = slide.shapes.add_table(n_rows, 4, x, y, cx,
                                                MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
 
@@ -2428,4 +2484,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main(sys.argv[1:])

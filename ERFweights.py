@@ -18,7 +18,6 @@ def ERFweights(true_seed, SQ_array):
     """
 
     import numpy as np
-    import itertools
 
     Ne = SQ_array.shape[0]
     Nq = SQ_array.shape[2]
@@ -231,8 +230,6 @@ def rtrian(a, b, c):
     This function is based on the R scripts
     written by A.Bevilacqua
     """
-
-    import numpy as np
 
     if (a == c):
 

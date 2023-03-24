@@ -1,11 +1,9 @@
 import pandas as pd
-import numpy as np
 import os
 import shutil as st
-from ElicipyDict import *
 
 
-def replace_strings(working_dir, df , header , i_row):
+def replace_strings(working_dir, df, header, i_row):
 
     main_dir = os.getcwd()
     os.chdir(working_dir)
@@ -43,15 +41,15 @@ def replace_strings(working_dir, df , header , i_row):
 
     os.chdir(main_dir)
 
-##########################################
 
 def main():
+
+    from ElicipyDict import output_dir
+    from Elicipydict import elicitation_name
 
     csv_file = output_dir + '/' + elicitation_name + '_samples.csv'
 
     df = pd.read_csv(csv_file)
-
-    templatedir = 'templatedir'
 
     print(df)
 
@@ -64,11 +62,11 @@ def main():
 
         working_dir = "ensemble." + "{:05d}".format(i_row)
         working_dir = os.path.join(os.getcwd(), working_dir)
-    
+
         st.copytree('templatedir', working_dir, symlinks=True)
-    
-        replace_strings(working_dir, df , header , i_row)
-        
+
+        replace_strings(working_dir, df, header, i_row)
+
 
 if __name__ == '__main__':
 

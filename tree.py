@@ -1,5 +1,4 @@
-import random
-from ete3 import Tree, TreeStyle, NodeStyle, faces, AttrFace, CircleFace
+from ete3 import Tree, TreeStyle, faces, AttrFace, CircleFace
 import textwrap
 import pandas as pd
 import numpy as np
@@ -33,7 +32,6 @@ def layout(node):
                                column=0,
                                position="branch-bottom")
 
-        
         # add erf percentiles
         erfFace = faces.TextFace('ERF [' + str(node.q_erf5) + ',' +
                                  str(node.q_erf50) + ',' + str(node.q_erf95) +
@@ -44,14 +42,13 @@ def layout(node):
                                node,
                                column=0,
                                position="branch-bottom")
-                               
 
         # add EW percentiles
         EWFace = faces.TextFace('EW [' + str(node.q_EW5) + ',' +
-                                 str(node.q_EW50) + ',' + str(node.q_EW95) +
-                                 ']',
-                                 fsize=8,
-                                 fgcolor="Green")
+                                str(node.q_EW50) + ',' + str(node.q_EW95) +
+                                ']',
+                                fsize=8,
+                                fgcolor="Green")
         faces.add_face_to_node(EWFace,
                                node,
                                column=0,
@@ -132,11 +129,9 @@ def build_tree(csv_file, first_node, first_node_str):
     cooke_50s = np.array((df['COOKE_50'].tolist()), dtype=int)
     cooke_95s = np.array((df['COOKE_95'].tolist()), dtype=int)
 
-    
     erf_5s = np.array((df['ERF_5'].tolist()), dtype=int)
     erf_50s = np.array((df['ERF_50'].tolist()), dtype=int)
     erf_95s = np.array((df['ERF_95'].tolist()), dtype=int)
-    
 
     EW_5s = np.array((df['EW_5'].tolist()), dtype=int)
     EW_50s = np.array((df['EW_50'].tolist()), dtype=int)
@@ -153,16 +148,13 @@ def build_tree(csv_file, first_node, first_node_str):
         node.add_features(q50=cooke_50s[idx])
         node.add_features(q95=cooke_95s[idx])
 
-        
         node.add_features(q_erf5=erf_5s[idx])
         node.add_features(q_erf50=erf_50s[idx])
         node.add_features(q_erf95=erf_95s[idx])
-        
-        
+
         node.add_features(q_EW5=EW_5s[idx])
         node.add_features(q_EW50=EW_50s[idx])
         node.add_features(q_EW95=EW_95s[idx])
-
 
     # Add features in all nodes
     for n in t.traverse():
@@ -247,7 +239,7 @@ if __name__ == "__main__":
                  w=3,
                  dpi=600,
                  tree_style=ts)
-
+    """"
     import matplotlib.pyplot as plt
 
     v1 = [2, 5, 3, 1, 4]
@@ -262,5 +254,5 @@ if __name__ == "__main__":
     plt.pie(v2, labels=labels2, labeldistance=0.75,
             radius=1-width, wedgeprops=wedge_properties)
     plt.show()
-
+    """
     # t.show(tree_style=ts)

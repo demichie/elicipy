@@ -1,12 +1,11 @@
 import pandas as pd
 import streamlit as st
 import os.path
+import sys
 
 from github import Github
-from github import InputGitTreeElement
 from datetime import datetime
 
-import cryptography
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives.kdf.scrypt import Scrypt
 
@@ -14,7 +13,7 @@ import secrets
 import base64
 import getpass
 
-from createWebformDict import *
+# from createWebformDict import *
 
 import smtplib
 from email import encoders
@@ -23,7 +22,6 @@ from email.mime.base import MIMEBase
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from email.header import Header
-from email.mime.application import MIMEApplication
 from io import StringIO
 
 
@@ -48,9 +46,6 @@ def send_email(sender, password, receiver, smtp_server, smtp_port,
     msg.add_header('Content-Disposition', 'attachment', filename=attach_name)
     message.attach(msg)
 
-    # att = MIMEApplication(attach_data, _subtype="txt")
-    # att.add_header('Content-Disposition', 'attachment', filename=attachment.name)
-    # message.attach(att)
     server = smtplib.SMTP(smtp_server, smtp_port)
     print('server', server)
     server.starttls()
@@ -64,7 +59,7 @@ def send_email(sender, password, receiver, smtp_server, smtp_port,
 
 
 def generate_salt(size=16):
-    """Generate the salt used for key derivation, 
+    """Generate the salt used for key derivation,
     `size` is the length of the salt to generate"""
     return secrets.token_bytes(size)
 
@@ -125,8 +120,7 @@ def convert_df(df):
     return df.to_csv().encode('utf-8')
 
 
-def pushToGithub(RepositoryData, df_new, input_dir, csv_file, quest_type,
-                 datarepo):
+def pushToGithub(RepositoryData, df_new, csv_file, quest_type, datarepo):
 
     if datarepo == 'github':
 
@@ -134,15 +128,26 @@ def pushToGithub(RepositoryData, df_new, input_dir, csv_file, quest_type,
 
     elif datarepo == 'local_github':
 
+        from createWebformDict import user
+        from createWebformDict import github_token
+
         g = Github(user, github_token)
 
-    repo = g.get_user().get_repo(RepositoryData)
+    print('RepositoryData', RepositoryData)
+
+    try:
+
+        repo = g.get_user().get_repo(RepositoryData)
+
+    except Exception:
+
+        print('Repository not found: ', RepositoryData)
 
     now = datetime.now()
     dt_string = now.strftime("%Y_%m_%d_%H_%M_%S")
 
     # Upload to github
-    git_prefix = input_dir + '/' + quest_type + '/'
+    git_prefix = './' + quest_type + '/'
 
     git_file = git_prefix + \
         csv_file.replace('.csv', '_')+dt_string+'_Output.csv'
@@ -150,11 +155,12 @@ def pushToGithub(RepositoryData, df_new, input_dir, csv_file, quest_type,
 
     try:
 
+        print('Committing file: ', git_file)
         repo.create_file(git_file, "committing files", df2, branch="main")
         st.write(git_file + ' CREATED')
         print(git_file + ' CREATED')
 
-    except:
+    except Exception:
 
         print('Problem committing file')
 
@@ -191,7 +197,7 @@ def saveAnswer(df_new, input_dir, csv_file, quest_type):
 
 
 def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
-               idxMaxs, sum50s,questions):
+               idxMaxs, sum50s, questions):
 
     print(ans[0:3])
 
@@ -206,7 +212,7 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
             idx = 3 + i * 3
 
             if (',' in ans[idx]):
-                st.markdown('**Error in question '+str(idxs[i])+'**')
+                st.markdown('**Error in question ' + str(idxs[i]) + '**')
                 st.write('Please remove comma')
                 st.write(qst[idx], ans[idx])
                 check_flag = False
@@ -214,7 +220,7 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
             try:
                 float(ans[idx])
             except ValueError:
-                st.markdown('**Error in question '+str(idxs[i])+'**')
+                st.markdown('**Error in question ' + str(idxs[i]) + '**')
                 st.write('Non numeric answer')
                 st.write(qst[idx], ans[idx])
                 check_flag = False
@@ -222,7 +228,7 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
             try:
                 float(ans[idx + 1])
             except ValueError:
-                st.markdown('**Error in question '+str(idxs[i])+'**')
+                st.markdown('**Error in question ' + str(idxs[i]) + '**')
                 st.write('Non numeric answer')
                 st.write(qst[idx + 1], ans[idx + 1])
                 check_flag = False
@@ -230,7 +236,7 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
             try:
                 float(ans[idx + 2])
             except ValueError:
-                st.markdown('**Error in question '+str(idxs[i])+'**')
+                st.markdown('**Error in question ' + str(idxs[i]) + '**')
                 st.write('Non numeric answer')
                 st.write(qst[idx + 2], ans[idx + 2])
                 check_flag = False
@@ -239,20 +245,20 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
 
                 if float(ans[idx]) >= float(ans[idx + 1]):
 
-                    st.markdown('**Error in question '+str(idxs[i])+'**')
+                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
                     st.write(qst[idx] + ' >= ' + qst[idx + 1])
                     check_flag = False
 
                 if float(ans[idx + 1]) >= float(ans[idx + 2]):
 
-                    st.markdown('**Error in question '+str(idxs[i])+'**')
+                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
                     st.write(qst[idx + 1] + ' >= ' + qst[idx + 2])
                     check_flag = False
 
                 if float(ans[idx]) <= minVals[i] or float(
                         ans[idx]) >= maxVals[i]:
 
-                    st.markdown('**Error in question '+str(idxs[i])+'**')
+                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
                     st.write(qst[idx] + ':' + str(ans[idx]))
                     st.write('The answer must be a value >' + str(minVals[i]) +
                              ' and  <' + str(maxVals[i]))
@@ -261,9 +267,8 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
                 if float(ans[idx + 1]) <= minVals[i] or float(
                         ans[idx + 1]) >= maxVals[i]:
 
-                    st.markdown('**Error in question '+str(idxs[i])+'**')
-                    st.write(qst[idx + 1] + ':' +
-                             str(ans[idx + 1]))
+                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
+                    st.write(qst[idx + 1] + ':' + str(ans[idx + 1]))
                     st.write('The answer must be a value  >' +
                              str(minVals[i]) + ' and <' + str(maxVals[i]))
                     check_flag = False
@@ -271,9 +276,8 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
                 if float(ans[idx + 2]) <= minVals[i] or float(
                         ans[idx + 2]) >= maxVals[i]:
 
-                    st.markdown('**Error in question '+str(idxs[i])+'**')
-                    st.write(qst[idx + 2] + ':' +
-                             str(ans[idx + 2]))
+                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
+                    st.write(qst[idx + 2] + ':' + str(ans[idx + 2]))
                     st.write('The answer must be a value >' + str(minVals[i]) +
                              ' and <' + str(maxVals[i]))
                     check_flag = False
@@ -288,7 +292,8 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
 
                     if float(sum50s[i] != sum50check):
 
-                        st.markdown('**Error in question '+str(idxs[i])+'**')
+                        st.markdown('**Error in question ' + str(idxs[i]) +
+                                    '**')
                         st.write('Error in sum of 50%iles for questions from ',
                                  str(idxMins[i]), ' to ', str(idxMaxs[i]))
                         st.write('The sum should be ' + str(sum50s[i]))
@@ -309,6 +314,46 @@ def main():
 
     st.title("Elicitation form")
 
+    current_path = os.getcwd()
+
+    path = current_path + '/ELICITATIONS'
+    os.chdir(path)
+    print('Path: ', path)
+    sys.path.append(path)
+
+    elicitation_list = next(os.walk(path))
+
+    if len(elicitation_list[1]) == 1:
+
+        wrk_dir = elicitation_list[1][0]
+
+    else:
+
+        try:
+
+            from ElicitationCase import wrk_dir
+
+        except ImportError:
+
+            filename = path + '/ElicitationCase.py'
+            isExist = os.path.exists(filename)
+
+            if isExist:
+
+                print('Please add wrk_dir to ElicitationCase.py')
+
+            else:
+
+                print('Please create file ElicitationCase.py with wrk_dir')
+
+    path = current_path + '/ELICITATIONS/' + wrk_dir
+    print('Path: ', path)
+    sys.path.append(path)
+
+    os.chdir(current_path)
+
+    from createWebformDict import quest_type
+
     try:
 
         from createWebformDict import datarepo
@@ -319,24 +364,28 @@ def main():
 
     print('Data repository:', datarepo)
 
-    try:
-
-        from createWebformDict import Repository
-
-    except ImportError:
-
-        print('Please add Repository')
-
     if (datarepo == 'local') or (datarepo == 'local_github'):
 
-        input_dir = Repository + '/DATA'
-        
+        input_dir = path + '/DATA'
+
         isExist = os.path.exists(input_dir)
 
         if not isExist:
 
             print('Please create Repository folder')
-        
+
+    else:
+
+        try:
+
+            from createWebformDict import Repository
+
+        except ImportError:
+
+            print('Please add Repository')
+
+        input_dir = Repository + '/DATA'
+
     csv_file = 'questionnaire.csv'
 
     try:
@@ -411,7 +460,7 @@ def main():
                                    mime='application/octet-stream')
 
     # read the questionnaire to a pandas dataframe
-    df = pd.read_csv('./' + input_dir + '/' + csv_file, header=0, index_col=0)
+    df = pd.read_csv(input_dir + '/' + csv_file, header=0, index_col=0)
 
     if quest_type == 'seed':
 
@@ -482,22 +531,17 @@ def main():
 
         from createWebformDict import group_list
         print('group_list read', group_list)
-        
-        group = st.multiselect('Select your group',group_list,[])
-        indices = [str(i+1) for i, w in enumerate(group_list) if w in group] 
+
+        group = st.multiselect('Select your group', group_list, [])
+        indices = [str(i + 1) for i, w in enumerate(group_list) if w in group]
         group = ';'.join(indices)
-        
-        print('Group',group,indices)
-        
-                
+
+        print('Group', group, indices)
+
     except ImportError:
 
         print('ImportError group_list')
         group = '0'
-
-
-
-    output_file = csv_file.replace('.csv', '_NEW.csv')
 
     pctls = [5, 50, 95]
 
@@ -514,8 +558,6 @@ def main():
     qst.append("Email address")
     ans.append(form2.text_input(qst[-1]))
 
-    
-
     idxs = []
     units = []
     minVals = []
@@ -524,20 +566,20 @@ def main():
     idxMins = []
     idxMaxs = []
     sum50s = []
-    
+
     questions = []
 
     for i in df.itertuples():
-    
-        print(  [ i[j] for j in index_list ] ) 
 
-        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, question, idxMin, idxMax, sum50, parent, image = [
-            i[j] for j in index_list
-        ]
+        print([i[j] for j in index_list])
+
+        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization,\
+            question, idxMin, idxMax, sum50, parent, image =\
+            [i[j] for j in index_list]
 
         minVal = float(minVal)
         maxVal = float(maxVal)
-        
+
         if (question == quest_type):
 
             units.append(unit)
@@ -553,7 +595,7 @@ def main():
 
             minVals.append(minVal)
             maxVals.append(maxVal)
-            
+
             questions.append(questions)
 
             sum50 = float(sum50)
@@ -583,7 +625,7 @@ def main():
 
                 if idxMin < idxMax:
 
-                    longQ_NB = "**N.B.** *The sum of 50%iles for questions " + \
+                    longQ_NB = "**N.B.** *The sum of 50%iles for questions " +\
                         str(idxMin)+"-"+str(idxMax) + \
                         " have to sum to "+str(sum50)+unit+".*"
                     form2.markdown(longQ)
@@ -611,7 +653,18 @@ def main():
 
     form2.markdown("""___""")
 
-    agree_text = "By sending this form and clicking the option “I AGREE”, you hereby consent to the processing of your given personal data (first name, last name and email address) voluntarily provided. These data are used for the only purpose of associating the asnwers of the seed question to those of the target questions, and to communicate with the participant only for matters related to the expert elicitation. In accordance with the EU GDPR, your personal data will be stored on a privite Github repository (https://github.com/security) for as long as is necessary for the purposes for which the personal data are processed."
+    agree_text = 'By sending this form and clicking the option “I AGREE”, '\
+                 + 'you hereby consent to the processing of your given '\
+                 + 'personal data (first name, last name and email address) '\
+                 + 'voluntarily provided. These data are used for the only '\
+                 + 'purpose of associating the asnwers of the seed question '\
+                 + 'to those of the target questions, and to communicate '\
+                 + 'with the participant only for matters related to the '\
+                 + 'expert elicitation. In accordance with the EU GDPR, '\
+                 + 'your personal data will be stored on a privite Github '\
+                 + 'repository (https://github.com/security) for as long '\
+                 + 'as is necessary for the purposes for which the personal '\
+                 + 'data are processed.'
 
     agree = form2.checkbox('I AGREE')
 
@@ -619,15 +672,15 @@ def main():
 
     form2.markdown("""___""")
 
-    zip_iterator = zip(qst, ans)
-    data = dict(zip_iterator)
-    df_download = pd.DataFrame([ans], columns=qst)
-    csv = convert_df(df_download)
+    # zip_iterator = zip(qst, ans)
+    # data = dict(zip_iterator)
+    # df_download = pd.DataFrame([ans], columns=qst)
+    # csv = convert_df(df_download)
 
-    now = datetime.now()
-    dt_string = now.strftime("%Y_%m_%d_%H:%M:%S")
+    # now = datetime.now()
+    # dt_string = now.strftime("%Y_%m_%d_%H:%M:%S")
 
-    file_download = 'myans_' + dt_string + '.csv'
+    # file_download = 'myans_' + dt_string + '.csv'
 
     # dwnl = st.download_button(
     #    label="Download answers as CSV",
@@ -643,7 +696,7 @@ def main():
         print('checkin for problems in answers')
 
         check_flag = check_form(qst, idxs, ans, units, minVals, maxVals,
-                                idx_list, idxMins, idxMaxs, sum50s,questions)
+                                idx_list, idxMins, idxMaxs, sum50s, questions)
 
         print('check_flag', check_flag)
 
@@ -654,7 +707,7 @@ def main():
         if check_flag and agree:
 
             st.write('Thank you ' + ans[0] + ' ' + ans[1])
-            
+
             from createWebformDict import confirmation_email
 
             if confirmation_email:
@@ -674,24 +727,21 @@ def main():
                     from createWebformDict import SENDER_NAME
                     from createWebformDict import SMTP_SERVER_ADDRESS
                     from createWebformDict import PORT
-            
-            
+
             if confirmation_email:
+                st.write('Please check your email to see if you received a ' +
+                         'confirmation message.')
                 st.write(
-                    'Please check your email to see if you received a confirmation message.'
-                )
-                st.write(
-                    "If you haven't received it, please wait a few minutes and submit your answers again."
-                )
+                    "If you haven't received it, please wait a few minutes " +
+                    "and submit your answers again.")
 
                 email = ans[2]
-                message = 'Dear ' + ans[0] + ' ' + ans[
-                    1] + ',\nThank you for filling in the questionnaire.\n' + 'You can find your answers attached to the email.\nKind regards,\n' + SENDER_NAME
+                message = 'Dear ' + ans[0] + ' ' + ans[1] + \
+                          ',\nThank you for filling in the questionnaire.\n'\
+                          + 'You can find your answers attached to the ' + \
+                          'email.\n' + 'Kind regards,\n' + SENDER_NAME
                 subject = 'Elicitation confirmation'
-                
 
-            zip_iterator = zip(qst, ans)
-            data = dict(zip_iterator)
             df_new = pd.DataFrame([ans], columns=qst)
             df_new.insert(loc=3, column='Group(s)', value=group)
 
@@ -700,11 +750,13 @@ def main():
                 f = Fernet(key)
                 df_new = f.encrypt(df_new)
 
-            if datarepo == 'github':
+            if datarepo == 'github' or datarepo == 'local_github':
+
+                from createWebformDict import RepositoryData
 
                 print('Before pushing file to Gihub')
-                save_file = pushToGithub(RepositoryData, df_new, input_dir,
-                                         csv_file, quest_type, datarepo)
+                save_file = pushToGithub(RepositoryData, df_new, csv_file,
+                                         quest_type, datarepo)
                 print('After pushing file to Gihub')
 
             else:
@@ -713,24 +765,25 @@ def main():
                 save_file = saveAnswer(df_new, input_dir, csv_file, quest_type)
                 print('After saving file')
 
+                if confirmation_email:
 
+                    try:
 
-                try:
+                        send_email(sender=SENDER_ADDRESS,
+                                   password=SENDER_PASSWORD,
+                                   receiver=email,
+                                   smtp_server=SMTP_SERVER_ADDRESS,
+                                   smtp_port=PORT,
+                                   email_message=message, subject=subject,
+                                   attach_data=df_new.to_csv(sep=',',
+                                                             index=False),
+                                   attach_name=save_file)
 
-                    send_email(sender=SENDER_ADDRESS,
-                               password=SENDER_PASSWORD,
-                               receiver=email,
-                               smtp_server=SMTP_SERVER_ADDRESS,
-                               smtp_port=PORT,
-                               email_message=message,
-                               subject=subject,
-                               attach_data=df_new.to_csv(sep=',', index=False),
-                               attach_name=save_file)
+                    except Exception:
 
-                except:
-
-                    print("Problem sending confirmation email")
+                        print("Problem sending confirmation email")
 
 
 if __name__ == '__main__':
+
     main()

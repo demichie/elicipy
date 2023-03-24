@@ -139,7 +139,7 @@ def calscore(M, cal_power):
     else:
         if len(S) == 4:
             P = np.array([0.05, 0.45, 0.45, 0.05])
-        elif length(S) == 6:
+        elif len(S) == 6:
             P = np.array([0.05, 0.20, 0.25, 0.25, 0.20, 0.05])
 
         E1 = S * np.log(S / P)
@@ -160,7 +160,6 @@ def calculate_information(SQ_array, TQ_array, realization, k,
 
     import numpy as np
 
-    per = [0.05, 0.5, 0.95]
     p = [0.05, 0.45, 0.45, 0.05]
     N = SQ_array.shape[2]
     E = SQ_array.shape[0]
