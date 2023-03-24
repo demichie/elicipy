@@ -3,7 +3,7 @@ Repository = 'testWebform'
 # this can be 'seed' or 'target'
 quest_type = 'seed'
 
-group_list = ['Group A','Group B','Group C']
+group_list = ['Group A', 'Group B', 'Group C']
 
 # target_list = [2,3]
 # seed_list = [1,2]
@@ -35,6 +35,3 @@ confirmation_email = False
 # SENDER_NAME
 # SMTP_SERVER_ADDRESS
 # PORT
-
-
-
