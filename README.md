@@ -53,18 +53,18 @@ repository).
 
 ### STREAMLIT
 
-2. login with github account.
-2. Open the drop-down menu next to "New app".
-2. Select "From existing repo".
-2. Select the github repository for the webapp.
-2. Click on "Advanced settings".
-2. Select Python version 3.7.
-2. In the Secrets textbox write.
+1. login with github account.
+1. Open the drop-down menu next to "New app".
+1. Select "From existing repo".
+1. Select the github repository for the webapp.
+1. Click on "Advanced settings".
+1. Select Python version 3.7.
+1. In the Secrets textbox write.
 
    github_token = "insert_here_your_token"
 
-2. Click on "Save".
-2. Click on "Deploy".
+1. Click on "Save".
+1. Click on "Deploy".
 
 You can share this link for the form:
 
