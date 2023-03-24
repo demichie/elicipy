@@ -1,0 +1,36 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: Elicipy
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Mattia
+    family-names: de' Michieli Vitturi
+    name-particle: Mattia
+    email: mattia.demichielivitturi@ingv.it
+    affiliation: Istituto Nazionale di Geofisica e Vulcanologia
+    orcid: 'https://orcid.org/0000-0002-6750-9245'
+  - given-names: Andrea
+    family-names: Bevilacqua
+    email: andrea.bevilacqua@ingv.it
+    affiliation: Istituto Nazionale di Geofisica e Vulcanologia
+  - given-names: Alessandro
+    family-names: Tadini
+    email: alessandro.tadini@ingv.it
+    affiliation: Istituto Nazionale di Geofisica e Vulcanologia
+repository-code: 'https://github.com/demichie/elicipy'
+abstract: >-
+  Elicipy is an Expert elicitation Python tool, aimed at
+  both the collection of answers from the experts with a
+  webform and their analysis.
+keywords:
+  - expert elicitation
+  - Structured expert judgment
+  - Cooke’s classical model
+  - Python toolbox
+  - Elicipy
+license: GPL-2.0
