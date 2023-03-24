@@ -26,7 +26,7 @@ pctls = [5, 50, 95]
 
 confirmation_email = False
 
-# if confirmation email is True and datarepo is 'local' 
+# if confirmation email is True and datarepo is 'local'
 # fill the following fields, if 'github' add to streamlit
 # secrets
 

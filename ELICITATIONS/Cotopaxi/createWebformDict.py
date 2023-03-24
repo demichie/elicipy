@@ -9,12 +9,12 @@ Repository = 'testWebform'
 # this can be 'seed' or 'target'
 quest_type = 'target'
 
-group_list = ['SG1 (Clermont)','SG2 (Quito)','SG3 (Geol.)','SG4 (MathMod)','SG5 (Junior)','SG6 (Senior)']
+group_list = ['SG1 (Clermont)', 'SG2 (Quito)', 'SG3 (Geol.)', 'SG4 (MathMod)',
+              'SG5 (Junior)', 'SG6 (Senior)']
 
 # target_list = [2,3]
 # seed_list = [1,2]
 absolute_indexing = True
-
 
 # encrypted = False
 
@@ -27,7 +27,7 @@ pctls = [5, 50, 95]
 
 confirmation_email = False
 
-# if confirmation email is True and datarepo is 'local' 
+# if confirmation email is True and datarepo is 'local'
 # fill the following fields, if 'github' add to streamlit
 # secrets
 
@@ -36,6 +36,3 @@ confirmation_email = False
 # SENDER_NAME
 # SMTP_SERVER_ADDRESS
 # PORT
-
-
-
