@@ -1,17 +1,17 @@
 # Elicipy
 
-Elicipy is an Expert elicitation Python tool, aimed at both the collection of 
+Elicipy is an Expert elicitation Python tool, aimed at both the collection of
 anwers from the epxerts with a webform and their analysis.
 
-The answers (for both seed and target questions) are collected with a 
+The answers (for both seed and target questions) are collected with a
 Streamlit webapp, that can run locally or from streamlit.io (read below).
 
-Once the seed and target questions have been answered by the expert, you can 
+Once the seed and target questions have been answered by the expert, you can
 run the Python analysis script:
 
 > python elicipy.py
 
-The script will create a new folder with .csv files and a .pptx presentation 
+The script will create a new folder with .csv files and a .pptx presentation
 of the results of the elicitation.
 
 Authors:
@@ -32,7 +32,7 @@ On Github, you need two repositories, one hosting the webapp streamlit_app.py
 (fork this repository) and the other to collect the answers (create a new
 repository).
 
-GITHUB STREAMLIT REPOSITORY
+### GITHUB STREAMLIT REPOSITORY
 
 1. Fork this repository
 2. Edit in the input file createWebformDict.py the fields datarepo (with the
@@ -51,7 +51,7 @@ GITHUB STREAMLIT REPOSITORY
 9. Give a name and copy your token
 10. Select scope "Repo"
 
-STREAMLIT
+### STREAMLIT
 
 1. login with github account
 2. Open the drop-down menu next to "New app"
