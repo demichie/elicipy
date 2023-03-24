@@ -38,33 +38,33 @@ repository).
 1. Edit in the input file createWebformDict.py the fields datarepo (with the
    forked repository) and the RepositoryData (with the new github repository
    for the answers).
-3. Set in the input file createWebformDict.py the quest_type variable to
+1. Set in the input file createWebformDict.py the quest_type variable to
    "seed" of "target".
-4. Edit the csv file with your questions in the DATA folder of the github
+1. Edit the csv file with your questions in the DATA folder of the github
    repository for the webapp (see the questionnaire.csv file for an example of
    the format).
-5. Click on the top-right (on your github user icon), and from the menu click
+1. Click on the top-right (on your github user icon), and from the menu click
    on "Settings".
-6. At the bottom of the left panel, click on "Developer settings".
-7. On the left, click on "Personal access tokens".
-8. Click on "Generate new token".
-9. Give a name and copy your token.
-10. Select scope "Repo".
+1. At the bottom of the left panel, click on "Developer settings".
+1. On the left, click on "Personal access tokens".
+1. Click on "Generate new token".
+1. Give a name and copy your token.
+1. Select scope "Repo".
 
 ### STREAMLIT
 
-1. login with github account.
+2. login with github account.
 2. Open the drop-down menu next to "New app".
-3. Select "From existing repo".
-4. Select the github repository for the webapp.
-5. Click on "Advanced settings".
-6. Select Python version 3.7.
-7. In the Secrets textbox write.
+2. Select "From existing repo".
+2. Select the github repository for the webapp.
+2. Click on "Advanced settings".
+2. Select Python version 3.7.
+2. In the Secrets textbox write.
 
    github_token = "insert_here_your_token"
 
-8. Click on "Save".
-9. Click on "Deploy".
+2. Click on "Save".
+2. Click on "Deploy".
 
 You can share this link for the form:
 
