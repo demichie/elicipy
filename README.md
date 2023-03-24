@@ -1,22 +1,26 @@
 # Elicipy
 
-Elicipy is an Expert elicitation Python tool, aimed at both the collection of anwers from the epxerts with a webform and their analysis.
+Elicipy is an Expert elicitation Python tool, aimed at both the collection of anwers from the
+epxerts with a webform and their analysis.
 
-The answers (for both seed and target questions) are collected with a Streamlit webapp, that can run locally or from streamlit.io (read below).
+The answers (for both seed and target questions) are collected with a Streamlit webapp, that
+can run locally or from streamlit.io (read below).
 
-Once the seed and target questions have been answered by the expert, you can run the Python analysis script:
+Once the seed and target questions have been answered by the expert, you can run the Python
+analysis script:
 
 > python elicipy.py
 
-The script will create a new folder with .csv files and a .pptx presentation of the results of the elicitation.
+The script will create a new folder with .csv files and a .pptx presentation of the results
+of the elicitation.
 
 Authors:
 - Mattia de' Michieli Vitturi
 - Andrea Bevilacqua
 - Alessandro Tadini
 
-Some of the functions are based on the scripts of the Matlab package Anduril (authors:  Georgios Leontaris and Oswaldo Morales-Napoles).
-
+Some of the functions are based on the scripts of the Matlab package Anduril 
+(authors:  Georgios Leontaris and Oswaldo Morales-Napoles).
 
 ## Webform
 
@@ -24,7 +28,8 @@ The webform can run locally or at streamlit.io.
 
 Here there are steps to install and run the webapp from streamlit.io.
 
-On Github, you need two repositories, one hosting the webapp streamlit_app.py (fork this repository) and the other to collect the answers (create a new repository).
+On Github, you need two repositories, one hosting the webapp streamlit_app.py 
+(fork this repository) and the other to collect the answers (create a new repository).
 
 GITHUB STREAMLIT REPOSITORY
 
@@ -39,7 +44,6 @@ GITHUB STREAMLIT REPOSITORY
 9) Give a name and copy your token
 10) Select scope "Repo"
 
-
 STREAMLIT
 
 1) login with github account
@@ -49,12 +53,11 @@ STREAMLIT
 5) Click on "Advanced settings"
 6) Select Python version 3.7
 7) In the Secrets textbox write
-   
+
    github_token = "insert_here_your_token"
 
 8) Click on "Save"
 9) Click on "Deploy"
-
 
 You can share this link for the form:
 
