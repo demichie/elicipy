@@ -35,7 +35,7 @@ repository).
 ### GITHUB STREAMLIT REPOSITORY
 
 1. Fork this repository.
-2. Edit in the input file createWebformDict.py the fields datarepo (with the
+1. Edit in the input file createWebformDict.py the fields datarepo (with the
    forked repository) and the RepositoryData (with the new github repository
    for the answers).
 3. Set in the input file createWebformDict.py the quest_type variable to
