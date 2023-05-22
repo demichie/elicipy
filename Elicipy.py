@@ -21,6 +21,7 @@ from createSamples import createSamples
 from COOKEweights import COOKEweights
 from ERFweights import ERFweights
 from merge_csv import merge_csv
+
 # from ElicipyDict import *
 
 max_len_table = 21
@@ -28,19 +29,42 @@ max_len_tableB = 18
 
 max_len_plot = 21
 
-plt.rcParams.update({'font.size': 8})
+plt.rcParams.update({"font.size": 8})
 
-rcParams['font.family'] = 'sans-serif'
-rcParams['font.sans-serif'] = ['Helvetica']
+rcParams["font.family"] = "sans-serif"
+rcParams["font.sans-serif"] = ["Helvetica"]
 
 matplotlib.use("TkAgg")
 
 
-def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
-                    colors, legends, legendsPDF, global_units, Cooke_flag,
-                    ERF_flag, EW_flag, global_log, global_minVal,
-                    global_maxVal, output_dir, elicitation_name, del_rows,
-                    TQ_units, label_indexes, minval_all, maxval_all, n_bins):
+def create_fig_hist(
+    group,
+    j,
+    n_sample,
+    n_SQ,
+    hist_type,
+    C,
+    C_erf,
+    C_EW,
+    colors,
+    legends,
+    legendsPDF,
+    global_units,
+    Cooke_flag,
+    ERF_flag,
+    EW_flag,
+    global_log,
+    global_minVal,
+    global_maxVal,
+    output_dir,
+    elicitation_name,
+    del_rows,
+    TQ_units,
+    label_indexes,
+    minval_all,
+    maxval_all,
+    n_bins,
+):
     """Create figure with histrogram and fit and small figure
        with PDFs only
 
@@ -112,35 +136,53 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
     C_stack = np.delete(C_stack, del_rows, 0)
     wg = np.ones_like(C_stack.T) / n_sample
 
-    if global_units[j] == "%":
+    if global_units[j] == "%" and global_log[j] == 0:
 
         xmin = 0.0
-        xmax = 100.0
 
     else:
 
         xmin = minval_all[j]
-        xmax = maxval_all[j]
 
-    if (global_log[j] == 1):
+    if global_units[j] == "%":
 
-        bins = np.geomspace(minval_all[j], maxval_all[j], n_bins+1)
+        xmax = 100.0
 
     else:
 
-        bins = np.linspace(minval_all[j], maxval_all[j], n_bins+1)
+        xmax = maxval_all[j]
 
-    if hist_type == 'step':
+    if global_log[j] == 1:
 
-        (n, bins, patches) = axs_h.hist(C_stack.T, bins=bins, weights=wg,
-                                        histtype='step', fill=False,
-                                        rwidth=0.95, color=colors)
+        bins = np.geomspace(minval_all[j], maxval_all[j], n_bins + 1)
 
-    elif hist_type == 'bar':
+    else:
 
-        (n, bins, patches) = axs_h.hist(C_stack.T, bins=bins, weights=wg,
-                                        histtype='bar', rwidth=0.50, ec="k",
-                                        color=colors)
+        bins = np.linspace(minval_all[j], maxval_all[j], n_bins + 1)
+
+    if hist_type == "step":
+
+        (n, bins, patches) = axs_h.hist(
+            C_stack.T,
+            bins=bins,
+            weights=wg,
+            histtype="step",
+            fill=False,
+            rwidth=0.95,
+            color=colors,
+        )
+
+    elif hist_type == "bar":
+
+        (n, bins, patches) = axs_h.hist(
+            C_stack.T,
+            bins=bins,
+            weights=wg,
+            histtype="bar",
+            rwidth=0.50,
+            ec="k",
+            color=colors,
+        )
 
     axs_h.set_xlabel(TQ_units[j - n_SQ])
     plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
@@ -149,7 +191,7 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
     axs_h2 = axs_h.twinx()
 
-    if (global_log[j] == 1):
+    if global_log[j] == 1:
 
         pdf_min = np.log10(minval_all[j])
         pdf_max = np.log10(maxval_all[j])
@@ -164,6 +206,9 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
 
         pdf_min = global_minVal[j]
         pdf_max = global_maxVal[j]
+        if pdf_max == float("inf"):
+            pdf_max = maxval_all[j]
+
         pdf_C = C
         pdf_C_erf = C_erf
         pdf_C_EW = C_EW
@@ -171,52 +216,54 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
         pdf_scale = 1.0
         lnspc = pdf_spc
 
-    if (Cooke_flag > 0):
+    if Cooke_flag > 0:
+
+        print("j", j)
+        print("pdf_min,pdf_max", pdf_min, pdf_max)
 
         gkde = stats.gaussian_kde(pdf_C)
         gkde_norm = gkde.integrate_box_1d(pdf_min, pdf_max)
         kdepdf = gkde.evaluate(pdf_spc) / gkde_norm * pdf_scale
-        axs_h2.plot(lnspc, kdepdf, 'r--')
+        axs_h2.plot(lnspc, kdepdf, "r--")
 
-    if (ERF_flag > 0):
+    if ERF_flag > 0:
         gkde_erf = stats.gaussian_kde(pdf_C_erf)
         gkde_erf_norm = gkde_erf.integrate_box_1d(pdf_min, pdf_max)
         kdepdf_erf = gkde_erf.evaluate(pdf_spc) / gkde_erf_norm * pdf_scale
-        axs_h2.plot(lnspc, kdepdf_erf, '--', color='tab:purple')
+        axs_h2.plot(lnspc, kdepdf_erf, "--", color="tab:purple")
 
-    if (EW_flag > 0):
+    if EW_flag > 0:
         gkde_EW = stats.gaussian_kde(pdf_C_EW)
         gkde_EW_norm = gkde_EW.integrate_box_1d(pdf_min, pdf_max)
         kdepdf_EW = gkde_EW.evaluate(pdf_spc) / gkde_EW_norm * pdf_scale
-        axs_h2.plot(lnspc, kdepdf_EW, 'g--')
+        axs_h2.plot(lnspc, kdepdf_EW, "g--")
 
     axs_h.set_xlim(xmin, xmax)
     axs_h2.set_xlim(xmin, xmax)
-    axs_h2.set_ylabel('PDF', color='b')
+    axs_h2.set_ylabel("PDF", color="b")
     axs_h2.set_ylim(bottom=0)
 
     [ymin, ymax] = axs_h2.get_ylim()
     for xbin in bins:
 
-        axs_h2.plot([xbin, xbin], [ymin, ymax], 'k-', linewidth=0.2,
-                    alpha=0.1)
+        axs_h2.plot([xbin, xbin], [ymin, ymax], "k-", linewidth=0.2, alpha=0.1)
 
-    if (global_log[j] == 1):
+    if global_log[j] == 1:
 
-        axs_h.set_xscale('log')
-        axs_h2.set_xscale('log')
+        axs_h.set_xscale("log")
+        axs_h2.set_xscale("log")
 
     plt.legend(legends)
-    plt.title('Target Question ' + str(label_indexes[j]))
+    plt.title("Target Question " + label_indexes[j])
 
-    figname = output_dir + '/' + elicitation_name + \
-        '_hist_' + str(j - n_SQ + 1).zfill(2) + '.pdf'
+    figname = (output_dir + "/" + elicitation_name + "_hist_" +
+               str(j - n_SQ + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     images = convert_from_path(figname)
-    figname = output_dir + '/' + elicitation_name + \
-        '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
-    images[0].save(figname, 'PNG')
+    figname = (output_dir + "/" + elicitation_name + "_hist_" +
+               str(j - n_SQ + 1).zfill(2) + ".png")
+    images[0].save(figname, "PNG")
 
     plt.close()
 
@@ -224,57 +271,70 @@ def create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf, C_EW,
     fig2 = plt.figure()
     axs_h2 = fig2.add_subplot(111)
 
-    if (Cooke_flag > 0):
+    if Cooke_flag > 0:
 
-        axs_h2.plot(lnspc, kdepdf, 'r--', linewidth=2)
+        axs_h2.plot(lnspc, kdepdf, "r--", linewidth=2)
 
-    if (ERF_flag > 0):
+    if ERF_flag > 0:
 
-        axs_h2.plot(lnspc, kdepdf_erf, '--', color='tab:purple', linewidth=2)
+        axs_h2.plot(lnspc, kdepdf_erf, "--", color="tab:purple", linewidth=2)
 
-    if (EW_flag > 0):
+    if EW_flag > 0:
 
-        axs_h2.plot(lnspc, kdepdf_EW, 'g--', linewidth=2)
+        axs_h2.plot(lnspc, kdepdf_EW, "g--", linewidth=2)
 
     axs_h2.set_xlim(xmin, xmax)
 
-    if (global_log[j] == 1):
+    if global_log[j] == 1:
 
-        axs_h2.set_xscale('log')
+        axs_h2.set_xscale("log")
 
-    axs_h2.set_ylabel('PDF', color='b')
+    axs_h2.set_ylabel("PDF", color="b")
 
     axs_h2.set_ylim(bottom=0)
     plt.legend(legends, prop={"size": 18})
 
     if group == 0:
 
-        plt.title('Target Question ' + str(label_indexes[j]), fontsize=18)
+        plt.title("Target Question " + label_indexes[j], fontsize=18)
 
     else:
 
-        plt.title('Target Question ' + str(label_indexes[j]) + ' Group ' +
+        plt.title("Target Question " + label_indexes[j] + " Group " +
                   str(group),
                   fontsize=18)
 
-    figname = output_dir + '/' + elicitation_name + \
-        '_PDF_' + str(j - n_SQ + 1).zfill(2) + '.pdf'
+    figname = (output_dir + "/" + elicitation_name + "_PDF_" +
+               str(j - n_SQ + 1).zfill(2) + ".pdf")
     fig2.savefig(figname)
 
     images = convert_from_path(figname)
-    figname = output_dir + '/' + elicitation_name + \
-        '_PDF_group'+str(group) + '_' + str(j - n_SQ + 1).zfill(2) + '.png'
-    images[0].save(figname, 'PNG')
+    figname = (output_dir + "/" + elicitation_name + "_PDF_group" +
+               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".png")
+    images[0].save(figname, "PNG")
 
     plt.close()
 
     return
 
 
-def create_figure_trend(count, trend_group, n_SQ, q_EW, q_Cooke, q_erf,
-                        global_units, Cooke_flag, ERF_flag, EW_flag,
-                        global_log, TQ_minVals, TQ_maxVals, output_dir,
-                        elicitation_name):
+def create_figure_trend(
+    count,
+    trend_group,
+    n_SQ,
+    q_EW,
+    q_Cooke,
+    q_erf,
+    global_units,
+    Cooke_flag,
+    ERF_flag,
+    EW_flag,
+    global_log,
+    TQ_minVals,
+    TQ_maxVals,
+    output_dir,
+    elicitation_name,
+):
     """Create figure for trend group (subset of target qustions)
 
     Parameters
@@ -316,7 +376,7 @@ def create_figure_trend(count, trend_group, n_SQ, q_EW, q_Cooke, q_erf,
     fig = plt.figure()
     axs = fig.add_subplot(111)
 
-    x = np.arange(len(trend_group))+1
+    x = np.arange(len(trend_group)) + 1
 
     handles = []
 
@@ -324,52 +384,63 @@ def create_figure_trend(count, trend_group, n_SQ, q_EW, q_Cooke, q_erf,
 
     if EW_flag:
 
-        y = q_EW[trend_group+n_SQ-1, 1]
-        lower_error = q_EW[trend_group+n_SQ-1, 1] - q_EW[trend_group+n_SQ-1, 0]
-        upper_error = q_EW[trend_group+n_SQ-1, 2] - q_EW[trend_group+n_SQ-1, 1]
+        y = q_EW[trend_group + n_SQ - 1, 1]
+        lower_error = q_EW[trend_group + n_SQ - 1, 1] - \
+            q_EW[trend_group + n_SQ - 1, 0]
+        upper_error = q_EW[trend_group + n_SQ - 1, 2] - \
+            q_EW[trend_group + n_SQ - 1, 1]
         asymmetric_error = [lower_error, upper_error]
 
-        line1 = axs.errorbar(
-            x-0.1, y, yerr=asymmetric_error, fmt='g-o', label='EW')
-        axs.plot(x-0.1, y - lower_error, 'gx')
-        axs.plot(x-0.1, y + upper_error, 'gx')
+        line1 = axs.errorbar(x - 0.1,
+                             y,
+                             yerr=asymmetric_error,
+                             fmt="g-o",
+                             label="EW")
+        axs.plot(x - 0.1, y - lower_error, "gx")
+        axs.plot(x - 0.1, y + upper_error, "gx")
         handles.append(line1)
 
     if Cooke_flag > 0:
 
-        y = q_Cooke[trend_group+n_SQ-1, 1]
-        lower_error = q_Cooke[trend_group+n_SQ-1, 1] - \
-            q_Cooke[trend_group+n_SQ-1, 0]
-        upper_error = q_Cooke[trend_group+n_SQ-1, 2] - \
-            q_Cooke[trend_group+n_SQ-1, 1]
+        y = q_Cooke[trend_group + n_SQ - 1, 1]
+        lower_error = (q_Cooke[trend_group + n_SQ - 1, 1] -
+                       q_Cooke[trend_group + n_SQ - 1, 0])
+        upper_error = (q_Cooke[trend_group + n_SQ - 1, 2] -
+                       q_Cooke[trend_group + n_SQ - 1, 1])
         asymmetric_error = [lower_error, upper_error]
 
-        line2 = axs.errorbar(x, y, yerr=asymmetric_error,
-                             fmt='r-o', label='CM')
-        axs.plot(x, y - lower_error, 'rx')
-        axs.plot(x, y + upper_error, 'rx')
+        line2 = axs.errorbar(x,
+                             y,
+                             yerr=asymmetric_error,
+                             fmt="r-o",
+                             label="CM")
+        axs.plot(x, y - lower_error, "rx")
+        axs.plot(x, y + upper_error, "rx")
         handles.append(line2)
 
     if ERF_flag > 0:
 
-        y = q_erf[trend_group+n_SQ-1, 1]
-        lower_error = q_erf[trend_group+n_SQ-1, 1] - \
-            q_erf[trend_group+n_SQ-1, 0]
-        upper_error = q_erf[trend_group+n_SQ-1, 2] - \
-            q_erf[trend_group+n_SQ-1, 1]
+        y = q_erf[trend_group + n_SQ - 1, 1]
+        lower_error = (q_erf[trend_group + n_SQ - 1, 1] -
+                       q_erf[trend_group + n_SQ - 1, 0])
+        upper_error = (q_erf[trend_group + n_SQ - 1, 2] -
+                       q_erf[trend_group + n_SQ - 1, 1])
         asymmetric_error = [lower_error, upper_error]
 
-        line3 = axs.errorbar(
-            x+0.1, y, yerr=asymmetric_error, fmt='b-o', label='ERF')
-        axs.plot(x+0.1, y - lower_error, 'bx')
-        axs.plot(x+0.1, y + upper_error, 'bx')
+        line3 = axs.errorbar(x + 0.1,
+                             y,
+                             yerr=asymmetric_error,
+                             fmt="b-o",
+                             label="ERF")
+        axs.plot(x + 0.1, y - lower_error, "bx")
+        axs.plot(x + 0.1, y + upper_error, "bx")
         handles.append(line3)
 
     axs.set_xticks(x)
 
     xtick = []
     for i in x:
-        xtick.append('TQ' + str(trend_group[i-1]))
+        xtick.append("TQ" + str(trend_group[i - 1]))
 
     axs.set_xticklabels(xtick)
 
@@ -379,36 +450,54 @@ def create_figure_trend(count, trend_group, n_SQ, q_EW, q_Cooke, q_erf,
 
     # axs.grid(linewidth=0.4)
 
-    plt.title('Question Group ' + str(count+1))
+    plt.title("Question Group " + str(count + 1))
 
     axs.legend(handles=handles)
 
-    figname = output_dir + '/' + elicitation_name + '_trend_' + \
-        str(count + 1).zfill(2)+'.pdf'
+    figname = (output_dir + "/" + elicitation_name + "_trend_" +
+               str(count + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     images = convert_from_path(figname)
-    figname = output_dir + '/' + elicitation_name + '_trend_' + \
-        str(count + 1).zfill(2)+'.png'
-    images[0].save(figname, 'PNG')
+    figname = (output_dir + "/" + elicitation_name + "_trend_" +
+               str(count + 1).zfill(2) + ".png")
+    images[0].save(figname, "PNG")
     plt.close()
 
     return
 
 
-def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array,
-                  realization, analysis, Cooke_flag, ERF_flag, EW_flag,
-                  global_units, output_dir, q_Cooke, q_erf, q_EW,
-                  elicitation_name, global_log, label_indexes):
+def create_figure(
+    h,
+    k,
+    n_experts,
+    max_len_plot,
+    n_SQ,
+    SQ_array,
+    TQ_array,
+    realization,
+    analysis,
+    Cooke_flag,
+    ERF_flag,
+    EW_flag,
+    global_units,
+    output_dir,
+    q_Cooke,
+    q_erf,
+    q_EW,
+    elicitation_name,
+    global_log,
+    label_indexes,
+):
 
     idx0 = k * max_len_plot
     idx1 = min((k + 1) * max_len_plot, n_experts)
 
-    if (h >= n_SQ):
+    if h >= n_SQ:
 
         j = h - n_SQ
         Q_array = TQ_array[idx0:idx1, :, j]
-        string = 'Target'
+        string = "Target"
 
         xmin = np.amin(TQ_array[:, 0, j])
         xmax = np.amax(TQ_array[:, 2, j])
@@ -417,12 +506,14 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array,
 
         j = h
         Q_array = SQ_array[idx0:idx1, :, j]
-        string = 'Seed'
+        string = "Seed"
 
         xmin = np.amin(SQ_array[:, 0, j])
+        xmin = np.minimum(xmin, realization[h])
         xmax = np.amax(SQ_array[:, 2, j])
+        xmax = np.maximum(xmax, realization[h])
 
-    if (global_log[h] == 1):
+    if global_log[h] == 1:
 
         log_xmin = np.log(xmin)
         log_xmax = np.log(xmax)
@@ -451,18 +542,18 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array,
 
     fig = plt.figure()
     axs = fig.add_subplot(111)
-    axs.errorbar(x, y, xerr=x_error, fmt='bo')
-    axs.plot(x - x_errormin, y, 'bx')
-    axs.plot(x + x_errormax, y, 'bx')
+    axs.errorbar(x, y, xerr=x_error, fmt="bo")
+    axs.plot(x - x_errormin, y, "bx")
+    axs.plot(x + x_errormax, y, "bx")
 
-    if (realization[j] > 999):
-        txt = '%5.2e' % realization[h]
+    if realization[j] > 999:
+        txt = "%5.2e" % realization[h]
     else:
-        txt = '%6.2f' % realization[h]
+        txt = "%6.2f" % realization[h]
 
     ytick = []
     for i in y:
-        ytick.append('Exp.' + str(int(i + idx0)))
+        ytick.append("Exp." + str(int(i + idx0)))
 
     yerror = idx1 - idx0
     if analysis:
@@ -470,57 +561,106 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array,
         if Cooke_flag > 0:
 
             yerror = yerror + 1
-            axs.errorbar(q_Cooke[h, 1],
-                         yerror,
-                         xerr=[[q_Cooke[h, 1] - q_Cooke[h, 0]],
-                               [q_Cooke[h, 2] - q_Cooke[h, 1]]],
-                         fmt='ro')
-            axs.plot(q_Cooke[h, 0], yerror, 'rx')
-            axs.plot(q_Cooke[h, 2], yerror, 'rx')
+            axs.errorbar(
+                q_Cooke[h, 1],
+                yerror,
+                xerr=[[q_Cooke[h, 1] - q_Cooke[h, 0]],
+                      [q_Cooke[h, 2] - q_Cooke[h, 1]]],
+                fmt="ro",
+            )
+            axs.plot(q_Cooke[h, 0], yerror, "rx")
+            axs.plot(q_Cooke[h, 2], yerror, "rx")
 
-            ytick.append('DM-Cooke')
+            ytick.append("DM-Cooke")
+
+            if global_log[h] == 1:
+
+                txt_Cooke = "%.2E" % q_Cooke[h, 1]
+
+            elif q_Cooke[h, 2] < 0.01:
+                txt_Cooke = "%5.3e" % q_Cooke[h, 1]
+            elif q_Cooke[h, 2] > 999:
+                txt_Cooke = "%5.2e" % q_Cooke[h, 1]
+            else:
+                txt_Cooke = "%6.2f" % q_Cooke[h, 1]
+
+            if h >= n_SQ:
+                axs.annotate(txt_Cooke, (q_Cooke[h, 1] * 0.99, yerror + 0.15))
 
         if ERF_flag > 0:
 
             yerror = yerror + 1
-            axs.errorbar(q_erf[h, 1], [yerror],
-                         xerr=[[q_erf[h, 1] - q_erf[h, 0]],
-                               [q_erf[h, 2] - q_erf[h, 1]]],
-                         fmt='o',
-                         color='tab:purple')
-            axs.plot(q_erf[h, 0], yerror, 'x', color='tab:purple')
-            axs.plot(q_erf[h, 2], yerror, 'x', color='tab:purple')
+            axs.errorbar(
+                q_erf[h, 1],
+                [yerror],
+                xerr=[[q_erf[h, 1] - q_erf[h, 0]],
+                      [q_erf[h, 2] - q_erf[h, 1]]],
+                fmt="o",
+                color="tab:purple",
+            )
+            axs.plot(q_erf[h, 0], yerror, "x", color="tab:purple")
+            axs.plot(q_erf[h, 2], yerror, "x", color="tab:purple")
 
-            ytick.append('DM-ERF')
+            ytick.append("DM-ERF")
+
+            if global_log[h] == 1:
+
+                txt_erf = "%.2E" % q_erf[h, 1]
+
+            elif q_erf[h, 2] < 0.01:
+                txt_erf = "%5.3e" % q_erf[h, 1]
+            elif q_erf[h, 2] > 999:
+                txt_erf = "%5.2e" % q_erf[h, 1]
+            else:
+                txt_erf = "%6.2f" % q_erf[h, 1]
+
+            if h >= n_SQ:
+                axs.annotate(txt_erf, (q_erf[h, 1] * 0.99, yerror + 0.15))
 
         if EW_flag > 0:
 
             yerror = yerror + 1
-            axs.errorbar([q_EW[h, 1]], [yerror],
-                         xerr=[[q_EW[h, 1] - q_EW[h, 0]],
-                               [q_EW[h, 2] - q_EW[h, 1]]],
-                         fmt='go')
+            axs.errorbar(
+                [q_EW[h, 1]],
+                [yerror],
+                xerr=[[q_EW[h, 1] - q_EW[h, 0]], [q_EW[h, 2] - q_EW[h, 1]]],
+                fmt="go",
+            )
 
-            axs.plot(q_EW[h, 0], yerror, 'gx')
-            axs.plot(q_EW[h, 2], yerror, 'gx')
+            axs.plot(q_EW[h, 0], yerror, "gx")
+            axs.plot(q_EW[h, 2], yerror, "gx")
 
-            ytick.append('DM-Equal')
+            ytick.append("DM-Equal")
 
-        if (h < n_SQ):
+            if global_log[h] == 1:
+
+                txt_EW = "%.2E" % q_EW[h, 1]
+
+            elif q_EW[h, 2] < 0.01:
+                txt_EW = "%5.3e" % q_EW[h, 1]
+            elif q_EW[h, 2] > 999:
+                txt_EW = "%5.2e" % q_EW[h, 1]
+            else:
+                txt_EW = "%6.2f" % q_EW[h, 1]
+
+            if h >= n_SQ:
+                axs.annotate(txt_EW, (q_EW[h, 1] * 0.99, yerror + 0.15))
+
+        if h < n_SQ:
 
             yerror = yerror + 1
-            axs.plot(realization[h], yerror, 'kx')
-            axs.annotate(txt, (realization[h] * 1.02, yerror + 0.15))
+            axs.plot(realization[h], yerror, "kx")
+            axs.annotate(txt, (realization[h] * 0.99, yerror + 0.15))
 
-            ytick.append('Realization')
+            ytick.append("Realization")
 
     else:
 
-        if (h < n_SQ):
+        if h < n_SQ:
 
-            axs.plot(realization[h], idx1 - idx0 + 1, 'kx')
-            axs.annotate(txt, (realization[j] * 1.02, yerror + 0.15))
-            ytick.append('Realization')
+            axs.plot(realization[h], idx1 - idx0 + 1, "kx")
+            axs.annotate(txt, (realization[j] * 0.99, idx1 - idx0 + 1 + 0.15))
+            ytick.append("Realization")
 
     y = np.arange(len(ytick)) + 1
 
@@ -530,26 +670,24 @@ def create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array, TQ_array,
     axs.set_yticklabels(ytick_tuple)
     axs.set_xlabel(global_units[h])
 
-    if (global_log[h] == 1):
+    if global_log[h] == 1:
 
-        axs.set_xscale('log')
+        axs.set_xscale("log")
 
     axs.set_ylim(0.5, len(ytick) + 1.0)
     axs.set_xlim(xmin, xmax)
 
     axs.grid(linewidth=0.4)
 
-    plt.title(string + ' Question ' + str(label_indexes[h]))
-    figname = output_dir + '/' + elicitation_name + \
-        '_'+string+'_' + str(j + 1).zfill(2) + \
-        '_' + str(k + 1).zfill(2) + '.pdf'
+    plt.title(string + " Question " + label_indexes[h])
+    figname = (output_dir + "/" + elicitation_name + "_" + string + "_" +
+               str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     images = convert_from_path(figname)
-    figname = output_dir + '/' + elicitation_name + \
-        '_'+string+'_' + str(j + 1).zfill(2) + \
-        '_' + str(k + 1).zfill(2) + '.png'
-    images[0].save(figname, 'PNG')
+    figname = (output_dir + "/" + elicitation_name + "_" + string + "_" +
+               str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) + ".png")
+    images[0].save(figname, "PNG")
     plt.close()
 
 
@@ -564,7 +702,7 @@ def add_date(slide):
     line = shape.line
     line.color.rgb = RGBColor(60, 90, 180)
     shape.text = "Expert elicitation " + \
-        datetime.datetime.today().strftime('%d-%b-%Y')
+        datetime.datetime.today().strftime("%d-%b-%Y")
     shape_para = shape.text_frame.paragraphs[0]
     shape_para.font.name = "Helvetica"
     shape_para.font.size = Pt(17)
@@ -632,8 +770,17 @@ def iter_cells(table):
             yield cell
 
 
-def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
-                 df_indexes_TQ, target, output_dir, elicitation_name):
+def read_answers(
+    input_dir,
+    csv_file,
+    group,
+    n_pctl,
+    df_indexes_SQ,
+    df_indexes_TQ,
+    target,
+    output_dir,
+    elicitation_name,
+):
 
     import difflib
 
@@ -642,7 +789,7 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
     merge_csv(input_dir, target, group)
 
     # seeds file name
-    filename = input_dir + '/seed.csv'
+    filename = input_dir + "/seed.csv"
 
     # Read a comma-separated values (csv) file into DataFrame df_SQ
     df_SQ = pd.read_csv(filename)
@@ -670,11 +817,11 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
 
         NS_SQ.append(name + surname)
 
-    print('NS_SQ', NS_SQ)
+    print("NS_SQ", NS_SQ)
 
-    csv_name = output_dir + '/' + elicitation_name + '_experts.csv'
+    csv_name = output_dir + "/" + elicitation_name + "_experts.csv"
 
-    d = {'index': range(1, len(NS_SQ) + 1), 'Expert': NS_SQ}
+    d = {"index": range(1, len(NS_SQ) + 1), "Expert": NS_SQ}
 
     df = pd.DataFrame(data=d)
 
@@ -705,13 +852,13 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
 
                 SQ_array[k, 2, i] = SQ_array[k, 1, i] * 1.01
 
-        print('')
-        print('Seed question ', i)
+        print("")
+        print("Seed question ", i)
         print(SQ_array[:, :, i])
 
     if target:
 
-        filename = input_dir + '/target.csv'
+        filename = input_dir + "/target.csv"
 
         # Read a comma-separated values (csv) file into DataFrame df_TQ
         df_TQ = pd.read_csv(filename)
@@ -739,7 +886,7 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
             index = NS_TQ.index(difflib.get_close_matches(SQ_name, NS_TQ)[0])
             sorted_idx.append(index)
 
-        print('Sorted list of experts to match the order of seeds:',
+        print("Sorted list of experts to match the order of seeds:",
               sorted_idx)
 
         print(NS_SQ)
@@ -756,9 +903,9 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
         n_experts_TQ = cols_as_np.shape[0]
 
         # check if number of experts in seed and target is the same
-        if (n_experts_TQ != n_experts):
+        if n_experts_TQ != n_experts:
 
-            print('Error: number of experts in seeds and targets different')
+            print("Error: number of experts in seeds and targets different")
             sys.exit()
 
         n_TQ = int(cols_as_np.shape[1] / n_pctl)
@@ -781,7 +928,7 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
                 if TQ_array[k, 2, i] == TQ_array[k, 1, i]:
                     TQ_array[k, 2, i] = TQ_array[k, 1, i] * 1.01
 
-            print('Target question ', i)
+            print("Target question ", i)
             print(TQ_array[:, :, i])
 
     # if we have a subset of the SQ, then extract from SQ_array
@@ -831,91 +978,102 @@ def read_questionnaire(input_dir, csv_file, target):
 
     """
 
-    df_read = pd.read_csv(input_dir + '/' + csv_file, header=0)
+    try:
+
+        from ElicipyDict import label_flag
+
+    except ImportError:
+
+        label_flag = False
+
+    df_read = pd.read_csv(input_dir + "/" + csv_file, header=0)
     # print(df_read)
 
-    quest_type = df_read['QUEST_TYPE'].to_list()
-    n_SQ = quest_type.count('seed')
+    quest_type = df_read["QUEST_TYPE"].to_list()
+    n_SQ = quest_type.count("seed")
 
     print(quest_type)
 
     try:
 
         from ElicipyDict import seed_list
-        print('seed_list read', seed_list)
+
+        print("seed_list read", seed_list)
 
     except ImportError:
 
-        print('ImportError')
-        seed_list = list(df_read['IDX'])
+        print("ImportError")
+        seed_list = list(df_read["IDX"])
 
-    print('seed_list', seed_list)
+    print("seed_list", seed_list)
 
     if len(seed_list) > 0:
 
         # extract the seed questions with index in seed_list (from column IDX)
-        df_SQ = df_read[df_read['IDX'].isin(seed_list)
-                        & df_read.QUEST_TYPE.str.contains('seed')]
-        print('Seed dataframe')
+        df_SQ = df_read[df_read["IDX"].isin(seed_list)
+                        & df_read.QUEST_TYPE.str.contains("seed")]
+        print("Seed dataframe")
         print(df_SQ)
 
         # find the python indexes as rows of the dataframe
         df_indexes = np.asarray(
-            np.where(df_read['IDX'].isin(seed_list)
-                     & df_read.QUEST_TYPE.str.contains('seed')))
+            np.where(df_read["IDX"].isin(seed_list)
+                     & df_read.QUEST_TYPE.str.contains("seed")))
 
     else:
 
-        df_SQ = df_read[df_read['QUEST_TYPE'] == 'seed']
+        df_SQ = df_read[df_read["QUEST_TYPE"] == "seed"]
         df_indexes = np.arange(len(df_SQ.index))
 
     # find the indexes of the seed questions (0<idx<n_SQ)
     df_indexes_SQ = df_indexes[(df_indexes < n_SQ)]
-    print('df_indexes_SQ', df_indexes_SQ)
+    print("df_indexes_SQ", df_indexes_SQ)
 
     if target:
 
         try:
 
             from ElicipyDict import target_list
-            print('target_list read', target_list)
+
+            print("target_list read", target_list)
 
         except ImportError:
 
-            print('ImportError')
-            target_list = list(df_read['IDX'])
+            print("ImportError")
+            target_list = list(df_read["IDX"])
 
-        print('target_list', target_list)
+        print("target_list", target_list)
 
         if len(target_list) > 0:
 
             # extract the target questions with index in
             # target_list (from column IDX)
-            df_TQ = df_read[df_read['IDX'].isin(target_list)
-                            & df_read.QUEST_TYPE.str.contains('target')]
-            print('Target dataframe')
+            df_TQ = df_read[df_read["IDX"].isin(target_list)
+                            & df_read.QUEST_TYPE.str.contains("target")]
+            print("Target dataframe")
             print(df_TQ)
 
             # find the python indexes as rows of the dataframe
             df_indexes = np.append(
                 df_indexes,
                 np.asarray(
-                    np.where(df_read['IDX'].isin(target_list)
-                             & df_read.QUEST_TYPE.str.contains('target'))))
-            print('df_indexes', df_indexes)
+                    np.where(df_read["IDX"].isin(target_list)
+                             & df_read.QUEST_TYPE.str.contains("target"))),
+            )
+            print("df_indexes", df_indexes)
 
         else:
 
-            df_TQ = df_read[df_read['QUEST_TYPE'] == 'target']
+            df_TQ = df_read[df_read["QUEST_TYPE"] == "target"]
             df_indexes = np.arange(len(df_TQ.index))
 
         # find the indexes of the target questions (0<idx<n_TQ)
         # in the extracted dataframe
         df_indexes_TQ = df_indexes[(df_indexes >= n_SQ)] - n_SQ
-        print('df_indexes_TQ', df_indexes_TQ)
+        print("df_indexes_TQ", df_indexes_TQ)
 
         df_quest = df_SQ.append(df_TQ)
-        print('df_quest')
+        print("df_quest")
         print(df_quest)
 
     else:
@@ -923,8 +1081,13 @@ def read_questionnaire(input_dir, csv_file, target):
         df_indexes_TQ = []
         df_quest = df_SQ
 
-    label_indexes = np.asarray(df_quest['IDX'])
-    print('label_indexes', label_indexes)
+    if label_flag:
+        label_indexes = df_quest["LABEL"].tolist()
+    else:
+        label_indexes = np.asarray(df_quest["IDX"])
+        label_indexes = label_indexes.astype(str).tolist()
+
+    print("label_indexes", label_indexes)
 
     data_top = df_quest.head()
 
@@ -933,14 +1096,14 @@ def read_questionnaire(input_dir, csv_file, target):
     # check if there are multiple languages
     for head in data_top:
 
-        if 'LONG Q' in head:
+        if "LONG Q" in head:
 
-            string = head.replace('LONG Q', '')
-            string2 = string.replace('_', '')
+            string = head.replace("LONG Q", "")
+            string2 = string.replace("_", "")
 
             langs.append(string2)
 
-    print('Languages:', langs)
+    print("Languages:", langs)
 
     try:
 
@@ -948,17 +1111,18 @@ def read_questionnaire(input_dir, csv_file, target):
 
     except ImportError:
 
-        language = ''
+        language = ""
 
     # select the columns to use according with the language
-    if (len(langs) > 1):
+    if len(langs) > 1:
 
         if language in langs:
 
             lang_index = langs.index(language)
             # list of column indexes to use
-            index_list = [1, 2, lang_index+3] + \
-                list(range(len(langs)+3, len(langs)+14))
+            index_list = [1, 2, 3, lang_index + 3] + list(
+                range(len(langs) + 3,
+                      len(langs) + 15))
 
         else:
 
@@ -967,8 +1131,8 @@ def read_questionnaire(input_dir, csv_file, target):
     else:
 
         lang_index = 0
-        language = ''
-        index_list = list(range(1, 15))
+        language = ""
+        index_list = list(range(1, 16))
 
     # list with the short title of the target questions
     SQ_question = []
@@ -993,14 +1157,28 @@ def read_questionnaire(input_dir, csv_file, target):
 
     for i in df_quest.itertuples():
 
-        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, \
-            question, idxMin, idxMax, sum50, parent, image = \
-            [i[j] for j in index_list]
+        (
+            idx,
+            label,
+            shortQ,
+            longQ,
+            unit,
+            scale,
+            minVal,
+            maxVal,
+            realization,
+            question,
+            idxMin,
+            idxMax,
+            sum50,
+            parent,
+            image,
+        ) = [i[j] for j in index_list]
 
         minVal = float(minVal)
         maxVal = float(maxVal)
 
-        if scale == 'uni':
+        if scale == "uni":
 
             global_log.append(0)
 
@@ -1008,7 +1186,7 @@ def read_questionnaire(input_dir, csv_file, target):
 
             global_log.append(1)
 
-        if (question == 'seed'):
+        if question == "seed":
 
             SQ_question.append(shortQ)
             SQ_LongQuestion.append(longQ)
@@ -1056,13 +1234,27 @@ def read_questionnaire(input_dir, csv_file, target):
 
         for i in df_quest.itertuples():
 
-            idx, shortQ, longQ, unit, scale, minVal, maxVal, realization, \
-                question, idxMin, idxMax, sum50, parent, image = \
-                [i[j] for j in index_list]
+            (
+                idx,
+                label,
+                shortQ,
+                longQ,
+                unit,
+                scale,
+                minVal,
+                maxVal,
+                realization,
+                question,
+                idxMin,
+                idxMax,
+                sum50,
+                parent,
+                image,
+            ) = [i[j] for j in index_list]
 
             minVal = float(minVal)
             maxVal = float(maxVal)
-            if (question == 'target'):
+            if question == "target":
 
                 TQ_question.append(shortQ)
                 TQ_LongQuestion.append(longQ)
@@ -1098,16 +1290,30 @@ def read_questionnaire(input_dir, csv_file, target):
 
         global_scale = SQ_scale
 
-    return df_indexes_SQ, df_indexes_TQ, SQ_scale, SQ_realization, TQ_scale, \
-        SQ_minVals, SQ_maxVals, TQ_minVals, TQ_maxVals, SQ_units, TQ_units, \
-        SQ_LongQuestion, TQ_LongQuestion, SQ_question, TQ_question, \
-        idx_list, global_scale, global_log, label_indexes, parents, \
-        global_idxMin, global_idxMax, global_sum50
+    return (df_indexes_SQ, df_indexes_TQ, SQ_scale, SQ_realization, TQ_scale,
+            SQ_minVals, SQ_maxVals, TQ_minVals, TQ_maxVals, SQ_units, TQ_units,
+            SQ_LongQuestion, TQ_LongQuestion, SQ_question, TQ_question,
+            idx_list, global_scale, global_log, label_indexes, parents,
+            global_idxMin, global_idxMax, global_sum50, df_quest)
 
 
-def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
-                    TQ_array, realization, global_scale, global_log, alpha,
-                    overshoot, cal_power, ERF_flag, Cooke_flag):
+def answer_analysis(
+    input_dir,
+    csv_file,
+    n_experts,
+    n_SQ,
+    n_TQ,
+    SQ_array,
+    TQ_array,
+    realization,
+    global_scale,
+    global_log,
+    alpha,
+    overshoot,
+    cal_power,
+    ERF_flag,
+    Cooke_flag,
+):
 
     W, score, information = COOKEweights(SQ_array, TQ_array, realization,
                                          alpha, global_scale, overshoot,
@@ -1125,17 +1331,23 @@ def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
             realization_temp = np.delete(realization, i)
             global_scale_temp = np.delete(global_scale, i)
 
-            W_temp, score_temp, information_temp = \
-                COOKEweights(SQ_temp, TQ_array, realization_temp, alpha,
-                             global_scale_temp, overshoot, cal_power)
+            W_temp, score_temp, information_temp = COOKEweights(
+                SQ_temp,
+                TQ_array,
+                realization_temp,
+                alpha,
+                global_scale_temp,
+                overshoot,
+                cal_power,
+            )
 
-            W_reldiff = W[:, 3]/np.sum(W[:, 3]) - \
-                W_temp[:, 3]/np.sum(W_temp[:, 3])
+            W_reldiff = W[:, 3] / \
+                np.sum(W[:, 3]) - W_temp[:, 3] / np.sum(W_temp[:, 3])
 
             W_mean = np.mean(np.abs(W_reldiff))
             W_std = np.sqrt(np.sum(np.square(W_reldiff)) / n_experts)
 
-            print(i+1, W_mean, W_std, np.sum(W_temp[:, 4] > 0))
+            print(i + 1, W_mean, W_std, np.sum(W_temp[:, 4] > 0))
 
             W_erf_temp, score_erf_temp = ERFweights(realization_temp, SQ_temp)
 
@@ -1144,7 +1356,7 @@ def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
             W_mean = np.mean(np.abs(W_reldiff))
             W_std = np.sqrt(np.sum(np.square(W_reldiff)) / n_experts)
 
-            print(i+1, W_mean, W_std, np.sum(W_erf_temp > alpha))
+            print(i + 1, W_mean, W_std, np.sum(W_erf_temp > alpha))
 
     Weq = np.ones(n_experts)
     Weqok = [x / n_experts for x in Weq]
@@ -1161,33 +1373,33 @@ def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
             expin.append(k)
         k += 1
 
-    W_gt0 = [round((x * 100.0), 2) for x in W_gt0_01]
-    Werf_gt0 = [round((x * 100.0), 2) for x in Werf_gt0_01]
+    W_gt0 = [round((x * 100.0), 5) for x in W_gt0_01]
+    Werf_gt0 = [round((x * 100.0), 5) for x in Werf_gt0_01]
 
     if ERF_flag > 0:
 
         print("")
-        print('W_erf')
+        print("W_erf")
         print(W_erf[:, -1])
 
     if Cooke_flag:
 
         print("")
-        print('W_cooke')
+        print("W_cooke")
         print(W[:, -1])
-        print('score', score)
-        print('information', information)
-        print('unNormalized weight', W[:, 3])
+        print("score", score)
+        print("information", information)
+        print("unNormalized weight", W[:, 3])
 
     print("")
-    print('Weq')
+    print("Weq")
     print(Weqok)
 
     return W, W_erf, Weqok, W_gt0, Werf_gt0, expin
 
 
 def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
-                 SQ_realization):
+                 SQ_realization, SQ_scale, SQ_array, TQ_scale, TQ_array):
 
     # ----------------------------------------- #
     # ------------ Save dtt and rls ----------- #
@@ -1196,31 +1408,9 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
     # Save a reference to the original standard output
     original_stdout = sys.stdout
 
-    filename = input_dir + '/seed.dtt'
+    filename = input_dir + "/seed.rls"
 
-    with open(filename, 'w') as f:
-        sys.stdout = f  # Change the standard output to the file we created.
-
-        print('* CLASS ASCII OUTPUT FILE. NQ=   3   QU=   5  50  95')
-        print('')
-        print('')
-
-        for k in np.arange(n_experts):
-
-            for i in np.arange(n_SQ):
-
-                print(
-                   f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} {"SQ"+str(i+1):>13}'
-                   '{SQ_scale[i]:4} {SQ_array[k, 0, i]:6e} {""} '
-                   '{SQ_array[k, 1, i]:6e} {" "}{SQ_array[k, 2, i]:6e}'
-                )
-
-        # Reset the standard output to its original value
-        sys.stdout = original_stdout
-
-    filename = input_dir + '/seed.rls'
-
-    with open(filename, 'w') as f:
+    with open(filename, "w") as f:
         sys.stdout = f  # Change the standard output to the file we created.
 
         for i in np.arange(n_SQ):
@@ -1228,8 +1418,7 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
             # print(i+1,str(i+1),SQ_realization[i],SQ_scale[i])
 
             print(
-                f'{i+1:>5d} {"SQ"+str(i+1):>13} {""} {SQ_realization[i]:6e} '
-                '{SQ_scale[i]:4}'
+                f'{i+1:>5d} {"SQ"+str(i+1):>13} {""} {SQ_realization[i]:6e} {SQ_scale[i]:4}'
             )
 
         # Reset the standard output to its original value
@@ -1237,41 +1426,75 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
 
     if target:
 
-        filename = input_dir + '/target.dtt'
+        filename = input_dir + "/seed_and_target.dtt"
 
-        with open(filename, 'w') as f:
-            # Change the standard output to the file we created.
-            sys.stdout = f
+    else:
 
-            print('* CLASS ASCII OUTPUT FILE. NQ=   3   QU=   5  50  95')
-            print('')
-            print('')
+        filename = input_dir + "/seed.dtt"
 
-            for k in np.arange(n_experts):
+    with open(filename, "w") as f:
+        sys.stdout = f  # Change the standard output to the file we created.
+
+        print("* CLASS ASCII OUTPUT FILE. NQ=   3   QU=   5  50  95")
+        print("")
+        print("")
+
+        for k in np.arange(n_experts):
+
+            for i in np.arange(n_SQ):
+
+                print(
+                    f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} {"SQ"+str(i+1):>13} {SQ_scale[i]:4} {SQ_array[k, 0, i]:6e} {""} {SQ_array[k, 1, i]:6e} {" "}{SQ_array[k, 2, i]:6e}'
+                )
+
+            if target:
 
                 for i in np.arange(n_TQ):
 
                     print(
-                        f'{k+1:>4d} {"Exp"+str(k+1):>10} {i+1:>4d} '
-                        '{"TQ"+str(i+1):>15} {TQ_scale[i]:>4} '
-                        '{TQ_array[k, 0, i]:>6e} {TQ_array[k, 1, i]:>6e} '
-                        '{TQ_array[k, 2, i]:>6e}'
+                        f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} {"TQ"+str(i+1):>13} {TQ_scale[i]:4} {TQ_array[k, 0, i]:6e} {""} {TQ_array[k, 1, i]:6e} {" "}{TQ_array[k, 2, i]:6e}'
                     )
 
-            # Reset the standard output to its original value
-            sys.stdout = original_stdout
+        # Reset the standard output to its original value
+        sys.stdout = original_stdout
 
     return
 
 
-def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
-                               TQ_array, n_sample, W, W_erf, Weqok, W_gt0,
-                               Werf_gt0, expin, global_log, global_minVal,
-                               global_maxVal, global_units, TQ_units,
-                               label_indexes, minval_all, maxval_all,
-                               postprocessing, analysis, ERF_flag, Cooke_flag,
-                               EW_flag, overshoot, hist_type, output_dir,
-                               elicitation_name, n_bins):
+def create_samples_and_barplot(
+    group,
+    n_experts,
+    n_SQ,
+    n_TQ,
+    n_pctl,
+    SQ_array,
+    TQ_array,
+    n_sample,
+    W,
+    W_erf,
+    Weqok,
+    W_gt0,
+    Werf_gt0,
+    expin,
+    global_log,
+    global_minVal,
+    global_maxVal,
+    global_units,
+    TQ_units,
+    label_indexes,
+    minval_all,
+    maxval_all,
+    postprocessing,
+    analysis,
+    ERF_flag,
+    Cooke_flag,
+    EW_flag,
+    overshoot,
+    hist_type,
+    output_dir,
+    elicitation_name,
+    n_bins,
+):
 
     DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
 
@@ -1295,25 +1518,25 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
     del_rows = []
     keep_rows = []
 
-    if (Cooke_flag == 0):
+    if Cooke_flag == 0:
         del_rows.append(int(0))
     else:
         keep_rows.append(int(0))
 
-    if (ERF_flag == 0):
+    if ERF_flag == 0:
         del_rows.append(int(1))
     else:
         keep_rows.append(int(1))
 
-    if (EW_flag == 0):
+    if EW_flag == 0:
         del_rows.append(int(2))
     else:
         keep_rows.append(int(2))
 
-    colors = ['tomato', 'purple', 'springgreen']
+    colors = ["tomato", "purple", "springgreen"]
     colors = [colors[index] for index in keep_rows]
 
-    legends = ['CM', 'ERF', 'EW']
+    legends = ["CM", "ERF", "EW"]
     legends = [legends[index] for index in keep_rows]
 
     for j in np.arange(n_SQ + n_TQ):
@@ -1321,8 +1544,15 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
         if analysis:
 
             quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createSamples(
-                DAT, j, Weqok, n_sample, global_log[j],
-                [global_minVal[j], global_maxVal[j]], overshoot, 0)
+                DAT,
+                j,
+                Weqok,
+                n_sample,
+                global_log[j],
+                [global_minVal[j], global_maxVal[j]],
+                overshoot,
+                0,
+            )
 
             print("%2i %9.2f %9.2f %9.2f %9.2f" %
                   (j, quan05_EW, quan50_EW, qmean_EW, quan95_EW))
@@ -1334,8 +1564,15 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
             if Cooke_flag:
 
                 quan05, quan50, qmean, quan95, C = createSamples(
-                    DAT, j, W[:, 4].flatten(), n_sample, global_log[j],
-                    [global_minVal[j], global_maxVal[j]], overshoot, 0)
+                    DAT,
+                    j,
+                    W[:, 4].flatten(),
+                    n_sample,
+                    global_log[j],
+                    [global_minVal[j], global_maxVal[j]],
+                    overshoot,
+                    0,
+                )
 
                 print("%2i %9.2f %9.2f %9.2f %9.2f" %
                       (j, quan05, quan50, qmean, quan95))
@@ -1350,10 +1587,16 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
             if ERF_flag > 0:
 
-                quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = \
-                    createSamples(DAT, j, W_erf[:, 4].flatten(), n_sample,
-                                  global_log[j], [global_minVal[j],
-                                  global_maxVal[j]], overshoot, ERF_flag)
+                quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = createSamples(
+                    DAT,
+                    j,
+                    W_erf[:, 4].flatten(),
+                    n_sample,
+                    global_log[j],
+                    [global_minVal[j], global_maxVal[j]],
+                    overshoot,
+                    ERF_flag,
+                )
 
                 print("%2i %9.2f %9.2f %9.2f %9.2f" %
                       (j, quan05_erf, quan50_erf, qmean_erf, quan95_erf))
@@ -1366,7 +1609,7 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
                 C_erf = C_EW
 
-            if (j >= n_SQ):
+            if j >= n_SQ:
 
                 if Cooke_flag:
 
@@ -1384,25 +1627,45 @@ def create_samples_and_barplot(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
 
                 if Cooke_flag:
 
-                    legendsPDF.append('CM' + '%9.2f' % quan05 +
-                                      '%9.2f' % quan50 +
-                                      '%9.2f' % quan95)
+                    legendsPDF.append("CM" + "%9.2f" % quan05 +
+                                      "%9.2f" % quan50 + "%9.2f" % quan95)
                 if ERF_flag > 0:
 
-                    legendsPDF.append('ERF' + '%9.2f' % quan05_erf +
-                                      '%9.2f' % quan50_erf +
-                                      '%9.2f' % quan95_erf)
+                    legendsPDF.append("ERF" + "%9.2f" % quan05_erf +
+                                      "%9.2f" % quan50_erf +
+                                      "%9.2f" % quan95_erf)
 
-                legendsPDF.append('EW' + '%9.2f' % quan05_EW +
-                                  '%9.2f' % quan50_EW + '%9.2f' % quan95_EW)
+                legendsPDF.append("EW" + "%9.2f" % quan05_EW +
+                                  "%9.2f" % quan50_EW + "%9.2f" % quan95_EW)
 
-                create_fig_hist(group, j, n_sample, n_SQ, hist_type, C, C_erf,
-                                C_EW, colors, legends, legendsPDF,
-                                global_units, Cooke_flag, ERF_flag, EW_flag,
-                                global_log, global_minVal, global_maxVal,
-                                output_dir, elicitation_name, del_rows,
-                                TQ_units, label_indexes, minval_all,
-                                maxval_all, n_bins)
+                create_fig_hist(
+                    group,
+                    j,
+                    n_sample,
+                    n_SQ,
+                    hist_type,
+                    C,
+                    C_erf,
+                    C_EW,
+                    colors,
+                    legends,
+                    legendsPDF,
+                    global_units,
+                    Cooke_flag,
+                    ERF_flag,
+                    EW_flag,
+                    global_log,
+                    global_minVal,
+                    global_maxVal,
+                    output_dir,
+                    elicitation_name,
+                    del_rows,
+                    TQ_units,
+                    label_indexes,
+                    minval_all,
+                    maxval_all,
+                    n_bins,
+                )
 
     return q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW
 
@@ -1415,7 +1678,7 @@ def main(argv):
 
         print(argv)
         repository = argv
-        path = current_path + '/ELICITATIONS/' + repository
+        path = current_path + "/ELICITATIONS/" + repository
 
         # Check whether the specified path exists or not
         repoExists = os.path.exists(path)
@@ -1426,14 +1689,14 @@ def main(argv):
 
     if repoExists:
 
-        print('')
-        print(repository+' found')
+        print("")
+        print(repository + " found")
         os.chdir(path)
 
     else:
 
-        elicitation_list = next(os.walk(current_path + '/ELICITATIONS/'))
-        print('List of elicitations:')
+        elicitation_list = next(os.walk(current_path + "/ELICITATIONS/"))
+        print("List of elicitations:")
 
         if len(elicitation_list[1]) == 1:
 
@@ -1446,7 +1709,7 @@ def main(argv):
 
                 print(count, elicitation)
 
-            print('')
+            print("")
             cond = True
 
         while cond:
@@ -1454,14 +1717,14 @@ def main(argv):
             userinput = int(input("Enter Elicitation Number\n"))
             cond = not (userinput in range(len(elicitation_list[1])))
             if cond:
-                print('Integer between 0 and ', len(elicitation_list[1])-1)
+                print("Integer between 0 and ", len(elicitation_list[1]) - 1)
 
         repository = elicitation_list[1][userinput]
-        print('repository', repository)
-        path = current_path + '/ELICITATIONS/' + repository
+        print("repository", repository)
+        path = current_path + "/ELICITATIONS/" + repository
 
     os.chdir(path)
-    print('Path: ', path)
+    print("Path: ", path)
     sys.path.append(path)
 
     from ElicipyDict import output_dir
@@ -1495,7 +1758,7 @@ def main(argv):
     n_pctl = 3
 
     # download the data from github repository
-    if datarepo == 'github' or datarepo == 'local_github':
+    if datarepo == "github" or datarepo == "local_github":
 
         from ElicipyDict import user
         from ElicipyDict import github_token
@@ -1504,12 +1767,12 @@ def main(argv):
         saveDataFromGithub(RepositoryData, user, github_token)
 
     sys.path.insert(0, os.getcwd())
-    input_dir = 'DATA'
-    csv_file = 'questionnaire.csv'
+    input_dir = "DATA"
+    csv_file = "questionnaire.csv"
 
     # change to full path
-    output_dir = path + '/' + output_dir
-    input_dir = path + '/' + input_dir
+    output_dir = path + "/" + output_dir
+    input_dir = path + "/" + input_dir
 
     # Check whether the specified output path exists or not
     isExist = os.path.exists(output_dir)
@@ -1518,21 +1781,29 @@ def main(argv):
 
         # Create a new directory because it does not exist
         os.makedirs(output_dir)
-        print('The new directory ' + output_dir + ' is created!')
+        print("The new directory " + output_dir + " is created!")
 
     # Read the questionnaire csv file
-    df_indexes_SQ, df_indexes_TQ, SQ_scale, SQ_realization, TQ_scale, \
-        SQ_minVals, SQ_maxVals, TQ_minVals, TQ_maxVals, SQ_units, TQ_units, \
-        SQ_LongQuestion, TQ_LongQuestion, SQ_question, TQ_question, idx_list, \
-        global_scale, global_log, label_indexes, parents, global_idxMin, \
-        global_idxMax, global_sum50 = \
-        read_questionnaire(input_dir, csv_file, target)
+    (df_indexes_SQ, df_indexes_TQ, SQ_scale, SQ_realization, TQ_scale,
+     SQ_minVals, SQ_maxVals, TQ_minVals, TQ_maxVals, SQ_units, TQ_units,
+     SQ_LongQuestion, TQ_LongQuestion, SQ_question, TQ_question, idx_list,
+     global_scale, global_log, label_indexes, parents, global_idxMin,
+     global_idxMax, global_sum50,
+     df_quest) = read_questionnaire(input_dir, csv_file, target)
 
     # Read the asnwers of all the experts
     group = 0
     n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
-        input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ,
-        target, output_dir, elicitation_name)
+        input_dir,
+        csv_file,
+        group,
+        n_pctl,
+        df_indexes_SQ,
+        df_indexes_TQ,
+        target,
+        output_dir,
+        elicitation_name,
+    )
 
     minval_all = np.zeros(n_SQ + n_TQ)
     minval_all[0:n_SQ] = np.amin(SQ_array[:, 0, :], axis=0)
@@ -1550,8 +1821,8 @@ def main(argv):
     global_longQuestion = SQ_LongQuestion + TQ_LongQuestion
     global_shortQuestion = SQ_question + TQ_question
 
-    print('')
-    print('Answer ranges')
+    print("")
+    print("Answer ranges")
 
     print(df_indexes_SQ, df_indexes_TQ)
 
@@ -1561,8 +1832,10 @@ def main(argv):
 
             deltalogval_all = np.log10(maxval_all[i]) - np.log10(minval_all[i])
 
-            minval_all[i] = 10**(np.log10(minval_all[i]) - 0.1*deltalogval_all)
-            maxval_all[i] = 10**(np.log10(maxval_all[i]) + 0.1*deltalogval_all)
+            minval_all[i] = 10**(np.log10(minval_all[i]) -
+                                 0.1 * deltalogval_all)
+            maxval_all[i] = 10**(np.log10(maxval_all[i]) +
+                                 0.1 * deltalogval_all)
 
         else:
 
@@ -1580,7 +1853,7 @@ def main(argv):
 
         print(i, minval_all[i], maxval_all[i])
 
-    print('')
+    print("")
 
     q_Cooke = np.zeros((len(global_scale), 3))
     q_erf = np.zeros((len(global_scale), 3))
@@ -1596,8 +1869,16 @@ def main(argv):
 
         # Read the asnwers of the experts
         n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
-            input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ,
-            target, output_dir, elicitation_name)
+            input_dir,
+            csv_file,
+            group,
+            n_pctl,
+            df_indexes_SQ,
+            df_indexes_TQ,
+            target,
+            output_dir,
+            elicitation_name,
+        )
 
         if not target:
 
@@ -1609,13 +1890,13 @@ def main(argv):
         realization[0:SQ_array.shape[2]] = SQ_realization
 
         print("")
-        print('Realization')
+        print("Realization")
         print(realization)
         print()
 
         if analysis:
 
-            tree = {'IDX': idx_list, 'SHORT_Q': TQ_question}
+            tree = {"IDX": idx_list, "SHORT_Q": TQ_question}
             df_tree = pd.DataFrame(data=tree)
 
             # ----------------------------------------- #
@@ -1625,35 +1906,89 @@ def main(argv):
             if group == 0:
 
                 W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
-                    input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
-                    TQ_array, realization, global_scale, global_log, alpha,
-                    overshoot, cal_power, ERF_flag, Cooke_flag)
+                    input_dir,
+                    csv_file,
+                    n_experts,
+                    n_SQ,
+                    n_TQ,
+                    SQ_array,
+                    TQ_array,
+                    realization,
+                    global_scale,
+                    global_log,
+                    alpha,
+                    overshoot,
+                    cal_power,
+                    ERF_flag,
+                    Cooke_flag,
+                )
 
             else:
 
                 # set alpha to zero
                 W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
-                    input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
-                    TQ_array, realization, global_scale, global_log, 0.0,
-                    overshoot, cal_power, ERF_flag, Cooke_flag)
+                    input_dir,
+                    csv_file,
+                    n_experts,
+                    n_SQ,
+                    n_TQ,
+                    SQ_array,
+                    TQ_array,
+                    realization,
+                    global_scale,
+                    global_log,
+                    0.0,
+                    overshoot,
+                    cal_power,
+                    ERF_flag,
+                    Cooke_flag,
+                )
 
             # ----------------------------------------- #
             # ------ Create samples and bar plots ----- #
             # ----------------------------------------- #
 
-            q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = \
-                create_samples_and_barplot(group, n_experts, n_SQ, n_TQ,
-                                           n_pctl, SQ_array, TQ_array,
-                                           n_sample, W, W_erf, Weqok, W_gt0,
-                                           Werf_gt0, expin, global_log,
-                                           global_minVal, global_maxVal,
-                                           global_units, TQ_units,
-                                           label_indexes, minval_all,
-                                           maxval_all, postprocessing,
-                                           analysis, ERF_flag, Cooke_flag,
-                                           EW_flag, overshoot, hist_type,
-                                           output_dir, elicitation_name,
-                                           n_bins)
+            (
+                q_Cooke,
+                q_erf,
+                q_EW,
+                samples,
+                samples_erf,
+                samples_EW,
+            ) = create_samples_and_barplot(
+                group,
+                n_experts,
+                n_SQ,
+                n_TQ,
+                n_pctl,
+                SQ_array,
+                TQ_array,
+                n_sample,
+                W,
+                W_erf,
+                Weqok,
+                W_gt0,
+                Werf_gt0,
+                expin,
+                global_log,
+                global_minVal,
+                global_maxVal,
+                global_units,
+                TQ_units,
+                label_indexes,
+                minval_all,
+                maxval_all,
+                postprocessing,
+                analysis,
+                ERF_flag,
+                Cooke_flag,
+                EW_flag,
+                overshoot,
+                hist_type,
+                output_dir,
+                elicitation_name,
+                n_bins,
+            )
 
             if len(group_list) > 1:
 
@@ -1667,28 +2002,28 @@ def main(argv):
 
     if analysis:
 
-        csv_name = output_dir + '/' + elicitation_name + '_weights.csv'
+        csv_name = output_dir + "/" + elicitation_name + "_weights.csv"
 
-        Weqok_100 = [100.0*elem for elem in Weqok]
+        Weqok_100 = [100.0 * elem for elem in Weqok]
 
-        Weqok_formatted = ['%.2f' % elem for elem in Weqok_100]
+        Weqok_formatted = ["%.2f" % elem for elem in Weqok_100]
 
-        d = {'index': range(1, n_experts + 1), 'Weq': Weqok_formatted}
+        d = {"index": range(1, n_experts + 1), "Weq": Weqok_formatted}
         df = pd.DataFrame(data=d)
 
         if Cooke_flag > 0:
 
-            df.insert(loc=2, column='WCooke', value=W_gt0)
+            df.insert(loc=2, column="WCooke", value=W_gt0)
 
         if ERF_flag > 0:
 
-            df.insert(loc=2, column='WERF', value=Werf_gt0)
+            df.insert(loc=2, column="WERF", value=Werf_gt0)
 
         df.to_csv(csv_name, index=False)
 
     if analysis and target:
 
-        targets = ['target_' + str(i).zfill(2) for i in range(n_TQ)]
+        targets = ["target_" + str(i).zfill(2) for i in range(n_TQ)]
 
         df_tree["EW_5"] = q_EW[n_SQ:, 0]
         df_tree["EW_50"] = q_EW[n_SQ:, 1]
@@ -1700,13 +2035,15 @@ def main(argv):
             df_tree["COOKE_50"] = q_Cooke[n_SQ:, 1]
             df_tree["COOKE_95"] = q_Cooke[n_SQ:, 2]
 
-            csv_name = output_dir + '/' + elicitation_name + '_samples.csv'
-            np.savetxt(csv_name,
-                       samples,
-                       header=','.join(targets),
-                       comments='',
-                       delimiter=",",
-                       fmt='%1.4e')
+            csv_name = output_dir + "/" + elicitation_name + "_samples.csv"
+            np.savetxt(
+                csv_name,
+                samples,
+                header=",".join(targets),
+                comments="",
+                delimiter=",",
+                fmt="%1.4e",
+            )
 
         if ERF_flag > 0:
 
@@ -1714,30 +2051,34 @@ def main(argv):
             df_tree["ERF_50"] = q_erf[n_SQ:, 1]
             df_tree["ERF_95"] = q_erf[n_SQ:, 2]
 
-            csv_name = output_dir + '/' + elicitation_name + '_samples_erf.csv'
-            np.savetxt(csv_name,
-                       samples_erf,
-                       header=','.join(targets),
-                       comments='',
-                       delimiter=",",
-                       fmt='%1.4e')
+            csv_name = output_dir + "/" + elicitation_name + "_samples_erf.csv"
+            np.savetxt(
+                csv_name,
+                samples_erf,
+                header=",".join(targets),
+                comments="",
+                delimiter=",",
+                fmt="%1.4e",
+            )
 
         if EW_flag > 0:
 
-            csv_name = output_dir + '/' + elicitation_name + '_samples_EW.csv'
-            np.savetxt(csv_name,
-                       samples_EW,
-                       header=','.join(targets),
-                       comments='',
-                       delimiter=",",
-                       fmt='%1.4e')
+            csv_name = output_dir + "/" + elicitation_name + "_samples_EW.csv"
+            np.savetxt(
+                csv_name,
+                samples_EW,
+                header=",".join(targets),
+                comments="",
+                delimiter=",",
+                fmt="%1.4e",
+            )
 
         df_tree["PARENT"] = parents
-        df_tree.to_csv('tree.csv', index=False)
+        df_tree.to_csv("tree.csv", index=False)
 
     if not postprocessing:
 
-        print('Analysis completed!')
+        print("Analysis completed!")
         sys.exit()
 
     if analysis:
@@ -1749,19 +2090,33 @@ def main(argv):
         try:
 
             from ElicipyDict import trend_groups
-            print('trend_groups read', trend_groups)
+
+            print("trend_groups read", trend_groups)
 
         except ImportError:
 
-            print('No trend group defined')
+            print("No trend group defined")
             trend_groups = []
 
         for count, trend_group in enumerate(trend_groups):
 
-            create_figure_trend(count, trend_group, n_SQ, q_EW, q_Cooke, q_erf,
-                                global_units, Cooke_flag, ERF_flag, EW_flag,
-                                global_log, TQ_minVals, TQ_maxVals, output_dir,
-                                elicitation_name)
+            create_figure_trend(
+                count,
+                trend_group,
+                n_SQ,
+                q_EW,
+                q_Cooke,
+                q_erf,
+                global_units,
+                Cooke_flag,
+                ERF_flag,
+                EW_flag,
+                global_log,
+                TQ_minVals,
+                TQ_maxVals,
+                output_dir,
+                elicitation_name,
+            )
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
@@ -1773,11 +2128,28 @@ def main(argv):
 
         for k in np.arange(n_panels):
 
-            create_figure(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
-                          TQ_array, realization, analysis, Cooke_flag,
-                          ERF_flag, EW_flag, global_units, output_dir, q_Cooke,
-                          q_erf, q_EW, elicitation_name, global_log,
-                          label_indexes)
+            create_figure(
+                h,
+                k,
+                n_experts,
+                max_len_plot,
+                n_SQ,
+                SQ_array,
+                TQ_array,
+                realization,
+                analysis,
+                Cooke_flag,
+                ERF_flag,
+                EW_flag,
+                global_units,
+                output_dir,
+                q_Cooke,
+                q_erf,
+                q_EW,
+                elicitation_name,
+                global_log,
+                label_indexes,
+            )
 
     # ----------------------------------------- #
     # ------- Create .pptx presentation ------- #
@@ -1799,16 +2171,18 @@ def main(argv):
     title_para = slide.shapes.title.text_frame.paragraphs[0]
     title_para.font.name = "Helvetica"
 
-    Current_Date_Formatted = datetime.datetime.today().strftime('%d-%b-%Y')
+    Current_Date_Formatted = datetime.datetime.today().strftime("%d-%b-%Y")
 
     subtitle.text = Current_Date_Formatted  # subtitle
 
     subtitle_para = slide.shapes.placeholders[1].text_frame.paragraphs[0]
     subtitle_para.font.name = "Helvetica"
 
-    logofile = current_path+'/logo.png'
+    logofile = current_path + "/logo.png"
 
-    slide.shapes.add_picture(logofile, left + Inches(11.3), top + Inches(5.4),
+    slide.shapes.add_picture(logofile,
+                             left + Inches(11.3),
+                             top + Inches(5.4),
                              width=Inches(2.4))
 
     title_slide_layout = prs.slide_layouts[5]
@@ -1862,35 +2236,35 @@ def main(argv):
             table = shape.table
 
             cell = table.cell(0, 0)
-            cell.text = 'Expert ID'
+            cell.text = "Expert ID"
 
             cell = table.cell(0, 1)
-            cell.text = 'Cooke'
+            cell.text = "Cooke"
 
             if ERF_flag > 0:
 
                 cell = table.cell(0, 2)
-                cell.text = 'ERF'
+                cell.text = "ERF"
 
             for j in np.arange(fisrt_j, last_j):
                 j_mod = np.remainder(j, max_len_table)
                 cell = table.cell(j_mod + 1, 0)
-                cell.text = 'Exp' + str(expin[j])
+                cell.text = "Exp" + str(expin[j])
 
                 cell = table.cell(j_mod + 1, 1)
 
                 if W_gt0[j] > 0.0:
 
-                    cell.text = '%6.2f' % W_gt0[j]
+                    cell.text = "%10.5f" % W_gt0[j]
 
                 else:
 
-                    cell.text = 'Below threshold'
+                    cell.text = "Below threshold"
 
                 if ERF_flag > 0:
 
                     cell = table.cell(j_mod + 1, 2)
-                    cell.text = '%6.2f' % Werf_gt0[j]
+                    cell.text = "%6.2f" % Werf_gt0[j]
 
             for cell in iter_cells(table):
                 for paragraph in cell.text_frame.paragraphs:
@@ -1899,14 +2273,14 @@ def main(argv):
 
             if EW_flag:
 
-                text_box = 'Equal weight = ' + f"{Weqok[0]*100:.2f}"
+                text_box = "Equal weight = " + f"{Weqok[0]*100:.2f}"
                 add_text_box(slide, Inches(12), Inches(2), text_box, 18)
 
-                text_box = "For Cookes' method, below threshold weight does "\
-                           "not mean zero score. It simply means that this "\
-                           "expert's knowledge was already contributed by "\
-                           "other experts and adding this expert would not "\
-                           "change significantly the results."
+                text_box = ("For Cookes' method, below threshold weight does "
+                            "not mean zero score. It simply means that this "
+                            "expert's knowledge was already contributed by "
+                            "other experts and adding this expert would not "
+                            "change significantly the results.")
                 add_text_box(slide, Inches(12), Inches(3), text_box, 18)
 
             add_date(slide)
@@ -1950,10 +2324,10 @@ def main(argv):
 
         text_box = global_longQuestion[h]
 
-        if (h >= n_SQ):
+        if h >= n_SQ:
 
             j = h - n_SQ
-            string = 'Target'
+            string = "Target"
 
             if len(text_box) < 250:
 
@@ -1961,12 +2335,12 @@ def main(argv):
 
             else:
 
-                fontsize = 18.0*np.sqrt(250.0/len(text_box))
+                fontsize = 18.0 * np.sqrt(250.0 / len(text_box))
 
         else:
 
             j = h
-            string = 'Seed'
+            string = "Seed"
 
             if len(text_box) < 500:
 
@@ -1974,7 +2348,7 @@ def main(argv):
 
             else:
 
-                fontsize = 18.0*np.sqrt(500.0/len(text_box))
+                fontsize = 18.0 * np.sqrt(500.0 / len(text_box))
 
         for k in np.arange(n_panels):
 
@@ -1982,15 +2356,15 @@ def main(argv):
 
             add_text_box(slide, left, top, text_box, fontsize)
 
-            figname = output_dir + '/' + elicitation_name + \
-                '_'+string+'_' + str(j + 1).zfill(2) + \
-                '_' + str(k + 1).zfill(2) + '.png'
+            figname = (output_dir + "/" + elicitation_name + "_" + string +
+                       "_" + str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) +
+                       ".png")
             add_figure(slide, figname, left, top)
 
-            if analysis and (string == 'Target'):
+            if analysis and (string == "Target"):
 
-                figname = output_dir + '/' + elicitation_name + \
-                    '_PDF_group0_' + str(j + 1).zfill(2) + '.png'
+                figname = (output_dir + "/" + elicitation_name +
+                           "_PDF_group0_" + str(j + 1).zfill(2) + ".png")
 
                 width = Inches(3.3)
                 add_small_figure(slide, figname, left - Inches(1),
@@ -1998,11 +2372,12 @@ def main(argv):
 
                 if global_idxMin[h] < global_idxMax[h]:
 
-                    longQ_NB = "N.B. The sum of 50%iles for questions " + \
-                        str(global_idxMin[h])+"-"+str(global_idxMax[h]) + \
-                        " have to sum to "+str(global_sum50[h])+"."
+                    longQ_NB = ("N.B. The sum of 50%iles for questions " +
+                                str(global_idxMin[h]) + "-" +
+                                str(global_idxMax[h]) + " have to sum to " +
+                                str(global_sum50[h]) + ".")
 
-                    add_text_box(slide, left, top+Inches(3.39), longQ_NB, 15)
+                    add_text_box(slide, left, top + Inches(3.39), longQ_NB, 15)
 
             add_date(slide)
             add_small_logo(slide, left, top, logofile)
@@ -2038,7 +2413,11 @@ def main(argv):
             fisrt_j = i_table * max_len_tableB
             last_j = np.minimum((i_table + 1) * max_len_tableB, n_TQ)
 
-            n_columns = 4
+            n_columns = 1
+
+            if Cooke_flag > 0:
+
+                n_columns += 3
 
             if EW_flag > 0:
 
@@ -2050,44 +2429,49 @@ def main(argv):
 
             # ---add table to slide---
             x, y, cx = Inches(1), Inches(2), Inches(14)
-            shape = slide.shapes.add_table(last_j - fisrt_j + 1, n_columns, x,
-                                           y, cx,
-                                           MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
+            shape = slide.shapes.add_table(
+                last_j - fisrt_j + 1,
+                n_columns,
+                x,
+                y,
+                cx,
+                MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT,
+            )
             table = shape.table
 
             cell = table.cell(0, 1)
-            cell.text = 'Q05 (EW)'
+            cell.text = "Q05 (EW)"
 
             cell = table.cell(0, 2)
-            cell.text = 'Q50 (EW)'
+            cell.text = "Q50 (EW)"
 
             cell = table.cell(0, 3)
-            cell.text = 'Q95 (EW)'
+            cell.text = "Q95 (EW)"
 
             j_column = 3
 
-            if EW_flag > 0:
+            if Cooke_flag > 0:
 
                 cell = table.cell(0, j_column + 1)
-                cell.text = 'Q05 (Cooke)'
+                cell.text = "Q05 (Cooke)"
 
                 cell = table.cell(0, j_column + 2)
-                cell.text = 'Q50 (Cooke)'
+                cell.text = "Q50 (Cooke)"
 
                 cell = table.cell(0, j_column + 3)
-                cell.text = 'Q95 (Cooke)'
+                cell.text = "Q95 (Cooke)"
                 j_column += 3
 
             if ERF_flag > 0:
 
                 cell = table.cell(0, j_column + 1)
-                cell.text = 'Q05 (ERF)'
+                cell.text = "Q05 (ERF)"
 
                 cell = table.cell(0, j_column + 2)
-                cell.text = 'Q50 (ERF)'
+                cell.text = "Q50 (ERF)"
 
                 cell = table.cell(0, j_column + 3)
-                cell.text = 'Q95 (ERF)'
+                cell.text = "Q95 (ERF)"
 
             for h in np.arange(fisrt_j, last_j):
 
@@ -2096,35 +2480,35 @@ def main(argv):
                 j = h + n_SQ
 
                 cell = table.cell(h_mod + 1, 0)
-                cell.text = 'TQ' + str(h + 1)
+                cell.text = "TQ " + label_indexes[j]
 
                 for li in range(3):
 
                     cell = table.cell(h_mod + 1, li + 1)
-                    if global_units[j] == "%":
-                        cell.text = '%6.2f' % q_EW[j, li]
+                    if global_units[j] == "%" and global_log[j] == 0:
+                        cell.text = "%6.2f" % q_EW[j, li]
                     else:
-                        cell.text = '%.2E' % q_EW[j, li]
+                        cell.text = "%.2E" % q_EW[j, li]
 
                     j_column = 3
 
-                    if EW_flag > 0:
+                    if Cooke_flag > 0:
 
                         cell = table.cell(h_mod + 1, j_column + li + 1)
-                        if global_units[j] == "%":
-                            cell.text = '%6.2f' % q_Cooke[j, li]
+                        if global_units[j] == "%" and global_log[j] == 0:
+                            cell.text = "%6.2f" % q_Cooke[j, li]
                         else:
-                            cell.text = '%.2E' % q_Cooke[j, li]
+                            cell.text = "%.2E" % q_Cooke[j, li]
 
                         j_column += 3
 
                     if ERF_flag > 0:
 
                         cell = table.cell(h_mod + 1, j_column + li + 1)
-                        if global_units[j] == "%":
-                            cell.text = '%6.2f' % q_erf[j, li]
+                        if global_units[j] == "%" and global_log[j] == 0:
+                            cell.text = "%6.2f" % q_erf[j, li]
                         else:
-                            cell.text = '%.2E' % q_erf[j, li]
+                            cell.text = "%.2E" % q_erf[j, li]
 
             for cell in iter_cells(table):
                 for paragraph in cell.text_frame.paragraphs:
@@ -2160,14 +2544,14 @@ def main(argv):
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            figname = output_dir + '/' + elicitation_name + '_trend_' + \
-                str(count + 1).zfill(2)+'.png'
+            figname = (output_dir + "/" + elicitation_name + "_trend_" +
+                       str(count + 1).zfill(2) + ".png")
 
-            text_box = ''
+            text_box = ""
             for i in trend_group:
 
-                text_box = text_box + 'TQ' + \
-                    str(i) + '. ' + TQ_question[i-1] + '.\n\n'
+                text_box = (text_box + "TQ" + str(i) + ". " +
+                            TQ_question[i - 1] + ".\n\n")
 
             if len(text_box) < 500:
 
@@ -2175,7 +2559,7 @@ def main(argv):
 
             else:
 
-                fontsize = 20.0*np.sqrt(500.0/len(text_box))
+                fontsize = 20.0 * np.sqrt(500.0 / len(text_box))
 
             add_text_box(slide, left, top, text_box, fontsize)
 
@@ -2183,7 +2567,7 @@ def main(argv):
             add_small_logo(slide, left, top, logofile)
             add_figure(slide, figname, left - Inches(0.8), top)
 
-            text_title = 'Target questions Group ' + str(count+1)
+            text_title = "Target questions Group " + str(count + 1)
             add_title(slide, text_title)
 
     # ------------ Barplot slides ------------#
@@ -2209,12 +2593,12 @@ def main(argv):
                 add_date(slide)
                 add_small_logo(slide, left, top, logofile)
 
-            if (j >= n_SQ):
+            if j >= n_SQ:
 
                 slide = prs.slides.add_slide(title_slide_layout)
 
-                figname = output_dir + '/' + elicitation_name + \
-                    '_hist_' + str(j - n_SQ + 1).zfill(2) + '.png'
+                figname = (output_dir + "/" + elicitation_name + "_hist_" +
+                           str(j - n_SQ + 1).zfill(2) + ".png")
 
                 text_box = TQ_LongQuestion[j - n_SQ]
 
@@ -2224,7 +2608,7 @@ def main(argv):
 
                 else:
 
-                    fontsize = 18.0*np.sqrt(400.0/len(text_box))
+                    fontsize = 18.0 * np.sqrt(400.0 / len(text_box))
 
                 add_text_box(slide, left, top, text_box, fontsize)
 
@@ -2237,7 +2621,11 @@ def main(argv):
 
                 # ---add table to slide---
 
-                n_rows = 2
+                n_rows = 1
+
+                if Cooke_flag > 0:
+
+                    n_rows += 1
 
                 if EW_flag > 0:
 
@@ -2252,58 +2640,58 @@ def main(argv):
                 table = shape.table
 
                 cell = table.cell(0, 1)
-                cell.text = 'Q05'
+                cell.text = "Q05"
 
                 cell = table.cell(0, 2)
-                cell.text = 'Q50'
+                cell.text = "Q50"
 
                 cell = table.cell(0, 3)
-                cell.text = 'Q95'
+                cell.text = "Q95"
 
                 j_row = 0
 
-                if EW_flag > 0:
+                if Cooke_flag > 0:
 
                     cell = table.cell(j_row + 1, 0)
-                    cell.text = 'Cooke'
+                    cell.text = "Cooke"
 
                     for li in range(3):
 
                         cell = table.cell(j_row + 1, li + 1)
-                        if global_units[j] == "%":
-                            cell.text = '%6.2f' % q_Cooke[j, li]
+                        if global_units[j] == "%" and global_log == 0:
+                            cell.text = "%6.2f" % q_Cooke[j, li]
                         else:
-                            cell.text = '%.2E' % q_Cooke[j, li]
+                            cell.text = "%.2E" % q_Cooke[j, li]
 
                     j_row += 1
 
                 if ERF_flag > 0:
 
                     cell = table.cell(j_row + 1, 0)
-                    cell.text = 'ERF'
+                    cell.text = "ERF"
 
                     for li in range(3):
 
                         cell = table.cell(j_row + 1, li + 1)
-                        if global_units[j] == "%":
-                            cell.text = '%6.2f' % q_erf[j, li]
+                        if global_units[j] == "%" and global_log == 0:
+                            cell.text = "%6.2f" % q_erf[j, li]
                         else:
-                            cell.text = '%.2E' % q_erf[j, li]
+                            cell.text = "%.2E" % q_erf[j, li]
 
                     j_row += 1
 
                 if EW_flag > 0:
 
                     cell = table.cell(j_row + 1, 0)
-                    cell.text = 'EW'
+                    cell.text = "EW"
 
                     for li in range(3):
 
                         cell = table.cell(j_row + 1, li + 1)
-                        if global_units[j] == "%":
-                            cell.text = '%6.2f' % q_EW[j, li]
+                        if global_units[j] == "%" and global_log == 0:
+                            cell.text = "%6.2f" % q_EW[j, li]
                         else:
-                            cell.text = '%.2E' % q_EW[j, li]
+                            cell.text = "%.2E" % q_EW[j, li]
 
                     j_row += 1
 
@@ -2335,15 +2723,15 @@ def main(argv):
                 add_date(slide)
                 add_small_logo(slide, left, top, logofile)
 
-            if (j >= n_SQ):
+            if j >= n_SQ:
 
                 slide = prs.slides.add_slide(title_slide_layout)
 
                 for count, group in enumerate(group_list):
 
-                    figname = output_dir + '/' + elicitation_name + \
-                        '_PDF_group' + str(group) + '_' + \
-                        str(j - n_SQ + 1).zfill(2) + '.png'
+                    figname = (output_dir + "/" + elicitation_name +
+                               "_PDF_group" + str(group) + "_" +
+                               str(j - n_SQ + 1).zfill(2) + ".png")
 
                     if group == 0:
 
@@ -2355,8 +2743,12 @@ def main(argv):
 
                         width = Inches(4.22)
                         add_small_figure(
-                            slide, figname, Inches(11.18),
-                            Inches(2.2) + count * Inches(3.02), width)
+                            slide,
+                            figname,
+                            Inches(11.18),
+                            Inches(2.2) + count * Inches(3.02),
+                            width,
+                        )
 
                 text_box = TQ_LongQuestion[j - n_SQ]
 
@@ -2366,7 +2758,7 @@ def main(argv):
 
                 else:
 
-                    fontsize = 18.0*np.sqrt(200.0/len(text_box))
+                    fontsize = 18.0 * np.sqrt(200.0 / len(text_box))
 
                 add_text_box(slide, left, top, text_box, fontsize)
 
@@ -2393,37 +2785,37 @@ def main(argv):
                 table = shape.table
 
                 cell = table.cell(0, 1)
-                cell.text = 'Q05'
+                cell.text = "Q05"
 
                 cell = table.cell(0, 2)
-                cell.text = 'Q50'
+                cell.text = "Q50"
 
                 cell = table.cell(0, 3)
-                cell.text = 'Q95'
+                cell.text = "Q95"
 
                 j_row = 0
 
-                if EW_flag > 0:
+                if Cooke_flag > 0:
 
                     for count, group in enumerate(group_list):
 
                         cell = table.cell(j_row + 1 + count, 0)
 
                         if group == 0:
-                            cell.text = 'Cooke'
+                            cell.text = "Cooke"
 
                         else:
-                            cell.text = 'Cooke ' + str(group)
+                            cell.text = "Cooke " + str(group)
 
                         for li in range(3):
 
                             cell = table.cell(j_row + 1 + count, li + 1)
 
-                            if global_units[j] == "%":
-                                cell.text = '%6.2f' % q_Cooke_groups[j, li,
+                            if global_units[j] == "%" and global_log == 0:
+                                cell.text = "%6.3f" % q_Cooke_groups[j, li,
                                                                      count]
                             else:
-                                cell.text = '%.2E' % q_Cooke_groups[j, li,
+                                cell.text = "%.2E" % q_Cooke_groups[j, li,
                                                                     count]
 
                     j_row += len(group_list)
@@ -2435,20 +2827,20 @@ def main(argv):
                         cell = table.cell(j_row + 1 + count, 0)
 
                         if group == 0:
-                            cell.text = 'ERF'
+                            cell.text = "ERF"
 
                         else:
-                            cell.text = 'ERF ' + str(group)
+                            cell.text = "ERF " + str(group)
 
                         for li in range(3):
 
                             cell = table.cell(j_row + 1 + count, li + 1)
 
-                            if global_units[j] == "%":
-                                cell.text = '%6.2f' % q_erf_groups[j,
-                                                                   li, count]
+                            if global_units[j] == "%" and global_log == 0:
+                                cell.text = "%6.3f" % q_erf_groups[j, li,
+                                                                   count]
                             else:
-                                cell.text = '%.2E' % q_erf_groups[j, li, count]
+                                cell.text = "%.2E" % q_erf_groups[j, li, count]
 
                     j_row += len(group_list)
 
@@ -2459,19 +2851,19 @@ def main(argv):
                         cell = table.cell(j_row + 1 + count, 0)
 
                         if group == 0:
-                            cell.text = 'EW'
+                            cell.text = "EW"
 
                         else:
-                            cell.text = 'EW ' + str(group)
+                            cell.text = "EW " + str(group)
 
                         for li in range(3):
 
                             cell = table.cell(j_row + 1 + count, li + 1)
 
-                            if global_units[j] == "%":
-                                cell.text = '%6.2f' % q_EW_groups[j, li, count]
+                            if global_units[j] == "%" and global_log == 0:
+                                cell.text = "%6.2f" % q_EW_groups[j, li, count]
                             else:
-                                cell.text = '%.2E' % q_EW_groups[j, li, count]
+                                cell.text = "%.2E" % q_EW_groups[j, li, count]
 
                     j_row += len(group_list)
 
@@ -2481,7 +2873,9 @@ def main(argv):
                             run.font.size = Pt(10)
 
     prs.save(output_dir + "/" + elicitation_name + ".pptx")  # saving file
+    save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
+                 SQ_realization, SQ_scale, SQ_array, TQ_scale, TQ_array)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main(sys.argv[1:])

@@ -193,11 +193,11 @@ def saveAnswer(df_new, input_dir, csv_file, quest_type):
 
     st.write(save_file + ' SAVED')
 
-    return save_file
+    return csv_file.replace('.csv', '_')+dt_string+'_Output.csv'
 
 
-def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
-               idxMaxs, sum50s, questions):
+def check_form(qst, idxs, labels, ans, units, minVals, maxVals, idx_list,
+               idxMins, idxMaxs, sum50s, questions, label_flag):
 
     print(ans[0:3])
 
@@ -212,7 +212,12 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
             idx = 3 + i * 3
 
             if (',' in ans[idx]):
-                st.markdown('**Error in question ' + str(idxs[i]) + '**')
+
+                if label_flag:
+                    st.markdown('**Error in question '+labels[i]+'**')
+                else:
+                    st.markdown('**Error in question '+str(idxs[i])+'**')
+                
                 st.write('Please remove comma')
                 st.write(qst[idx], ans[idx])
                 check_flag = False
@@ -220,7 +225,12 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
             try:
                 float(ans[idx])
             except ValueError:
-                st.markdown('**Error in question ' + str(idxs[i]) + '**')
+
+                if label_flag:
+                    st.markdown('**Error in question '+labels[i]+'**')
+                else:
+                    st.markdown('**Error in question '+str(idxs[i])+'**')
+                
                 st.write('Non numeric answer')
                 st.write(qst[idx], ans[idx])
                 check_flag = False
@@ -228,7 +238,12 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
             try:
                 float(ans[idx + 1])
             except ValueError:
-                st.markdown('**Error in question ' + str(idxs[i]) + '**')
+
+                if label_flag:
+                    st.markdown('**Error in question '+labels[i]+'**')
+                else:
+                    st.markdown('**Error in question '+str(idxs[i])+'**')
+                
                 st.write('Non numeric answer')
                 st.write(qst[idx + 1], ans[idx + 1])
                 check_flag = False
@@ -236,7 +251,12 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
             try:
                 float(ans[idx + 2])
             except ValueError:
-                st.markdown('**Error in question ' + str(idxs[i]) + '**')
+
+                if label_flag:
+                    st.markdown('**Error in question '+labels[i]+'**')
+                else:
+                    st.markdown('**Error in question '+str(idxs[i])+'**')
+                
                 st.write('Non numeric answer')
                 st.write(qst[idx + 2], ans[idx + 2])
                 check_flag = False
@@ -245,20 +265,32 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
 
                 if float(ans[idx]) >= float(ans[idx + 1]):
 
-                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
+                    if label_flag:
+                        st.markdown('**Error in question '+labels[i]+'**')
+                    else:
+                        st.markdown('**Error in question '+str(idxs[i])+'**')
+
                     st.write(qst[idx] + ' >= ' + qst[idx + 1])
                     check_flag = False
 
                 if float(ans[idx + 1]) >= float(ans[idx + 2]):
 
-                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
+                    if label_flag:
+                        st.markdown('**Error in question '+labels[i]+'**')
+                    else:
+                        st.markdown('**Error in question '+str(idxs[i])+'**')
+
                     st.write(qst[idx + 1] + ' >= ' + qst[idx + 2])
                     check_flag = False
 
                 if float(ans[idx]) <= minVals[i] or float(
                         ans[idx]) >= maxVals[i]:
 
-                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
+                    if label_flag:
+                        st.markdown('**Error in question '+labels[i]+'**')
+                    else:
+                        st.markdown('**Error in question '+str(idxs[i])+'**')
+
                     st.write(qst[idx] + ':' + str(ans[idx]))
                     st.write('The answer must be a value >' + str(minVals[i]) +
                              ' and  <' + str(maxVals[i]))
@@ -267,7 +299,11 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
                 if float(ans[idx + 1]) <= minVals[i] or float(
                         ans[idx + 1]) >= maxVals[i]:
 
-                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
+                    if label_flag:
+                        st.markdown('**Error in question '+labels[i]+'**')
+                    else:
+                        st.markdown('**Error in question '+str(idxs[i])+'**')
+
                     st.write(qst[idx + 1] + ':' + str(ans[idx + 1]))
                     st.write('The answer must be a value  >' +
                              str(minVals[i]) + ' and <' + str(maxVals[i]))
@@ -276,7 +312,11 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
                 if float(ans[idx + 2]) <= minVals[i] or float(
                         ans[idx + 2]) >= maxVals[i]:
 
-                    st.markdown('**Error in question ' + str(idxs[i]) + '**')
+                    if label_flag:
+                        st.markdown('**Error in question '+labels[i]+'**')
+                    else:
+                        st.markdown('**Error in question '+str(idxs[i])+'**')
+
                     st.write(qst[idx + 2] + ':' + str(ans[idx + 2]))
                     st.write('The answer must be a value >' + str(minVals[i]) +
                              ' and <' + str(maxVals[i]))
@@ -292,10 +332,19 @@ def check_form(qst, idxs, ans, units, minVals, maxVals, idx_list, idxMins,
 
                     if float(sum50s[i] != sum50check):
 
-                        st.markdown('**Error in question ' + str(idxs[i]) +
-                                    '**')
-                        st.write('Error in sum of 50%iles for questions from ',
-                                 str(idxMins[i]), ' to ', str(idxMaxs[i]))
+                        if label_flag:
+                        
+                            labelIdxMin = idxs.index(idxMins[i])
+                            labelIdxMax = idxs.index(idxMaxs[i])
+                        
+                            st.markdown('**Error in question '+labels[i]+'**')
+                            st.write('Error in sum of 50%iles for questions from ',
+                                 labels[labelIdxMin], ' to ', labels[labelIdxMax])
+
+                        else:
+                            st.markdown('**Error in question '+str(idxs[i])+'**')
+                            st.write('Error in sum of 50%iles for questions from ',
+                                 idxMins[i], ' to ', idxMaxs[i])
                         st.write('The sum should be ' + str(sum50s[i]))
                         check_flag = False
 
@@ -384,7 +433,7 @@ def main():
 
             print('Please add Repository')
 
-        input_dir = Repository + '/DATA'
+        input_dir = path + '/DATA'
 
     csv_file = 'questionnaire.csv'
 
@@ -516,14 +565,14 @@ def main():
         print('lang_index', lang_index)
         language = options[lang_index]
         index_list = [0, 1, lang_index+2] + \
-            list(range(len(langs)+2, len(langs)+13))
+            list(range(len(langs)+2, len(langs)+14))
         print('language', language)
 
     else:
 
         lang_index = 0
         language = ''
-        index_list = list(range(0, 14))
+        index_list = list(range(0, 15))
 
     # print('index_list',index_list)
 
@@ -558,7 +607,17 @@ def main():
     qst.append("Email address")
     ans.append(form2.text_input(qst[-1]))
 
+    try:
+
+        from createWebformDict import label_flag
+
+    except ImportError:
+
+        label_flag = False
+
+
     idxs = []
+    labels = []
     units = []
     minVals = []
     maxVals = []
@@ -571,9 +630,21 @@ def main():
 
     for i in df.itertuples():
 
+        idx, label, shortQ, longQ, unit, scale, minVal, maxVal, realization,\
+            question, idxMin, idxMax, sum50, parent, image =\
+            [i[j] for j in index_list]
+
+        if (question == quest_type):
+
+            labels.append(label)
+            idxs.append(idx)
+            
+
+    for i in df.itertuples():
+
         print([i[j] for j in index_list])
 
-        idx, shortQ, longQ, unit, scale, minVal, maxVal, realization,\
+        idx, label, shortQ, longQ, unit, scale, minVal, maxVal, realization,\
             question, idxMin, idxMax, sum50, parent, image =\
             [i[j] for j in index_list]
 
@@ -583,8 +654,7 @@ def main():
         if (question == quest_type):
 
             units.append(unit)
-            idxs.append(idx)
-
+            
             if minVal.is_integer():
 
                 minVal = int(minVal)
@@ -612,11 +682,17 @@ def main():
                 # print(idx,qst,unit,scale)
                 if quest_type == 'target':
 
-                    form2.header('TQ' + str(idx) + '. ' + shortQ)
+                    if label_flag:
+                        form2.header('TQ ' + label + '. ' + shortQ)
+                    else:
+                        form2.header('TQ' + str(idx) + '. ' + shortQ)
 
                 else:
 
-                    form2.header('SQ' + str(idx) + '. ' + shortQ)
+                    if label_flag:
+                        form2.header('SQ ' + label + '. ' + shortQ)
+                    else:
+                        form2.header('SQ' + str(idx) + '. ' + shortQ)
 
                 if (not pd.isnull(image)):
                     imagefile = './' + input_dir + '/images/' + str(image)
@@ -625,9 +701,22 @@ def main():
 
                 if idxMin < idxMax:
 
-                    longQ_NB = "**N.B.** *The sum of 50%iles for questions " +\
-                        str(idxMin)+"-"+str(idxMax) + \
-                        " have to sum to "+str(sum50)+unit+".*"
+                    if label_flag:
+
+                        labelIdxMin = idxs.index(idxMin)
+                        labelIdxMax = idxs.index(idxMax)
+                        
+                        longQ_NB = "**N.B.** *The sum of 50%iles for questions " +\
+                            labels[labelIdxMin] +"-"+ labels[labelIdxMax] + \
+                            " have to sum to "+str(sum50)+unit+".*"
+
+                    else:
+
+                        longQ_NB = "**N.B.** *The sum of 50%iles for questions " +\
+                            str(idxMin)+"-"+str(idxMax) + \
+                            " have to sum to "+str(sum50)+unit+".*"
+
+
                     form2.markdown(longQ)
                     form2.markdown(longQ_NB)
 
@@ -695,8 +784,9 @@ def main():
 
         print('checkin for problems in answers')
 
-        check_flag = check_form(qst, idxs, ans, units, minVals, maxVals,
-                                idx_list, idxMins, idxMaxs, sum50s, questions)
+        check_flag = check_form(qst, idxs, labels, ans, units, minVals, maxVals,
+                                idx_list, idxMins, idxMaxs, sum50s, questions,
+                                label_flag)
 
         print('check_flag', check_flag)
 
@@ -765,23 +855,23 @@ def main():
                 save_file = saveAnswer(df_new, input_dir, csv_file, quest_type)
                 print('After saving file')
 
-                if confirmation_email:
+            if confirmation_email:
 
-                    try:
+                try:
 
-                        send_email(sender=SENDER_ADDRESS,
-                                   password=SENDER_PASSWORD,
-                                   receiver=email,
-                                   smtp_server=SMTP_SERVER_ADDRESS,
-                                   smtp_port=PORT,
-                                   email_message=message, subject=subject,
-                                   attach_data=df_new.to_csv(sep=',',
-                                                             index=False),
-                                   attach_name=save_file)
+                    send_email(sender=SENDER_ADDRESS,
+                               password=SENDER_PASSWORD,
+                               receiver=email,
+                               smtp_server=SMTP_SERVER_ADDRESS,
+                               smtp_port=PORT,
+                               email_message=message, subject=subject,
+                               attach_data=df_new.to_csv(sep=',',
+                                                         index=False),
+                               attach_name=save_file)
 
-                    except Exception:
+                except Exception:
 
-                        print("Problem sending confirmation email")
+                    print("Problem sending confirmation email")
 
 
 if __name__ == '__main__':

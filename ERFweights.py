@@ -18,6 +18,7 @@ def ERFweights(true_seed, SQ_array):
     """
 
     import numpy as np
+    import itertools
 
     Ne = SQ_array.shape[0]
     Nq = SQ_array.shape[2]
@@ -29,8 +30,9 @@ def ERFweights(true_seed, SQ_array):
 
         for j in range(Nq):
 
-            p_single[j] = ERFcompute(true_seed[j], SQ_array[i, 0, j],
-                                     SQ_array[i, 1, j], SQ_array[i, 2, j])
+            p_single[j] = ERFcompute(
+                true_seed[j], SQ_array[i, 0, j], SQ_array[i, 1, j], SQ_array[i, 2, j]
+            )
 
         pERF[i] = np.mean(p_single)
 
@@ -66,31 +68,34 @@ def ERFcompute(x, a, b, c):
 
     import numpy as np
 
-    if (a == c):
+    if a == c:
 
-        if (b == x):
+        if b == x:
 
-            return (1)
+            return 1
 
         else:
 
-            return (0)
+            return 0
 
     S = NewRap(a, b, c)
     a = S[0]
     c = S[1]
     A = np.minimum(np.maximum(0.95 * x, a), c)
     B = np.maximum(np.minimum(1.05 * x, c), a)
-    p = ((A - c)**2 - (B - c)**2) / ((c - a) * (c - b))
+    p = ((A - c) ** 2 - (B - c) ** 2) / ((c - a) * (c - b))
 
-    if (A < b):
+    if A < b:
 
-        p = 1.0 - (B - c)**2 / ((c - a) * (c - b)) - (A - a)**2 / ((b - a) *
-                                                                   (c - a))
+        p = (
+            1.0
+            - (B - c) ** 2 / ((c - a) * (c - b))
+            - (A - a) ** 2 / ((b - a) * (c - a))
+        )
 
-        if (B < b):
+        if B < b:
 
-            p = ((B - a)**2 - (A - a)**2) / ((b - a) * (c - a))
+            p = ((B - a) ** 2 - (A - a) ** 2) / ((b - a) * (c - a))
 
     return p
 
@@ -202,8 +207,8 @@ def FunRap(x, y, a, b, c):
 
     import numpy as np
 
-    A1 = (a - x)**2 - 0.05 * (y - x) * (b - x)
-    A2 = (y - c)**2 - 0.05 * (y - x) * (y - b)
+    A1 = (a - x) ** 2 - 0.05 * (y - x) * (b - x)
+    A2 = (y - c) ** 2 - 0.05 * (y - x) * (y - b)
     v = np.array([A1, A2])
 
     return v
@@ -231,7 +236,9 @@ def rtrian(a, b, c):
     written by A.Bevilacqua
     """
 
-    if (a == c):
+    import numpy as np
+
+    if a == c:
 
         R = b
 
@@ -269,7 +276,7 @@ def rtrian_inner(a, b, c):
     rng = np.random.default_rng()
     u = rng.random(1)
 
-    if (u < ((b - a) / (c - a))):
+    if u < ((b - a) / (c - a)):
 
         x = np.sqrt(u * (b - a) * (c - a)) + a
 
