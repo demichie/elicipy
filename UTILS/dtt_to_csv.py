@@ -136,9 +136,9 @@ for count,idx in enumerate(idx_experts):
             if idx == 1:
 
                 row_sq.append(int(row['type_and_idx_q'].replace('SQ','')))
-                row_sq.append(str(row['type_and_idx_q']).replace('SQ',''))
-                row_sq.append('')
-                row_sq.append('')
+                row_sq.append(str(row['type_and_idx_q']))
+                row_sq.append(row['type_and_idx_q'])
+                row_sq.append('Long text')
                 row_sq.append('[]')
                 row_sq.append(str(row['scale']))
                 row_sq.append(0)
@@ -208,9 +208,9 @@ for count,idx in enumerate(idx_experts):
             if idx == 1:
 
                 row_tq.append(int(row['type_and_idx_q'].replace('TQ','')))
-                row_tq.append(str(row['type_and_idx_q']).replace('TQ',''))
-                row_tq.append('')
-                row_tq.append('')
+                row_tq.append(str(row['type_and_idx_q']))
+                row_tq.append(row['type_and_idx_q'])
+                row_tq.append('Long text')
                 row_tq.append('[]')
                 row_tq.append(str(row['scale']))
                 row_tq.append(0)
@@ -242,5 +242,5 @@ for count,idx in enumerate(idx_experts):
 new_filename = './DTT_TO_CSV/questionnaire.csv'
         
 df = pd.DataFrame(data_quest, columns = header_quest)
-df.to_csv(new_filename)             
+df.to_csv(new_filename,index=False)             
             

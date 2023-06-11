@@ -1120,12 +1120,9 @@ def read_questionnaire(input_dir, csv_file, target):
 
             lang_index = langs.index(language)
             # list of column indexes to use
-            index_list = [1, 2, 3, lang_index + 4] + list(
-                range(len(langs) + 4,
+            index_list = [1, 2, 3, lang_index + 3] + list(
+                range(len(langs) + 3,
                       len(langs) + 15))
-
-            print('index_list')
-            print(index_list)
 
         else:
 

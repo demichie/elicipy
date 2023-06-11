@@ -1,6 +1,8 @@
 import pandas as pd
+import numpy as np
 import os
 import shutil as st
+from ElicipyDict import *
 
 
 def replace_strings(working_dir, df, header, i_row):
@@ -14,7 +16,7 @@ def replace_strings(working_dir, df, header, i_row):
         if os.path.isfile(fname):
             # print(fname)
             # Full path
-            f = open(fname, 'r')
+            f = open(fname, "r")
             filedata = f.read()
 
             for name in header:
@@ -25,31 +27,34 @@ def replace_strings(working_dir, df, header, i_row):
 
                 if searchstring in filedata:
 
-                    print('found string in file %s' % fname)
+                    print("found string in file %s" % fname)
                     print(searchstring)
                     f.seek(0)
 
                     for line in f:
                         # replacing the string and write to output file
-                        filedata = filedata.replace(searchstring,
-                                                    str(df.at[i_row, name]))
+                        filedata = filedata.replace(
+                            searchstring, str(df.at[i_row, name])
+                        )
 
             f.close()
-            f_out = open(fname, 'w')
+            f_out = open(fname, "w")
             f_out.write(filedata)
             f_out.close()
 
     os.chdir(main_dir)
 
 
+##########################################
+
+
 def main():
 
-    from ElicipyDict import output_dir
-    from Elicipydict import elicitation_name
-
-    csv_file = output_dir + '/' + elicitation_name + '_samples.csv'
+    csv_file = output_dir + "/" + elicitation_name + "_samples.csv"
 
     df = pd.read_csv(csv_file)
+
+    templatedir = "templatedir"
 
     print(df)
 
@@ -63,11 +68,11 @@ def main():
         working_dir = "ensemble." + "{:05d}".format(i_row)
         working_dir = os.path.join(os.getcwd(), working_dir)
 
-        st.copytree('templatedir', working_dir, symlinks=True)
+        st.copytree("templatedir", working_dir, symlinks=True)
 
         replace_strings(working_dir, df, header, i_row)
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
 
     main()

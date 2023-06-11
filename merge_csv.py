@@ -73,12 +73,15 @@ def merge_csv(input_dir, target, group):
             timestamp.append("-".join(split_f[1:-1]))
 
         # combine all files in the list
-        combined_seed_csv = pd.concat(
-            [pd.read_csv(f) for f in all_filenames], ignore_index=True
-        )
+        combined_seed_csv = pd.concat([pd.read_csv(f) for f in all_filenames],
+                                      ignore_index=True)
 
         combined_seed_csv.insert(loc=0, column="timestamp", value=timestamp)
 
+        combined_seed_csv.sort_values(by='timestamp',
+                                        ascending=False,
+                                        inplace=True)
+        
         combined_seed_csv.drop("Group(s)", axis=1, inplace=True)
 
         # print('combined_seed_csv',combined_seed_csv)
@@ -125,20 +128,23 @@ def merge_csv(input_dir, target, group):
                     check_sim = False
 
                     print("")
-                    print("High similarity (", sim, ") found in names of two experts:")
+                    print("High similarity (", sim,
+                          ") found in names of two experts:")
                     print(flname_seed[previous], ",", flname_seed[current])
 
-                    time0 = datetime.strptime(timestamp[previous], "%Y-%m-%d-%H-%M-%S")
-                    time1 = datetime.strptime(timestamp[current], "%Y-%m-%d-%H-%M-%S")
+                    time0 = datetime.strptime(timestamp[previous],
+                                              "%Y-%m-%d-%H-%M-%S")
+                    time1 = datetime.strptime(timestamp[current],
+                                              "%Y-%m-%d-%H-%M-%S")
 
                     print("Keeping the answers with more recent timestamp:")
 
-                    combined_seed_csv["First Name"].iloc[previous] = combined_seed_csv[
-                        "First Name"
-                    ].iloc[current]
-                    combined_seed_csv["Last Name"].iloc[previous] = combined_seed_csv[
-                        "Last Name"
-                    ].iloc[current]
+                    combined_seed_csv["First Name"].iloc[
+                        previous] = combined_seed_csv["First Name"].iloc[
+                            current]
+                    combined_seed_csv["Last Name"].iloc[
+                        previous] = combined_seed_csv["Last Name"].iloc[
+                            current]
 
                     if time0 > time1:
 
@@ -165,23 +171,27 @@ def merge_csv(input_dir, target, group):
                 # take the last valid value
                 for col in df2.columns:
                     if len(df2[col].dropna()) > 0:
-                        combined_seed_csv[col].iloc[previous] = (
-                            df2[col].dropna().iloc[-1]
-                        )
-                        combined_seed_csv[col].iloc[current] = (
-                            df2[col].dropna().iloc[-1]
-                        )
 
+                        combined_seed_csv.iloc[
+                            previous,
+                            combined_seed_csv.columns.get_loc(col)] = (
+                                df2[col].dropna().iloc[-1])
+                        combined_seed_csv.iloc[
+                            current,
+                            combined_seed_csv.columns.get_loc(col)] = (
+                                df2[col].dropna().iloc[-1])
+                        
                 print("Remove duplicate expert from seed:", flname_seed[disc])
                 combined_seed_csv = combined_seed_csv.drop(
-                    [combined_seed_csv.index[disc]]
-                )
+                    [combined_seed_csv.index[disc]])
                 combined_seed_csv = combined_seed_csv.reset_index(drop=True)
 
         # export to csv
         merged_file = "../" + foldername + ".csv"
 
-        combined_seed_csv.to_csv(merged_file, index=False, encoding="utf-8-sig")
+        combined_seed_csv.to_csv(merged_file,
+                                 index=False,
+                                 encoding="utf-8-sig")
 
     os.chdir(current_path)
 
@@ -241,15 +251,27 @@ def merge_csv(input_dir, target, group):
         print("All target filenames", len(target_filenames))
 
         timestamp = []
+        times = []
         for f in target_filenames:
 
             split_f = f.split("_")
             timestamp.append("-".join(split_f[1:-1]))
+            times.append(datetime.strptime(timestamp[-1], "%Y-%m-%d-%H-%M-%S"))
 
+        # print('Timestamps')
+        # print(times)
         # combine all files in the list
-        combined_target_csv = pd.concat([pd.read_csv(f) for f in target_filenames])
+        combined_target_csv = pd.concat(
+            [pd.read_csv(f) for f in target_filenames])
 
         combined_target_csv.insert(loc=0, column="timestamp", value=timestamp)
+
+        combined_target_csv.sort_values(by='timestamp',
+                                        ascending=False,
+                                        inplace=True)
+
+        print(combined_target_csv["timestamp"])
+        # A = input('PAUSE')
 
         combined_target_csv.drop("Group(s)", axis=1, inplace=True)
 
@@ -273,6 +295,10 @@ def merge_csv(input_dir, target, group):
 
             for (previous, current) in res:
 
+                if previous == current:
+
+                    continue
+
                 sim1 = similar(flname_target[previous], flname_target[current])
                 sim2 = similar(flname_target[previous], lfname_target[current])
                 sim = max(sim1, sim2)
@@ -284,14 +310,17 @@ def merge_csv(input_dir, target, group):
                     check_sim = False
 
                     print("")
-                    print("High similarity (", sim, ") found in names of two experts:")
+                    print("High similarity (", sim,
+                          ") found in names of two experts:")
                     print(flname_target[previous], ",", flname_target[current])
 
-                    time0 = datetime.strptime(timestamp[previous], "%Y-%m-%d-%H-%M-%S")
-                    time1 = datetime.strptime(timestamp[current], "%Y-%m-%d-%H-%M-%S")
+                    time0 = datetime.strptime(timestamp[previous],
+                                              "%Y-%m-%d-%H-%M-%S")
+                    time1 = datetime.strptime(timestamp[current],
+                                              "%Y-%m-%d-%H-%M-%S")
 
-                    print(time0)
-                    print(time1)
+                    # print('time0',time0)
+                    # print('time1',time1)
 
                     print("Keeping the answers with more recent timestamp:")
 
@@ -313,28 +342,50 @@ def merge_csv(input_dir, target, group):
 
             if check_sim:
 
-                combined_target_csv = combined_target_csv.reset_index(drop=True)
+                combined_target_csv = combined_target_csv.reset_index(
+                    drop=True)
                 break
 
             else:
 
                 # take the last valid value
-                for col in df2.columns:
-                    if len(df2[col].dropna()) > 0:
-                        combined_target_csv[col].iloc[previous] = (
-                            df2[col].dropna().iloc[-1]
-                        )
-                        combined_target_csv[col].iloc[current] = (
-                            df2[col].dropna().iloc[-1]
-                        )
+                for count, col in enumerate(df2.columns):
 
-                combined_target_csv = combined_target_csv.reset_index(drop=True)
-                print("Remove duplicate expert from target:", flname_target[disc])
+                    print('')
+                    print(flname_target[current])
+                    print('Question', count, time0, time1)
+                    print(df2[col])
+
+                    if len(df2[col].dropna()) > 0:
+
+                        # print('BEFORE')
+                        # print('Value 1', combined_target_csv[col].iloc[previous])
+                        # print('Value 2', combined_target_csv[col].iloc[current])
+
+                        combined_target_csv.iloc[
+                            previous,
+                            combined_target_csv.columns.get_loc(col)] = (
+                                df2[col].dropna().iloc[-1])
+                        combined_target_csv.iloc[
+                            current,
+                            combined_target_csv.columns.get_loc(col)] = (
+                                df2[col].dropna().iloc[-1])
+
+                        # print('AFTER')
+                        # print('Value 1', combined_target_csv[col].iloc[previous])
+                        # print('Value 2', combined_target_csv[col].iloc[current])
+                # a = input('PAUSE')
+
+                combined_target_csv = combined_target_csv.reset_index(
+                    drop=True)
+                print("Remove duplicate expert from target:",
+                      flname_target[disc])
                 combined_target_csv = combined_target_csv.drop(
-                    [combined_target_csv.index[disc]]
-                )
-                combined_target_csv = combined_target_csv.reset_index(drop=True)
+                    [combined_target_csv.index[disc]])
+                combined_target_csv = combined_target_csv.reset_index(
+                    drop=True)
                 # print('new',combined_target_csv)
+                # a = input('PAUSE')
 
         if seedExists:
 
@@ -364,20 +415,27 @@ def merge_csv(input_dir, target, group):
             check_target = np.sum(check_matrix, axis=1)
 
             # print('check_seed',check_seed)
-            disc_seed = [i for i in range(len(check_seed)) if check_seed[i] == 0]
+            disc_seed = [
+                i for i in range(len(check_seed)) if check_seed[i] == 0
+            ]
             # print(disc_seed)
             print("Removed from seed:", [flname_seed[i] for i in disc_seed])
             # print('check_target',check_target)
-            disc_target = [i for i in range(len(check_target)) if check_target[i] == 0]
+            disc_target = [
+                i for i in range(len(check_target)) if check_target[i] == 0
+            ]
             # print(disc_target)
-            print("Removed from target:", [flname_target[i] for i in disc_target])
+            print("Removed from target:",
+                  [flname_target[i] for i in disc_target])
 
             combined_seed_csv = combined_seed_csv.drop(disc_seed)
 
             # export to csv
             merged_file = "../" + "seed" + ".csv"
 
-            combined_seed_csv.to_csv(merged_file, index=False, encoding="utf-8-sig")
+            combined_seed_csv.to_csv(merged_file,
+                                     index=False,
+                                     encoding="utf-8-sig")
             print(combined_target_csv)
             print(disc_target)
             combined_target_csv = combined_target_csv.drop(disc_target)
@@ -385,6 +443,8 @@ def merge_csv(input_dir, target, group):
         # export to csv
         merged_file = "../" + foldername + ".csv"
 
-        combined_target_csv.to_csv(merged_file, index=False, encoding="utf-8-sig")
+        combined_target_csv.to_csv(merged_file,
+                                   index=False,
+                                   encoding="utf-8-sig")
 
     os.chdir(current_path)

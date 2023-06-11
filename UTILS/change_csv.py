@@ -29,7 +29,7 @@ def ask_change(quest_type):
         data = list(csv_reader)  # legge il resto del file come dati
 
     # chiede all'utente una stringa da cercare nella colonna "LABEL"
-    search_string = input("Inserit question 'LABEL': ")
+    search_string = input("Insert question 'LABEL': ")
 
     # cerca la riga con il valore corrispondente nella colonna "LABEL"
     search_col_index = header.index("LABEL")
@@ -178,6 +178,7 @@ def ask_change(quest_type):
             csv_writer.writerow(new_csv_data)
 
     os.chdir(current_path)
+
 
 def main(argv):
 
