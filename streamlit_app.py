@@ -459,7 +459,7 @@ def main():
 
         from createWebformDict import companion_document
 
-        pdf_doc = './' + input_dir + '/' + companion_document
+        pdf_doc = input_dir + '/' + companion_document
         # Check whether the specified output path exists or not
         isExists = os.path.exists(pdf_doc)
 
@@ -493,7 +493,7 @@ def main():
 
         for doc in supplementary_documents:
 
-            pdf_doc = './' + input_dir + '/' + doc
+            pdf_doc = input_dir + '/' + doc
 
             isExists = os.path.exists(pdf_doc)
 
@@ -695,9 +695,10 @@ def main():
                         form2.header('SQ' + str(idx) + '. ' + shortQ)
 
                 if (not pd.isnull(image)):
-                    imagefile = './' + input_dir + '/images/' + str(image)
+                    imagefile = input_dir + '/images/' + str(image)
+                    print(imagefile, os.path.exists(imagefile))
                     if os.path.exists(imagefile):
-                        form2.image('./' + input_dir + '/images/' + str(image))
+                        form2.image(input_dir + '/images/' + str(image))
 
                 if idxMin < idxMax:
 
