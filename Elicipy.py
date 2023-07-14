@@ -394,7 +394,7 @@ def create_figure_trend(
         line1 = axs.errorbar(x - 0.1,
                              y,
                              yerr=asymmetric_error,
-                             fmt="g-o",
+                             fmt="go",
                              label="EW")
         axs.plot(x - 0.1, y - lower_error, "gx")
         axs.plot(x - 0.1, y + upper_error, "gx")
@@ -412,7 +412,7 @@ def create_figure_trend(
         line2 = axs.errorbar(x,
                              y,
                              yerr=asymmetric_error,
-                             fmt="r-o",
+                             fmt="ro",
                              label="CM")
         axs.plot(x, y - lower_error, "rx")
         axs.plot(x, y + upper_error, "rx")
@@ -430,7 +430,7 @@ def create_figure_trend(
         line3 = axs.errorbar(x + 0.1,
                              y,
                              yerr=asymmetric_error,
-                             fmt="b-o",
+                             fmt="bo",
                              label="ERF")
         axs.plot(x + 0.1, y - lower_error, "bx")
         axs.plot(x + 0.1, y + upper_error, "bx")
@@ -1120,8 +1120,8 @@ def read_questionnaire(input_dir, csv_file, target):
 
             lang_index = langs.index(language)
             # list of column indexes to use
-            index_list = [1, 2, 3, lang_index + 3] + list(
-                range(len(langs) + 3,
+            index_list = [1, 2, 3, lang_index + 4] + list(
+                range(len(langs) + 4,
                       len(langs) + 15))
 
         else:
@@ -1134,6 +1134,9 @@ def read_questionnaire(input_dir, csv_file, target):
         language = ""
         index_list = list(range(1, 16))
 
+    print('index_list')
+    print(index_list)
+        
     # list with the short title of the target questions
     SQ_question = []
     # list with the long title of the target questions
