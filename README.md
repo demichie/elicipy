@@ -54,9 +54,12 @@ repository).
    on "Settings".
 1. At the bottom of the left panel, click on "Developer settings".
 1. On the left, click on "Personal access tokens".
-1. Click on "Generate new token".
-1. Give a name and copy your token.
+1. Click on "Tokens (classic)".
+1. Click on top on "Generate new token" and select (Generate new token (classic).
+1. Give a name.
 1. Select scope "Repo".
+1. At the end of the page click on "Generate token".
+1. Copy the newly generated token. You will use it as Streamlit Secret.
 
 ### STREAMLIT
 
@@ -65,7 +68,7 @@ repository).
 1. Select "Use existing repo".
 1. Select the github repository for the webapp.
 1. Click on "Advanced settings".
-1. Select Python version 3.7.
+1. Select Python version 3.8, 3.9 or 3.10.
 1. In the Secrets textbox write.
 
    github_token = "insert_here_your_token"
