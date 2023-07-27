@@ -113,8 +113,8 @@ repository).
 1. Select scope "Repo".
 1. At the end of the page click on "Generate token".
 1. Copy the newly generated token. 
-1. On your computer, edit in the input file createWebformDict.py the fields datarepo (set to 'local_github') and add the RepositoryData (with the new github repository
-   for the answers).   
+1. On your computer, edit in the input file createWebformDict.py the fields datarepo (set to 'local_github') and fill the RepositoryData field (with the new github repository
+   for the answers), the user filed and the github_token_field.   
 1. Edit the file "ElicitationCase.py" with the elicitation folder name
 1. Start the webapp with:
 
