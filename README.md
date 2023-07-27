@@ -31,6 +31,8 @@ Some of the functions are based on the scripts of the Matlab package Anduril
 
 The webform can run locally or at streamlit.io.
 
+### Webapp hosted on streamlit.io
+
 Here there are steps to install and run the webapp from streamlit.io.
 
 On Github, you need two repositories, one hosting the webapp streamlit_app.py
