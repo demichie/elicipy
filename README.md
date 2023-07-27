@@ -125,10 +125,12 @@ repository).
  
 On your screen you will see these lines (with different web addresses):
 
+```
   You can now view your Streamlit app in your browser.
 
   Local URL: http://localhost:8501
   Network URL: http://10.246.1.121:8501
+```
 
 The "Network URL" is the link to share. 
 
