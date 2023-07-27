@@ -415,14 +415,17 @@ def main():
 
     if (datarepo == 'local') or (datarepo == 'local_github'):
 
+        input_dir = path + '/DATA'
+
         isExist = os.path.exists(input_dir)
 
         if not isExist:
 
             print('Please create Repository folder')
 
+    else:
 
-    input_dir = path + '/DATA'
+        input_dir = path + '/DATA'
 
     csv_file = 'questionnaire.csv'
 
