@@ -60,7 +60,7 @@ repository).
 
 1. login with github account.
 1. Open the drop-down menu next to "New app".
-1. Select "From existing repo".
+1. Select "Use existing repo".
 1. Select the github repository for the webapp.
 1. Click on "Advanced settings".
 1. Select Python version 3.7.
