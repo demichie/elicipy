@@ -73,6 +73,18 @@ repository).
 
    github_token = "insert_here_your_token"
 
+1. If you want to send a confirmation email after the answers are submitted, in the file createWebformDict.py set confirmation_mail = True and add the following lines in the Secrets texbox (fill with your email data). 
+
+ SENDER_ADDRESS = ''
+
+ SENDER_NAME = ''
+ 
+ SENDER_PASSWORD = ''
+
+ SMTP_SERVER_ADDRESS = ''
+ 
+ PORT = 587   
+
 1. Click on "Save".
 1. Click on "Deploy".
 
