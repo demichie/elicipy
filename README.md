@@ -49,7 +49,7 @@ repository).
 1. Edit the csv file with your questions in the DATA folder of the github
    repository for the webapp (see the questionnaire.csv file for an example of
    the format).
-1. Edit the "ElicitationCase.py" with the repository name
+1. Edit the file "ElicitationCase.py" with the elicitation folder name
 1. Click on the top-right (on your github user icon), and from the menu click
    on "Settings".
 1. At the bottom of the left panel, click on "Developer settings".
@@ -83,8 +83,21 @@ You can share this link for the form:
 ### Webapp running locally with data saved locally
 
 1. Edit in the input file createWebformDict.py the fields datarepo (set to 'local').
+1. Edit the file "ElicitationCase.py" with the elicitation folder name.
+1. Start the webapp with:
 
-1. Edit the "ElicitationCase.py" with the repository name
+> streamlit run streamlit_app.py
+
+On your screen you will see these lines (with different web addresses):
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://10.246.1.121:8501
+
+The "Network URL" is the link to share. 
+
+
 
 ### Webapp running locally with data saved on Github
 
@@ -102,10 +115,18 @@ repository).
 1. Copy the newly generated token. 
 1. On your computer, edit in the input file createWebformDict.py the fields datarepo (set to 'local_github') and add the RepositoryData (with the new github repository
    for the answers).   
-1. Edit the "ElicitationCase.py" with the repository name
+1. Edit the file "ElicitationCase.py" with the elicitation folder name
 1. Start the webapp with:
 
 > streamlit run streamlit_app.py
  
+On your screen you will see these lines (with different web addresses):
+
+  You can now view your Streamlit app in your browser.
+
+  Local URL: http://localhost:8501
+  Network URL: http://10.246.1.121:8501
+
+The "Network URL" is the link to share. 
 
 
