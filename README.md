@@ -88,12 +88,24 @@ You can share this link for the form:
 
 ### Webapp running locally with data saved on Github
 
-On Github, you need a repository to collect the answers (create a new
+1. On Github, you need a repository to collect the answers (create a new
 repository).
-
-1. Edit in the input file createWebformDict.py the fields datarepo (set to 'local_github') and the RepositoryData (with the new github repository
-   for the answers).
-   
+1. Click on the top-right (on your github user icon), and from the menu click
+   on "Settings".
+1. At the bottom of the left panel, click on "Developer settings".
+1. On the left, click on "Personal access tokens".
+1. Click on "Tokens (classic)".
+1. Click on top on "Generate new token" and select (Generate new token (classic).
+1. Give a name.
+1. Select scope "Repo".
+1. At the end of the page click on "Generate token".
+1. Copy the newly generated token. 
+1. On your computer, edit in the input file createWebformDict.py the fields datarepo (set to 'local_github') and add the RepositoryData (with the new github repository
+   for the answers).   
 1. Edit the "ElicitationCase.py" with the repository name
+1. Start the webapp with:
+
+> streamlit run streamlit_app.py
+ 
 
 
