@@ -48,6 +48,7 @@ repository).
 1. Edit the csv file with your questions in the DATA folder of the github
    repository for the webapp (see the questionnaire.csv file for an example of
    the format).
+1. Edit the "ElicitationCase.py" with the repository name
 1. Click on the top-right (on your github user icon), and from the menu click
    on "Settings".
 1. At the bottom of the left panel, click on "Developer settings".
