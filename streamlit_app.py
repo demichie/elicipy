@@ -415,25 +415,14 @@ def main():
 
     if (datarepo == 'local') or (datarepo == 'local_github'):
 
-        input_dir = path + '/DATA'
-
         isExist = os.path.exists(input_dir)
 
         if not isExist:
 
             print('Please create Repository folder')
 
-    else:
 
-        try:
-
-            from createWebformDict import Repository
-
-        except ImportError:
-
-            print('Please add Repository')
-
-        input_dir = path + '/DATA'
+    input_dir = path + '/DATA'
 
     csv_file = 'questionnaire.csv'
 
@@ -564,8 +553,8 @@ def main():
                                   format_func=lambda x: options[x])
         print('lang_index', lang_index)
         language = options[lang_index]
-        index_list = [0, 1, lang_index+2] + \
-            list(range(len(langs)+2, len(langs)+14))
+        index_list = [0, 1, 2, lang_index+3] + \
+            list(range(len(langs)+3, len(langs)+14))
         print('language', language)
 
     else:

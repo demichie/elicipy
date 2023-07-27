@@ -2,12 +2,13 @@
 datarepo = 'local'
 
 # datarepo = 'github'
-# RepositoryData = 'createWebformAnswers'
+RepositoryData = ''
 
-Repository = 'testWebform'
+user = ''
+github_token = ''
 
 # this can be 'seed' or 'target'
-quest_type = 'target'
+quest_type = 'seed'
 
 group_list = ['SG1 (Clermont)', 'SG2 (Quito)', 'SG3 (Geol.)', 'SG4 (MathMod)',
               'SG5 (Junior)', 'SG6 (Senior)']
