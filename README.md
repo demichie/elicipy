@@ -42,8 +42,7 @@ repository).
 ### GITHUB STREAMLIT REPOSITORY
 
 1. Fork this repository.
-1. Edit in the input file createWebformDict.py the fields datarepo (with the
-   forked repository) and the RepositoryData (with the new github repository
+1. Edit in the input file createWebformDict.py the fields datarepo (set to 'github') and the RepositoryData (with the new github repository
    for the answers).
 1. Set in the input file createWebformDict.py the quest_type variable to
    "seed" of "target".
@@ -61,7 +60,7 @@ repository).
 
 ### STREAMLIT
 
-1. login with github account.
+1. Login with github account.
 1. Open the drop-down menu next to "New app".
 1. Select "Use existing repo".
 1. Select the github repository for the webapp.
@@ -80,7 +79,18 @@ You can share this link for the form:
 
 ### Webapp running locally with data saved locally
 
+1. Edit in the input file createWebformDict.py the fields datarepo (set to 'local').
+
+1. Edit the "ElicitationCase.py" with the repository name
 
 ### Webapp running locally with data saved on Github
+
+On Github, you need a repository to collect the answers (create a new
+repository).
+
+1. Edit in the input file createWebformDict.py the fields datarepo (set to 'local_github') and the RepositoryData (with the new github repository
+   for the answers).
+   
+1. Edit the "ElicitationCase.py" with the repository name
 
 
