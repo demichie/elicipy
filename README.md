@@ -10,26 +10,7 @@ anwers from the epxerts with a webform and their analysis.
 The answers (for both seed and target questions) are collected with a
 Streamlit webapp, that can run locally or from streamlit.io (read below).
 
-Once the seed and target questions have been answered by the expert, you can
-run the Python analysis script:
-
-> python elicipy.py
-
-The script will create a new folder with .csv files and a .pptx presentation
-of the results of the elicitation.
-
-Authors:
-
-* Mattia de' Michieli Vitturi.
-* Andrea Bevilacqua.
-* Alessandro Tadini.
-
-Some of the functions are based on the scripts of the Matlab package Anduril
-(authors:  Georgios Leontaris and Oswaldo Morales-Napoles).
-
 ## Webform
-
-The webform can run locally or at streamlit.io.
 
 ### Webapp hosted on streamlit.io
 
@@ -169,4 +150,22 @@ On your screen you will see these lines (with different web addresses):
 
 The "Network URL" is the link to share. 
 
+## Analysis
+
+Once the seed and target questions have been answered by the expert, you can
+run the Python analysis script:
+
+> python elicipy.py
+
+The script will create a new folder with .csv files and a .pptx presentation
+of the results of the elicitation.
+
+Authors:
+
+* Mattia de' Michieli Vitturi.
+* Andrea Bevilacqua.
+* Alessandro Tadini.
+
+Some of the functions are based on the scripts of the Matlab package Anduril
+(authors:  Georgios Leontaris and Oswaldo Morales-Napoles).
 
