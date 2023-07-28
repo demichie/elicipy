@@ -1,5 +1,4 @@
-import random
-from ete3 import Tree, TreeStyle, NodeStyle, faces, AttrFace, CircleFace
+from ete3 import Tree, TreeStyle, faces, AttrFace, CircleFace
 import textwrap
 import pandas as pd
 import numpy as np
@@ -25,39 +24,39 @@ def layout(node):
 
         # add Cooke percentiles
         cookeFace = faces.TextFace(
-            "Cooke [" + str(node.q5) + "," + str(node.q50) + "," + str(node.q95) + "]",
+            "Cooke [" + str(node.q5) + "," + str(node.q50) + "," +
+            str(node.q95) + "]",
             fsize=8,
             fgcolor="RoyalBlue",
         )
-        faces.add_face_to_node(cookeFace, node, column=0, position="branch-bottom")
+        faces.add_face_to_node(cookeFace,
+                               node,
+                               column=0,
+                               position="branch-bottom")
 
         # add erf percentiles
         erfFace = faces.TextFace(
-            "ERF ["
-            + str(node.q_erf5)
-            + ","
-            + str(node.q_erf50)
-            + ","
-            + str(node.q_erf95)
-            + "]",
+            "ERF [" + str(node.q_erf5) + "," + str(node.q_erf50) + "," +
+            str(node.q_erf95) + "]",
             fsize=8,
             fgcolor="Red",
         )
-        faces.add_face_to_node(erfFace, node, column=0, position="branch-bottom")
+        faces.add_face_to_node(erfFace,
+                               node,
+                               column=0,
+                               position="branch-bottom")
 
         # add EW percentiles
         EWFace = faces.TextFace(
-            "EW ["
-            + str(node.q_EW5)
-            + ","
-            + str(node.q_EW50)
-            + ","
-            + str(node.q_EW95)
-            + "]",
+            "EW [" + str(node.q_EW5) + "," + str(node.q_EW50) + "," +
+            str(node.q_EW95) + "]",
             fsize=8,
             fgcolor="Green",
         )
-        faces.add_face_to_node(EWFace, node, column=0, position="branch-bottom")
+        faces.add_face_to_node(EWFace,
+                               node,
+                               column=0,
+                               position="branch-bottom")
 
     # add short Q to all the nodes
     longNameFace = faces.TextFace(lines, fsize=6)
@@ -67,9 +66,9 @@ def layout(node):
 
         # Creates a sphere face whose size is proportional to node's
         # feature "weight"
-        C = CircleFace(
-            radius=node.weight_cooke * 100, color="RoyalBlue", style="sphere"
-        )
+        C = CircleFace(radius=node.weight_cooke * 100,
+                       color="RoyalBlue",
+                       style="sphere")
         # Let's make the sphere transparent
         C.opacity = 0.3
         # And place as a float face over the tree
@@ -79,7 +78,9 @@ def layout(node):
 
         # Creates a sphere face whose size is proportional to node's
         # feature "weight"
-        C1 = CircleFace(radius=node.weight_erf * 80, color="Red", style="sphere")
+        C1 = CircleFace(radius=node.weight_erf * 80,
+                        color="Red",
+                        style="sphere")
         # Let's make the sphere transparent
         C1.opacity = 0.3
         # And place as a float face over the tree
@@ -118,7 +119,8 @@ def build_tree(csv_file, first_node, first_node_str):
     short_q = df["SHORT_Q"].tolist()
 
     # build tree from list of parents and first node
-    child_string = build_subtree(idx_list, parents, first_node, "TQ" + str(first_node))
+    child_string = build_subtree(idx_list, parents, first_node,
+                                 "TQ" + str(first_node))
     tree_string = child_string[1] + ";"
 
     t = Tree(tree_string, format=8)
@@ -200,7 +202,8 @@ def build_subtree(idx_list, parents, node, tree_string):
     rep_string = "TQ" + str(node)
     child_string = "(TQ" + ",TQ".join(map(str, childs)) + ")"
     if len(childs) > 0:
-        tree_string = tree_string.replace(rep_string, child_string + rep_string)
+        tree_string = tree_string.replace(rep_string,
+                                          child_string + rep_string)
 
     for ch in childs:
 
@@ -229,12 +232,14 @@ if __name__ == "__main__":
 
     csv_file = "tree.csv"
 
-    for first_node, first_node_str in zip(first_node_list, first_node_str_list):
+    for first_node, first_node_str in zip(first_node_list,
+                                          first_node_str_list):
 
         t, ts, code2name = build_tree(csv_file, first_node, first_node_str)
 
         t.render(
-            output_dir + "/" + elicitation_name + "_tree" + str(first_node) + ".png",
+            output_dir + "/" + elicitation_name + "_tree" + str(first_node) +
+            ".png",
             units="in",
             w=3,
             dpi=600,
@@ -250,7 +255,10 @@ if __name__ == "__main__":
     width = 0.3
     wedge_properties = {"width": width, "edgecolor": "w", "linewidth": 2}
 
-    plt.pie(v1, labels=labels1, labeldistance=0.85, wedgeprops=wedge_properties)
+    plt.pie(v1,
+            labels=labels1,
+            labeldistance=0.85,
+            wedgeprops=wedge_properties)
     plt.pie(
         v2,
         labels=labels2,

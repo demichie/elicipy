@@ -1,8 +1,6 @@
 import pandas as pd
-import numpy as np
 import os
 import shutil as st
-from ElicipyDict import *
 
 
 def replace_strings(working_dir, df, header, i_row):
@@ -33,9 +31,8 @@ def replace_strings(working_dir, df, header, i_row):
 
                     for line in f:
                         # replacing the string and write to output file
-                        filedata = filedata.replace(
-                            searchstring, str(df.at[i_row, name])
-                        )
+                        filedata = filedata.replace(searchstring,
+                                                    str(df.at[i_row, name]))
 
             f.close()
             f_out = open(fname, "w")
@@ -49,6 +46,12 @@ def replace_strings(working_dir, df, header, i_row):
 
 
 def main():
+
+    from ElicipyDict import output_dir
+    from ElicipyDict import elicitation_name
+
+    current_path = os.getcwd()
+    output_dir = current_path + "/" + output_dir
 
     csv_file = output_dir + "/" + elicitation_name + "_samples.csv"
 
@@ -68,7 +71,7 @@ def main():
         working_dir = "ensemble." + "{:05d}".format(i_row)
         working_dir = os.path.join(os.getcwd(), working_dir)
 
-        st.copytree("templatedir", working_dir, symlinks=True)
+        st.copytree(templatedir, working_dir, symlinks=True)
 
         replace_strings(working_dir, df, header, i_row)
 

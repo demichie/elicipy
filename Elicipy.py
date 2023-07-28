@@ -409,11 +409,7 @@ def create_figure_trend(
                        q_Cooke[trend_group + n_SQ - 1, 1])
         asymmetric_error = [lower_error, upper_error]
 
-        line2 = axs.errorbar(x,
-                             y,
-                             yerr=asymmetric_error,
-                             fmt="ro",
-                             label="CM")
+        line2 = axs.errorbar(x, y, yerr=asymmetric_error, fmt="ro", label="CM")
         axs.plot(x, y - lower_error, "rx")
         axs.plot(x, y + upper_error, "rx")
         handles.append(line2)
@@ -1136,7 +1132,7 @@ def read_questionnaire(input_dir, csv_file, target):
 
     print('index_list')
     print(index_list)
-        
+
     # list with the short title of the target questions
     SQ_question = []
     # list with the long title of the target questions
@@ -1420,9 +1416,8 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
 
             # print(i+1,str(i+1),SQ_realization[i],SQ_scale[i])
 
-            print(
-                f'{i+1:>5d} {"SQ"+str(i+1):>13} {""} {SQ_realization[i]:6e} {SQ_scale[i]:4}'
-            )
+            print(f'{i+1:>5d} {"SQ"+str(i+1):>13} {""} ' +
+                  '{SQ_realization[i]:6e} {SQ_scale[i]:4}')
 
         # Reset the standard output to its original value
         sys.stdout = original_stdout
@@ -1446,17 +1441,20 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
 
             for i in np.arange(n_SQ):
 
-                print(
-                    f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} {"SQ"+str(i+1):>13} {SQ_scale[i]:4} {SQ_array[k, 0, i]:6e} {""} {SQ_array[k, 1, i]:6e} {" "}{SQ_array[k, 2, i]:6e}'
-                )
+                print(f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} ' +
+                      '{"SQ"+str(i+1):>13} {SQ_scale[i]:4} ' +
+                      '{SQ_array[k, 0, i]:6e} {""} {SQ_array[k, 1, i]:6e} ' +
+                      '{" "}{SQ_array[k, 2, i]:6e}')
 
             if target:
 
                 for i in np.arange(n_TQ):
 
                     print(
-                        f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} {"TQ"+str(i+1):>13} {TQ_scale[i]:4} {TQ_array[k, 0, i]:6e} {""} {TQ_array[k, 1, i]:6e} {" "}{TQ_array[k, 2, i]:6e}'
-                    )
+                        f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} ' +
+                        '{"TQ"+str(i+1):>13} {TQ_scale[i]:4} ' +
+                        '{TQ_array[k, 0, i]:6e} {""} {TQ_array[k, 1, i]:6e} ' +
+                        '{" "}{TQ_array[k, 2, i]:6e}')
 
         # Reset the standard output to its original value
         sys.stdout = original_stdout
@@ -1590,16 +1588,17 @@ def create_samples_and_barplot(
 
             if ERF_flag > 0:
 
-                quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = createSamples(
-                    DAT,
-                    j,
-                    W_erf[:, 4].flatten(),
-                    n_sample,
-                    global_log[j],
-                    [global_minVal[j], global_maxVal[j]],
-                    overshoot,
-                    ERF_flag,
-                )
+                quan05_erf, quan50_erf, qmean_erf, \
+                    quan95_erf, C_erf = createSamples(
+                        DAT,
+                        j,
+                        W_erf[:, 4].flatten(),
+                        n_sample,
+                        global_log[j],
+                        [global_minVal[j], global_maxVal[j]],
+                        overshoot,
+                        ERF_flag,
+                    )
 
                 print("%2i %9.2f %9.2f %9.2f %9.2f" %
                       (j, quan05_erf, quan50_erf, qmean_erf, quan95_erf))
@@ -1807,6 +1806,9 @@ def main(argv):
         output_dir,
         elicitation_name,
     )
+
+    save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
+                 SQ_realization, SQ_scale, SQ_array, TQ_scale, TQ_array)
 
     minval_all = np.zeros(n_SQ + n_TQ)
     minval_all[0:n_SQ] = np.amin(SQ_array[:, 0, :], axis=0)
@@ -2876,8 +2878,6 @@ def main(argv):
                             run.font.size = Pt(10)
 
     prs.save(output_dir + "/" + elicitation_name + ".pptx")  # saving file
-    save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
-                 SQ_realization, SQ_scale, SQ_array, TQ_scale, TQ_array)
 
 
 if __name__ == "__main__":

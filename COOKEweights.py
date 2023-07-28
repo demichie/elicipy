@@ -1,6 +1,5 @@
-def COOKEweights(
-    SQ_array, TQ_array, realization, alpha, background_measure, overshoot, cal_power
-):
+def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
+                 overshoot, cal_power):
     """Compute the weights with Cooke formulation
 
     Parameters
@@ -43,7 +42,6 @@ def COOKEweights(
     # array with information, score and normalized weight for each expert
     W = np.zeros((E, 5))
 
-    
     # create numpy array M with the number of realizations captured in every
     # expert's bin that is formed by the provided quantiles
     for ex in np.arange(E):
@@ -78,9 +76,8 @@ def COOKEweights(
             else:
 
                 M[ex, 3] = M[ex, 3] + 1
-
     """
-    
+
     # create numpy array M with the number of realizations captured in every
     # expert's bin that is formed by the provided quantiles
     for ex in np.arange(E):
@@ -102,11 +99,10 @@ def COOKEweights(
                 M[ex, 3] = M[ex, 3] + 1
 
     """
-                
+
     # calculate calibration and information score for every expert
-    [I_real, I_tot] = calculate_information(
-        SQ_array, TQ_array, realization, overshoot, background_measure
-    )
+    [I_real, I_tot] = calculate_information(SQ_array, TQ_array, realization,
+                                            overshoot, background_measure)
 
     for ex in np.arange(E):
 
@@ -166,7 +162,7 @@ def calscore(M, cal_power):
     else:
         if len(S) == 4:
             P = np.array([0.05, 0.45, 0.45, 0.05])
-        elif length(S) == 6:
+        elif len(S) == 6:
             P = np.array([0.05, 0.20, 0.25, 0.25, 0.20, 0.05])
 
         E1 = S * np.log(S / P)
@@ -177,7 +173,8 @@ def calscore(M, cal_power):
     return CS
 
 
-def calculate_information(SQ_array, TQ_array, realization, k, background_measure):
+def calculate_information(SQ_array, TQ_array, realization, k,
+                          background_measure):
     """
     This function is based on the Matlab package
     ANDURIL (Authors:  Georgios Leontaris and
@@ -186,7 +183,6 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
 
     import numpy as np
 
-    per = [0.05, 0.5, 0.95]
     p = [0.05, 0.45, 0.45, 0.05]
     N = SQ_array.shape[2]
     E = SQ_array.shape[0]
@@ -233,19 +229,18 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
                         i,
                     )
 
-                x_o[i] = np.log(lowval[i]) - k * (
-                    np.log(highval[i]) - np.log(lowval[i])
-                )
-                x_n[i] = np.log(highval[i]) + k * (
-                    np.log(highval[i]) - np.log(lowval[i])
-                )
+                x_o[i] = np.log(
+                    lowval[i]) - k * (np.log(highval[i]) - np.log(lowval[i]))
+                x_n[i] = np.log(
+                    highval[i]) + k * (np.log(highval[i]) - np.log(lowval[i]))
                 tmp = np.insert(np.log(SQ_array[e, :, i]), 0, x_o[i])
                 tmp2 = np.append(tmp, x_n[i])
                 x[e, :] = tmp2
 
             for j in np.arange(N_P):
 
-                suma[i, e] = suma[i, e] + p[j] * np.log(p[j] / (x[e, j + 1] - x[e, j]))
+                suma[i, e] = suma[i, e] + p[j] * \
+                    np.log(p[j] / (x[e, j + 1] - x[e, j]))
 
             info_per_variable[i, e] = np.log(x_n[i] - x_o[i]) + suma[i, e]
 
@@ -271,7 +266,8 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
                     x_o[i] = lowval[i] - k * (highval[i] - lowval[i])
                     x_n[i] = highval[i] + k * (highval[i] - lowval[i])
 
-                    tmp = np.insert(TQ_array[e, :, i - SQ_array.shape[2]], 0, x_o[i])
+                    tmp = np.insert(TQ_array[e, :, i - SQ_array.shape[2]], 0,
+                                    x_o[i])
                     tmp2 = np.append(tmp, x_n[i])
                     x[e, :] = tmp2
 
@@ -286,28 +282,26 @@ def calculate_information(SQ_array, TQ_array, realization, k, background_measure
                             i,
                         )
 
-                    x_o[i] = np.log(lowval[i]) - k * (
-                        np.log(highval[i]) - np.log(lowval[i])
-                    )
-                    x_n[i] = np.log(highval[i]) + k * (
-                        np.log(highval[i]) - np.log(lowval[i])
-                    )
+                    x_o[i] = np.log(lowval[i]) - k * (np.log(highval[i]) -
+                                                      np.log(lowval[i]))
+                    x_n[i] = np.log(highval[i]) + k * (np.log(highval[i]) -
+                                                       np.log(lowval[i]))
 
                     tmp = np.insert(
-                        np.log(TQ_array[e, :, i - SQ_array.shape[2]]), 0, x_o[i]
-                    )
+                        np.log(TQ_array[e, :, i - SQ_array.shape[2]]), 0,
+                        x_o[i])
                     tmp2 = np.append(tmp, x_n[i])
                     x[e, :] = tmp2
 
                 for j in np.arange(N_P):
 
-                    sumb[i - SQ_array.shape[2], e] = sumb[i - SQ_array.shape[2], e] + p[
-                        j
-                    ] * np.log(p[j] / (x[e, j + 1] - x[e, j]))
+                    sumb[i - SQ_array.shape[2],
+                         e] = sumb[i - SQ_array.shape[2],
+                                   e] + p[j] * np.log(p[j] /
+                                                      (x[e, j + 1] - x[e, j]))
 
-                info_per_variable[i, e] = (
-                    np.log(x_n[i] - x_o[i]) + sumb[i - SQ_array.shape[2], e]
-                )
+                info_per_variable[i, e] = (np.log(x_n[i] - x_o[i]) +
+                                           sumb[i - SQ_array.shape[2], e])
 
     # compute total information score
     for e in np.arange(E):

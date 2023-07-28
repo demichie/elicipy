@@ -5,8 +5,11 @@ import sys
 import time
 from datetime import datetime
 
+
 def ordina_file_per_data(nomi_file, date):
-    # Crea una lista di tuple contenente il nome del file e la data corrispondente
+    # Crea una lista di tuple contenente il nome del file
+    # e la data corrispondente
+
     file_date = [(nome, data) for nome, data in zip(nomi_file, date)]
 
     # Ordina la lista in base alla data
@@ -24,6 +27,7 @@ def similar(a, b):
 
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
+
 current_path = os.getcwd()
 
 while True:
@@ -31,7 +35,7 @@ while True:
     if quest_type not in ('0', '1', '2'):
         print("Not an appropriate choice.")
     else:
-        if quest_type=='0':
+        if quest_type == '0':
             sys.exit()
         else:
             break
@@ -83,11 +87,10 @@ if found_row:
     maxval = found_row[maxval_col_index]
     units = found_row[units_col_index]
 
-    
 short_q_value = short_q_value.lstrip().rstrip()
 if short_q_value.startswith('"'):
     short_q_value = short_q_value[1:]
-    
+
 if short_q_value.endswith('"'):
     short_q_value = short_q_value[:-1]
 
@@ -187,17 +190,17 @@ for pct in pctls:
         str(maxval) + ')' + ' [' + units + ']'
     Qstr_list.append(Qstr)
 
-    ans_list.append(input(Qstr+' '))
+    ans_list.append(input(Qstr + ' '))
 
 os.chdir(current_path)
 os.chdir(dir_main)
 
-print('Folder:',dir_main)
+print('Folder:', dir_main)
 
 for file in filelist:
 
-    print('Old file',file)    
-    
+    print('Old file', file)
+
     # Open the second CSV file and read its contents
     with open(file, 'r') as file2:
         reader2 = csv.reader(file2)
@@ -218,8 +221,8 @@ for file in filelist:
     dt_string = now.strftime("%Y_%m_%d_%H_%M_%S")
     new_filename = 'questionnaire_' + dt_string + '_Output.csv'
 
-    print('New file',new_filename)    
-    
+    print('New file', new_filename)
+
     # Write the merged data to a new CSV file
     with open(new_filename, 'w', newline='') as outfile:
         writer = csv.writer(outfile)
@@ -227,9 +230,7 @@ for file in filelist:
         writer.writerow(data2)  # Write the merged data row
 
     time.sleep(2)
-
-
-"""    
+"""
 os.chdir(current_path)
 os.chdir(dir_other)
 
@@ -237,7 +238,7 @@ print('Folder:',dir_other)
 
 for file in filelist_other:
 
-    print('Old file',file)    
+    print('Old file',file)
 
     # Open the second CSV file and read its contents
     with open(file, 'r') as file2:
@@ -259,7 +260,7 @@ for file in filelist_other:
     dt_string = now.strftime("%Y_%m_%d_%H_%M_%S")
     new_filename = 'questionnaire_' + dt_string + '_Output.csv'
 
-    print('New file',new_filename)    
+    print('New file',new_filename)
 
     # Write the merged data to a new CSV file
     with open(new_filename, 'w', newline='') as outfile:

@@ -79,9 +79,9 @@ def merge_csv(input_dir, target, group):
         combined_seed_csv.insert(loc=0, column="timestamp", value=timestamp)
 
         combined_seed_csv.sort_values(by='timestamp',
-                                        ascending=False,
-                                        inplace=True)
-        
+                                      ascending=False,
+                                      inplace=True)
+
         combined_seed_csv.drop("Group(s)", axis=1, inplace=True)
 
         # print('combined_seed_csv',combined_seed_csv)
@@ -180,7 +180,7 @@ def merge_csv(input_dir, target, group):
                             current,
                             combined_seed_csv.columns.get_loc(col)] = (
                                 df2[col].dropna().iloc[-1])
-                        
+
                 print("Remove duplicate expert from seed:", flname_seed[disc])
                 combined_seed_csv = combined_seed_csv.drop(
                     [combined_seed_csv.index[disc]])
@@ -358,10 +358,6 @@ def merge_csv(input_dir, target, group):
 
                     if len(df2[col].dropna()) > 0:
 
-                        # print('BEFORE')
-                        # print('Value 1', combined_target_csv[col].iloc[previous])
-                        # print('Value 2', combined_target_csv[col].iloc[current])
-
                         combined_target_csv.iloc[
                             previous,
                             combined_target_csv.columns.get_loc(col)] = (
@@ -370,11 +366,6 @@ def merge_csv(input_dir, target, group):
                             current,
                             combined_target_csv.columns.get_loc(col)] = (
                                 df2[col].dropna().iloc[-1])
-
-                        # print('AFTER')
-                        # print('Value 1', combined_target_csv[col].iloc[previous])
-                        # print('Value 2', combined_target_csv[col].iloc[current])
-                # a = input('PAUSE')
 
                 combined_target_csv = combined_target_csv.reset_index(
                     drop=True)

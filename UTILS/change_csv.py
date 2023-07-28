@@ -49,10 +49,10 @@ def ask_change(quest_type):
 
         short_q_index = header.index("SHORT Q")
         short_q_value = found_row[short_q_index]
-        minval_index = header.index("MINVAL")
-        minval_value = found_row[minval_index]
-        maxval_index = header.index("MAXVAL")
-        maxval_value = found_row[maxval_index]
+        # minval_index = header.index("MINVAL")
+        # minval_value = found_row[minval_index]
+        # maxval_index = header.index("MAXVAL")
+        # maxval_value = found_row[maxval_index]
 
         print('Sort q')
         print(short_q_value)
@@ -141,7 +141,6 @@ def ask_change(quest_type):
         print('')
 
         # cerca le colonne che contengono la stringa "short_q_value"
-        new_values = {}
         new_csv_data = []
         for col_index, col_name in enumerate(csv_header):
             # print(col_name)
@@ -149,7 +148,7 @@ def ask_change(quest_type):
                 old_value = csv_data[0][col_index]
                 print(f"'{col_name}'")
                 print(f"Old value '{old_value}'")
-                new_value = input(f"Type the new value: ")
+                new_value = input("Type the new value: ")
                 new_csv_data.append(new_value)
             elif (col_name == 'First Name'):
                 new_csv_data.append(csv_data[0][col_index])
