@@ -156,13 +156,32 @@ ___
 
 ## Analysis
 
-Once the seed and target questions have been answered by the expert, you can
-run the Python analysis script:
+### Analysis with Webapp hosted on streamlit.io
+
+1. Copy from the ELICITATIONS folder of the Webapp repositry the elicitation folder containing DATA
+1. In ElicipyDict.py set datarepo = 'github' and in RepositoryData write the name of the Github repository with the answers
+1. Set the analysis parameter as desired.
+1. run the Python analysis script:
 
 > python elicipy.py
 
-The script will create a new folder with .csv files and a .pptx presentation
-of the results of the elicitation.
+### Analysis with Webapp hosted locally and answers saved on Github
+1. In ElicipyDict.py set datarepo = 'github' and in RepositoryData write the name of the Github repository with the answers
+1. Set the analysis parameter as desired.
+1. run the Python analysis script:
+
+> python elicipy.py
+
+
+### Analysis with Webapp hosted locally and answers saved locally
+1. In ElicipyDict.py set datarepo = 'local'
+1. Set the analysis parameter as desired.
+1. run the Python analysis script:
+
+> python elicipy.py
+
+
+The analysis results are saved in the folder output_dir (set in ElicipyDeict.py)
 
 ___
 
