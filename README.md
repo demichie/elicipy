@@ -152,6 +152,8 @@ On your screen you will see these lines (with different web addresses):
 
 The "Network URL" is the link to share. 
 
+___
+
 ## Analysis
 
 Once the seed and target questions have been answered by the expert, you can
