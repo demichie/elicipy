@@ -20,11 +20,6 @@ group_list = ['SG1 (Clermont)', 'SG2 (Quito)', 'SG3 (Geol.)', 'SG4 (MathMod)',
 # seed_list = [1,2]
 absolute_indexing = True
 
-# encrypted = False
-
-# user = 'username'
-# github_token = "token"
-
 pctls = [5, 50, 95]
 # companion_document = ""
 # supplementary_documents = [""]
