@@ -2,7 +2,7 @@
 
 [![SQAaaS badge shields.io](https://img.shields.io/badge/sqaaas%20software-gold-yellow)](https://api.eu.badgr.io/public/assertions/egeaQ6tgQkWEtV3myK3SKQ "SQAaaS gold badge achieved")
 
-![DOI](https://zenodo.org/badge/421933730.svg)](https://zenodo.org/badge/latestdoi/421933730)
+[![DOI](https://zenodo.org/badge/421933730.svg)](https://zenodo.org/badge/latestdoi/421933730)
 
 
 
