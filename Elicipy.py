@@ -1766,8 +1766,16 @@ def main(argv):
         from ElicipyDict import user
         from ElicipyDict import github_token
         from ElicipyDict import RepositoryData
+        if datarepo == "github":
+            try:    
+                from ElicipyDict import Repository
+            except ImportError:
+                print('Add Repository containing questionnaire.csv in input file')
+                sys.exit()    
+        else:
+             Repository = ''
 
-        saveDataFromGithub(RepositoryData, user, github_token)
+        saveDataFromGithub(datarepo,Repository,RepositoryData, user, github_token)
 
     sys.path.insert(0, os.getcwd())
     input_dir = "DATA"
