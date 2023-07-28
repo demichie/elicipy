@@ -10,6 +10,16 @@ anwers from the epxerts with a webform and their analysis.
 The answers (for both seed and target questions) are collected with a
 Streamlit webapp, that can run locally or from streamlit.io (read below).
 
+The analysis is always done locally.
+
+All the elicitation data, included the input files for the creation of the webapp and for analysis, are in subfolders of the ELICITATIONS folder. 
+The files required to run an elicitation are:
+1. createWebformDict.py
+1. elicipyDict.py
+1. DATA/questionnaire.csv 
+
+When there are multiple elicitations folders inside ELICITATION, the elicitation for the Webapp is specified in the file ElicitationCase.py
+
 ___
 
 ## Webform
