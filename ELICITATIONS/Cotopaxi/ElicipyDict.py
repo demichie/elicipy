@@ -1,4 +1,4 @@
-elicitation_name = 'test'
+elicitation_name = 'Cotopaxi'
 
 # datarepo can be 'local' or 'github'
 datarepo = 'local'
@@ -7,8 +7,8 @@ datarepo = 'local'
 # user = ''
 # github_token = ''
 
-# folder or repository with data
-Repository = 'testWebform'
+# Repository with data (used only when datarepo='github')
+# Repository = ''
 
 output_dir = 'OUTPUT'
 
