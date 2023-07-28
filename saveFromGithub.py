@@ -55,42 +55,26 @@ def download_directory(repository, branch, server_path) -> None:
     return
 
 
-def saveDataFromGithub(datarepo, Repository, RepositoryData, user, github_token):
+def saveDataFromGithub(RepositoryData, user, github_token):
 
     g = Github(user, github_token)
     repo = g.get_user().get_repo(RepositoryData)
 
     current_path = os.getcwd()
 
-    filename = "createWebformDict.py"
+    os.chdir('DATA')
+    print('Current path:',os.getcwd())
 
-    if datarepo == "github":
-
-        if os.path.exists("./DATA"):
-            print("Deleting old DATA folder")
-            shutil.rmtree("./DATA")
-
-        os.makedirs("./DATA")
-        os.chdir('./DATA')
-        csv_file = 'questionnaire.csv'
-
-        github_file_to_bytes(Repository, repo, csv_file, branch="main")
-
-    elif datarepo == "local_github":
-    
-        os.chdir('./DATA')
-        print('Current path:',os.getcwd())
-
-        if os.path.exists("./seed"):
-            print("Deleting old seed folder")
-            shutil.rmtree("./seed")
-        else:
-            print("No seed folder found")    
-        if os.path.exists("./target"):
-            print("Deleting old seed folder")
-            shutil.rmtree("./target")
-        else:
-            print("No target folder found")    
+    if os.path.exists("seed"):
+        print("Deleting old seed folder")
+        shutil.rmtree("seed")
+    else:
+        print("No seed folder found")    
+    if os.path.exists("target"):
+        print("Deleting old target folder")
+        shutil.rmtree("target")
+    else:
+        print("No target folder found")    
 
 
     print(os.getcwd())
