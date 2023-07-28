@@ -158,15 +158,15 @@ ___
 
 ### Analysis with Webapp hosted on streamlit.io
 
-1. Copy from the ELICITATIONS folder of the Webapp repositry the elicitation folder containing DATA
-1. In ElicipyDict.py set datarepo = 'github' and in RepositoryData write the name of the Github repository with the answers
+1. Copy the elicitation folder containing DATA from the ELICITATIONS folder of the Webapp repository to the ELICITATIONS folder on your computer 
+1. On your computer, in the file ElicipyDict.py, set datarepo = 'github' and RepositoryData = the name of the Github repository with the answers
 1. Set the analysis parameter as desired.
 1. run the Python analysis script:
 
 > python elicipy.py
 
 ### Analysis with Webapp hosted locally and answers saved on Github
-1. In ElicipyDict.py set datarepo = 'github' and in RepositoryData write the name of the Github repository with the answers
+1. On your computer, in the file ElicipyDict.py, set datarepo = 'github' and RepositoryData = the name of the Github repository with the answers
 1. Set the analysis parameter as desired.
 1. run the Python analysis script:
 
