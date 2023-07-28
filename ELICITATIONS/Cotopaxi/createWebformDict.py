@@ -1,11 +1,14 @@
-# select 'github' or 'local'
+# select 'github', 'local' or 'local_github'
 datarepo = 'local'
 
 # datarepo = 'github'
-RepositoryData = ''
 
-user = ''
-github_token = ''
+# Github repository for answers, used only when datarepo='local' or 'local_github'
+# RepositoryData = ''
+
+# Parameters used only when datarepo='local' or 'local_github'
+# user = ''
+# github_token = ''
 
 # this can be 'seed' or 'target'
 quest_type = 'seed'
