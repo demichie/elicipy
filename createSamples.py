@@ -1,4 +1,5 @@
 def createSamples(DAT, j, W, N, logSCALE, domain, overshoot, ERF_flag):
+
     """Compute the quantiles and samples for question j from weights and answers
 
     Parameters
@@ -47,22 +48,26 @@ def createSamples(DAT, j, W, N, logSCALE, domain, overshoot, ERF_flag):
     if ERF_flag == 1:
 
         quan05, quan50, qmean, quan95, C = createSamplesERF_original(
-            incm, mid, incM, W, N, logSCALE, domain)
+            incm, mid, incM, W, N, logSCALE, domain
+        )
 
     elif ERF_flag == 2:
 
         quan05, quan50, qmean, quan95, C = createSamplesERF(
-            incm, mid, incM, W, N, logSCALE, domain)
+            incm, mid, incM, W, N, logSCALE, domain
+        )
 
     else:
 
         quan05, quan50, qmean, quan95, C = createSamplesUCA2(
-            incm, mid, incM, W, N, logSCALE, domain, overshoot)
+            incm, mid, incM, W, N, logSCALE, domain, overshoot
+        )
 
     return quan05, quan50, qmean, quan95, C
 
 
 def max_entropy(incm, mid, incM, rA, rB):
+
     """Produces a random sample from a maximum entropy distribution
 
     Parameters
@@ -109,6 +114,7 @@ def max_entropy(incm, mid, incM, rA, rB):
 
 
 def sampleDISCR(P, N):
+
     """Produces an array of random samples from a discrete distribution
 
     Parameters
@@ -155,8 +161,8 @@ def sampleDISCR(P, N):
 
 
 def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
-    """Produces an array of random samples from weights and answers by using
-       max. entropy distributions and linear pooling
+
+    """Produces an array of random samples from weights and answers by using max. entropy distributions and linear pooling
 
     Parameters
     ----------
@@ -194,7 +200,7 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
 
     import numpy as np
 
-    W = W / np.sum(W)
+    W = W / np.sum(W)    
     DDD = domain
 
     if logSCALE:
@@ -222,7 +228,7 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
     R = rB - rA
     rA = rA - overshoot * R
     rB = rB + overshoot * R
-
+    
     sV = sampleDISCR(W, N)
 
     for j in np.arange(N):
@@ -234,26 +240,27 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
         while (C[j] < DDD[0]) or (C[j] > DDD[1]):
 
             C[j] = max_entropy(incm[s], mid[s], incM[s], rA, rB)
-
+    
     if logSCALE:
 
         C1 = 10.0**C
-
+        qmean = 10.0**np.mean(C)
+    
     else:
 
         C1 = C
-
+        qmean = np.mean(C1)
+    
     quan05 = np.quantile(C1, 0.05)
     quan50 = np.quantile(C1, 0.5)
-    qmean = np.mean(C1)
     quan95 = np.quantile(C1, 0.95)
 
     return quan05, quan50, qmean, quan95, C1
 
 
 def createSamplesERF_original(incm, mid, incM, W, N, logSCALE, domain):
-    """Produces an array of random samples from weights and answers by using
-       triangular distributions and quantile pooling
+
+    """Produces an array of random samples from weights and answers by using triangular distributions and quantile pooling
 
     Parameters
     ----------
@@ -344,30 +351,30 @@ def createSamplesERF_original(incm, mid, incM, W, N, logSCALE, domain):
 
             else:
 
-                P[i] = c[i] - np.sqrt(
-                    (1.0 - u[j]) * (c[i] - a[i]) * (c[i] - b[i]))
+                P[i] = c[i] - np.sqrt((1.0 - u[j]) * (c[i] - a[i]) * (c[i] - b[i]))
 
         C[j] = np.dot(P, W)
 
     if logSCALE:
 
         C1 = 10.0**C
-
+        qmean = 10.0**np.mean(C)
+    
     else:
 
         C1 = C
+        qmean = np.mean(C1)
 
     quan05 = np.quantile(C1, 0.05)
     quan50 = np.quantile(C1, 0.5)
-    qmean = np.mean(C1)
     quan95 = np.quantile(C1, 0.95)
 
     return quan05, quan50, qmean, quan95, C1
 
 
 def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
-    """Produces an array of random samples from weights and answers by using
-       triangular distributions and linear pooling
+
+    """Produces an array of random samples from weights and answers by using triangular distributions and linear pooling
 
     Parameters
     ----------
@@ -404,7 +411,6 @@ def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
     """
 
     import numpy as np
-    from ERFweights import rtrian
 
     W = W / np.sum(W)
 
@@ -445,14 +451,15 @@ def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
     if logSCALE:
 
         C1 = 10.0**C
-
+        qmean = 10.0**np.mean(C)
+    
     else:
 
         C1 = C
+        qmean = np.mean(C1)
 
     quan05 = np.quantile(C1, 0.05)
     quan50 = np.quantile(C1, 0.5)
-    qmean = np.mean(C1)
     quan95 = np.quantile(C1, 0.95)
 
     return quan05, quan50, qmean, quan95, C1

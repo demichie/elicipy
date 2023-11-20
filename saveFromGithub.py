@@ -1,15 +1,20 @@
 import os
+import sys
 import urllib
 import shutil
 import base64
 
 from github import Github
-from github import GithubException
+from github import InputGitTreeElement
+from datetime import datetime
+from github import Github, GithubException
+from github.ContentFile import ContentFile
 
 
 def github_file_to_bytes(Repository, repo, filename, branch="main"):
-    content_encoded = repo.get_contents(urllib.parse.quote(filename),
-                                        ref=branch).content
+    content_encoded = repo.get_contents(
+        urllib.parse.quote(filename), ref=branch
+    ).content
     content = base64.b64decode(content_encoded)
     dict_file = open(Repository + "/" + filename, "wb")
     dict_file.write(content)
@@ -38,7 +43,8 @@ def download_directory(repository, branch, server_path) -> None:
                 path = content.path
                 if path[-3:] == "csv":
                     content_encoded = repository.get_contents(
-                        urllib.parse.quote(path), ref=branch)
+                        urllib.parse.quote(path), ref=branch
+                    )
                     repo_file = open(path, "w")
                     repo_file.write(content_encoded.decoded_content.decode())
                     repo_file.close()
@@ -49,31 +55,31 @@ def download_directory(repository, branch, server_path) -> None:
     return
 
 
-def saveDataFromGithub(RepositoryData, user, github_token):
+def saveDataFromGithub(Repository, user, github_token):
 
     g = Github(user, github_token)
-    repo = g.get_user().get_repo(RepositoryData)
+    repo = g.get_user().get_repo(Repository)
+
+    filename = "createWebformDict.py"
+
+    if os.path.exists(Repository):
+        shutil.rmtree(Repository)
+
+    os.makedirs(Repository)
+
+    github_file_to_bytes(Repository, repo, filename, branch="main")
 
     current_path = os.getcwd()
 
-    os.chdir('DATA')
-    print('Current path:', os.getcwd())
-
-    if os.path.exists("seed"):
-        print("Deleting old seed folder")
-        shutil.rmtree("seed")
-    else:
-        print("No seed folder found")
-    if os.path.exists("target"):
-        print("Deleting old target folder")
-        shutil.rmtree("target")
-    else:
-        print("No target folder found")
+    os.chdir(Repository)
 
     print(os.getcwd())
 
-    download_directory(repo, "main", "seed")
-    download_directory(repo, "main", "target")
+    sys.path.insert(0, os.getcwd())
+    from createWebformDict import input_dir
+    from createWebformDict import csv_file
+
+    download_directory(repo, "main", input_dir)
     os.chdir(current_path)
 
     return

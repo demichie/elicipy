@@ -6,8 +6,10 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
     ----------
     SQ_array : numpy array
         Array with answers to seed questions
+        Size: n_exp * n_pctl * n_seed 
     TQ_array : numpy array
-        Array with answers to seed questions
+        Array with answers to target questions
+        Size: n_exp * n_pctl * n_target 
     realization : list
         Python list with realization of the seed questions
     alpha : float
@@ -173,7 +175,7 @@ def calscore(M, cal_power):
     return CS
 
 
-def calculate_information(SQ_array, TQ_array, realization, k,
+def calculate_information(SQ_array, TQ_array, realization, overshoot,
                           background_measure):
     """
     This function is based on the Matlab package
@@ -202,17 +204,50 @@ def calculate_information(SQ_array, TQ_array, realization, k,
     Info_score_real = np.zeros((E))
     Info_score_tot = np.zeros((E))
 
+    # loop over seed questions
     for i in np.arange(N):
+
+        print('seed index', i)
 
         lowval[i] = np.minimum(np.amin(SQ_array[:, :, i]), realization[i])
         highval[i] = np.maximum(np.amax(SQ_array[:, :, i]), realization[i])
 
+        # print('lowval,highval', lowval[i], highval[i])
+
+        if background_measure[i] == "uni":
+
+            x_o[i] = lowval[i] - overshoot * (highval[i] - lowval[i])
+            x_n[i] = highval[i] + overshoot * (highval[i] - lowval[i])
+
+        elif background_measure[i] == "log":
+
+            if lowval[i] < 0 or highval[i] < 0:
+
+                raise ValueError(
+                    "Log-Uniform background measure cannot be used "
+                    "for item %d because an expert provided "
+                    "negative values",
+                    i,
+                )
+
+            x_o[i] = np.log(lowval[i]) - overshoot * (np.log(highval[i]) -
+                                                      np.log(lowval[i]))
+            x_n[i] = np.log(highval[i]) + overshoot * (np.log(highval[i]) -
+                                                       np.log(lowval[i]))
+
+        else:
+
+            raise ValueError(
+                "ERROR: scale not uni or log",
+                i,
+            )
+
+        # print('x_o,x_n', x_o[i], x_n[i])
+
+        # loop over experts
         for e in np.arange(E):
 
             if background_measure[i] == "uni":
-
-                x_o[i] = lowval[i] - k * (highval[i] - lowval[i])
-                x_n[i] = highval[i] + k * (highval[i] - lowval[i])
 
                 tmp = np.insert(SQ_array[e, :, i], 0, x_o[i])
                 tmp2 = np.append(tmp, x_n[i])
@@ -220,19 +255,6 @@ def calculate_information(SQ_array, TQ_array, realization, k,
 
             elif background_measure[i] == "log":
 
-                if lowval[i] < 0 or highval[i] < 0:
-
-                    raise ValueError(
-                        "Log-Uniform background measure cannot be used "
-                        "for item %d because an expert provided "
-                        "negative values",
-                        i,
-                    )
-
-                x_o[i] = np.log(
-                    lowval[i]) - k * (np.log(highval[i]) - np.log(lowval[i]))
-                x_n[i] = np.log(
-                    highval[i]) + k * (np.log(highval[i]) - np.log(lowval[i]))
                 tmp = np.insert(np.log(SQ_array[e, :, i]), 0, x_o[i])
                 tmp2 = np.append(tmp, x_n[i])
                 x[e, :] = tmp2
@@ -240,7 +262,7 @@ def calculate_information(SQ_array, TQ_array, realization, k,
             for j in np.arange(N_P):
 
                 suma[i, e] = suma[i, e] + p[j] * \
-                    np.log(p[j] / (x[e, j + 1] - x[e, j]))
+                    np.log(p[j] / (x[e, j+1] - x[e, j]))
 
             info_per_variable[i, e] = np.log(x_n[i] - x_o[i]) + suma[i, e]
 
@@ -259,12 +281,37 @@ def calculate_information(SQ_array, TQ_array, realization, k,
             lowval[i] = np.amin(TQ_array[:, :, i - SQ_array.shape[2]])
             highval[i] = np.amax(TQ_array[:, :, i - SQ_array.shape[2]])
 
+            if background_measure[i] == "uni":
+
+                x_o[i] = lowval[i] - overshoot * (highval[i] - lowval[i])
+                x_n[i] = highval[i] + overshoot * (highval[i] - lowval[i])
+
+            elif background_measure[i] == "log":
+
+                if lowval[i] < 0 or highval[i] < 0:
+
+                    raise ValueError(
+                        "Log-Uniform background measure cannot be used "
+                        "for item %d because an expert provided "
+                        "negative values",
+                        i,
+                    )
+
+                x_o[i] = np.log(lowval[i]) - overshoot * (np.log(highval[i]) -
+                                                          np.log(lowval[i]))
+                x_n[i] = np.log(highval[i]) + overshoot * (np.log(highval[i]) -
+                                                           np.log(lowval[i]))
+
+            else:
+
+                raise ValueError(
+                    "ERROR: scale not uni or log",
+                    i,
+                )
+
             for e in np.arange(E):
 
                 if background_measure[i] == "uni":
-
-                    x_o[i] = lowval[i] - k * (highval[i] - lowval[i])
-                    x_n[i] = highval[i] + k * (highval[i] - lowval[i])
 
                     tmp = np.insert(TQ_array[e, :, i - SQ_array.shape[2]], 0,
                                     x_o[i])
@@ -272,20 +319,6 @@ def calculate_information(SQ_array, TQ_array, realization, k,
                     x[e, :] = tmp2
 
                 elif background_measure[i] == "log":
-
-                    if lowval[i] < 0 or highval[i] < 0:
-
-                        raise ValueError(
-                            "Log-Uniform background measure cannot be used "
-                            "for item %d because an expert provided "
-                            "negative values",
-                            i,
-                        )
-
-                    x_o[i] = np.log(lowval[i]) - k * (np.log(highval[i]) -
-                                                      np.log(lowval[i]))
-                    x_n[i] = np.log(highval[i]) + k * (np.log(highval[i]) -
-                                                       np.log(lowval[i]))
 
                     tmp = np.insert(
                         np.log(TQ_array[e, :, i - SQ_array.shape[2]]), 0,

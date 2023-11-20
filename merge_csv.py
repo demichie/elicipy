@@ -5,24 +5,67 @@ def similar(a, b):
     return SequenceMatcher(None, a.lower(), b.lower()).ratio()
 
 
-def merge_csv(input_dir, target, group):
+def merge_csv(input_dir, seed, target, group, csv_file, label_flag, write_flag):
 
     import os
+    import time
     import glob
     import pandas as pd
     import numpy as np
     from itertools import combinations
     from datetime import datetime
 
-    current_path = os.getcwd()
+    # ----------------------------------------- #
+    # ------- READ LABELS FROM CSV_FILE ------- #
+    # ----------------------------------------- #
 
-    print("QUI")
+    df_read = pd.read_csv(input_dir + "/" + csv_file, header=0)
+
+    df_SQ = df_read[df_read["QUEST_TYPE"] == "seed"]
+
+    if label_flag:
+        label_indexes = df_SQ["LABEL"].tolist()
+    else:
+        label_indexes = np.asarray(df_SQ["IDX"])
+        label_indexes = label_indexes.astype(str).tolist()
+
+    # print("label_indexes", label_indexes)
+
+    seed_label_row = ['', '', '', '']
+    for label in label_indexes:
+
+        seed_label_row.append(label)
+        seed_label_row.append(label)
+        seed_label_row.append(label)
+
+    # print(seed_label_row)
+
+    df_TQ = df_read[df_read["QUEST_TYPE"] == "target"]
+
+    if label_flag:
+        label_indexes = df_TQ["LABEL"].tolist()
+    else:
+        label_indexes = np.asarray(df_TQ["IDX"])
+        label_indexes = label_indexes.astype(str).tolist()
+
+    # print("label_indexes", label_indexes)
+
+    target_label_row = ['', '', '', '']
+    for label in label_indexes:
+
+        target_label_row.append(label)
+        target_label_row.append(label)
+        target_label_row.append(label)
+
+    # print(target_label_row)
+
+    current_path = os.getcwd()
 
     foldername = "seed"
     path = input_dir + "/" + foldername
 
     # Check whether the specified path exists or not
-    seedExists = os.path.exists(path)
+    seedExists = os.path.exists(path) and seed
 
     if seedExists:
 
@@ -36,6 +79,7 @@ def merge_csv(input_dir, target, group):
 
         for f in all_filenames:
 
+            print(f)
             seed_df = pd.read_csv(f)
             fgroup = seed_df["Group(s)"].to_list()[0]
 
@@ -66,15 +110,33 @@ def merge_csv(input_dir, target, group):
 
         print("All seed filenames", len(all_filenames))
 
+        # get the timestamp of all the files
         timestamp = []
+        time_list = []
         for f in all_filenames:
 
             split_f = f.split("_")
             timestamp.append("-".join(split_f[1:-1]))
+            time_list.append(
+                datetime.strptime(timestamp[-1], "%Y-%m-%d-%H-%M-%S"))
+
+        # sort by list of all files by timestamp (more recent first)
+        sorted_time_list = sorted(time_list, reverse=True)
+        time_index = [time_list.index(i) for i in sorted_time_list]
+        timestamp_sorted = []
+        filelist_sorted = []
+
+        for i in time_index:
+            timestamp_sorted.append(timestamp[i])
+            filelist_sorted.append(all_filenames[i])
+
+        timestamp = timestamp_sorted
+        all_filenames = filelist_sorted
 
         # combine all files in the list
         combined_seed_csv = pd.concat([pd.read_csv(f) for f in all_filenames],
-                                      ignore_index=True)
+                                      ignore_index=True,
+                                      axis=0)
 
         combined_seed_csv.insert(loc=0, column="timestamp", value=timestamp)
 
@@ -188,10 +250,54 @@ def merge_csv(input_dir, target, group):
 
         # export to csv
         merged_file = "../" + foldername + ".csv"
+        if os.path.exists(merged_file):
+            os.remove(merged_file)
+
+        column_list = combined_seed_csv.columns
+        column_names = []
+
+        for i, label in enumerate(seed_label_row):
+
+            print(i, label + '. ' + column_list[i])
+
+            if label != "":
+
+                column_names.append(label + '. ' + column_list[i])
+
+            else:
+
+                column_names.append(column_list[i])
+
+        combined_seed_csv.columns = column_names
 
         combined_seed_csv.to_csv(merged_file,
                                  index=False,
                                  encoding="utf-8-sig")
+
+        if write_flag:
+
+            seed_new_dir = "../SEED_NEW"
+
+            # Check whether the specified output path exists or not
+            isExist = os.path.exists(seed_new_dir)
+
+            if not isExist:
+
+                # Create a new directory because it does not exist
+                os.makedirs(seed_new_dir)
+                print("The new directory " + seed_new_dir + " is created!")
+
+            n_experts = len(combined_seed_csv.index)
+
+            for i in range(n_experts):
+
+                print('Saving seed answers for expert ', i + 1)
+                df_test = combined_seed_csv.iloc[[i]]
+                now = datetime.now()
+                dt_string = now.strftime("%Y_%m_%d_%H_%M_%S")
+                file_test = '../SEED_NEW/questionnaire_' + dt_string + '_Output.csv'
+                df_test.to_csv(file_test, index=False, encoding="utf-8-sig")
+                time.sleep(1)
 
     os.chdir(current_path)
 
@@ -234,7 +340,7 @@ def merge_csv(input_dir, target, group):
 
             print("")
             print(f)
-            print(seed_df["Last Name"].to_list()[0], "Group ", fgroup)
+            print(target_df["Last Name"].to_list()[0], "Group ", fgroup)
 
             if (group in fgroup) or (group == 0):
 
@@ -251,12 +357,26 @@ def merge_csv(input_dir, target, group):
         print("All target filenames", len(target_filenames))
 
         timestamp = []
-        times = []
+        time_list = []
         for f in target_filenames:
 
             split_f = f.split("_")
             timestamp.append("-".join(split_f[1:-1]))
-            times.append(datetime.strptime(timestamp[-1], "%Y-%m-%d-%H-%M-%S"))
+            time_list.append(
+                datetime.strptime(timestamp[-1], "%Y-%m-%d-%H-%M-%S"))
+
+        # sort by list of all files by timestamp (more recent first)
+        sorted_time_list = sorted(time_list, reverse=True)
+        time_index = [time_list.index(i) for i in sorted_time_list]
+        timestamp_sorted = []
+        filelist_sorted = []
+
+        for i in time_index:
+            timestamp_sorted.append(timestamp[i])
+            filelist_sorted.append(target_filenames[i])
+
+        timestamp = timestamp_sorted
+        target_filenames = filelist_sorted
 
         # print('Timestamps')
         # print(times)
@@ -351,12 +471,16 @@ def merge_csv(input_dir, target, group):
                 # take the last valid value
                 for count, col in enumerate(df2.columns):
 
-                    print('')
-                    print(flname_target[current])
-                    print('Question', count, time0, time1)
-                    print(df2[col])
+                    # print('')
+                    # print(flname_target[current])
+                    # print('Question', count, time0, time1)
+                    # print(df2[col])
 
                     if len(df2[col].dropna()) > 0:
+
+                        # print('BEFORE')
+                        # print('Value 1', combined_target_csv[col].iloc[previous])
+                        # print('Value 2', combined_target_csv[col].iloc[current])
 
                         combined_target_csv.iloc[
                             previous,
@@ -366,6 +490,11 @@ def merge_csv(input_dir, target, group):
                             current,
                             combined_target_csv.columns.get_loc(col)] = (
                                 df2[col].dropna().iloc[-1])
+
+                        # print('AFTER')
+                        # print('Value 1', combined_target_csv[col].iloc[previous])
+                        # print('Value 2', combined_target_csv[col].iloc[current])
+                # a = input('PAUSE')
 
                 combined_target_csv = combined_target_csv.reset_index(
                     drop=True)
@@ -423,6 +552,9 @@ def merge_csv(input_dir, target, group):
 
             # export to csv
             merged_file = "../" + "seed" + ".csv"
+            if os.path.exists(merged_file):
+                os.remove(merged_file)
+            
 
             combined_seed_csv.to_csv(merged_file,
                                      index=False,
@@ -434,8 +566,50 @@ def merge_csv(input_dir, target, group):
         # export to csv
         merged_file = "../" + foldername + ".csv"
 
+        column_list = combined_target_csv.columns
+        column_names = []
+
+        for i, label in enumerate(target_label_row):
+
+            print(i, label + '. ' + column_list[i])
+
+            if label != "":
+
+                column_names.append(label + '. ' + column_list[i])
+
+            else:
+
+                column_names.append(column_list[i])
+
+        combined_target_csv.columns = column_names
+
         combined_target_csv.to_csv(merged_file,
                                    index=False,
                                    encoding="utf-8-sig")
+
+        if write_flag:
+
+            target_new_dir = "../TARGET_NEW"
+
+            # Check whether the specified output path exists or not
+            isExist = os.path.exists(target_new_dir)
+
+            if not isExist:
+
+                # Create a new directory because it does not exist
+                os.makedirs(target_new_dir)
+                print("The new directory " + target_new_dir + " is created!")
+
+            n_experts = len(combined_target_csv.index)
+
+            for i in range(n_experts):
+
+                print('Saving target answers for expert ', i + 1)
+                df_test = combined_target_csv.iloc[[i]]
+                now = datetime.now()
+                dt_string = now.strftime("%Y_%m_%d_%H_%M_%S")
+                file_test = '../TARGET_NEW/questionnaire_' + dt_string + '_Output.csv'
+                df_test.to_csv(file_test, index=False, encoding="utf-8-sig")
+                time.sleep(1)
 
     os.chdir(current_path)

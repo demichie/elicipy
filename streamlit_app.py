@@ -4,6 +4,8 @@ import os.path
 import sys
 
 from github import Github
+from github import Auth
+
 from datetime import datetime
 
 from cryptography.fernet import Fernet
@@ -124,14 +126,15 @@ def pushToGithub(RepositoryData, df_new, csv_file, quest_type, datarepo):
 
     if datarepo == 'github':
 
-        g = Github(st.secrets["github_token"])
+        auth = Auth.Token(st.secrets["github_token"])
 
     elif datarepo == 'local_github':
 
         from createWebformDict import user
         from createWebformDict import github_token
+        auth = Auth.Token(github_token)
 
-        g = Github(user, github_token)
+    g = Github(auth=auth)
 
     print('RepositoryData', RepositoryData)
 
@@ -217,7 +220,7 @@ def check_form(qst, idxs, labels, ans, units, minVals, maxVals, idx_list,
                     st.markdown('**Error in question ' + labels[i] + '**')
                 else:
                     st.markdown('**Error in question ' + str(idxs[i]) + '**')
-
+                
                 st.write('Please remove comma')
                 st.write(qst[idx], ans[idx])
                 check_flag = False
@@ -230,7 +233,7 @@ def check_form(qst, idxs, labels, ans, units, minVals, maxVals, idx_list,
                     st.markdown('**Error in question ' + labels[i] + '**')
                 else:
                     st.markdown('**Error in question ' + str(idxs[i]) + '**')
-
+                
                 st.write('Non numeric answer')
                 st.write(qst[idx], ans[idx])
                 check_flag = False
@@ -243,7 +246,7 @@ def check_form(qst, idxs, labels, ans, units, minVals, maxVals, idx_list,
                     st.markdown('**Error in question ' + labels[i] + '**')
                 else:
                     st.markdown('**Error in question ' + str(idxs[i]) + '**')
-
+                
                 st.write('Non numeric answer')
                 st.write(qst[idx + 1], ans[idx + 1])
                 check_flag = False
@@ -256,7 +259,7 @@ def check_form(qst, idxs, labels, ans, units, minVals, maxVals, idx_list,
                     st.markdown('**Error in question ' + labels[i] + '**')
                 else:
                     st.markdown('**Error in question ' + str(idxs[i]) + '**')
-
+                
                 st.write('Non numeric answer')
                 st.write(qst[idx + 2], ans[idx + 2])
                 check_flag = False
@@ -338,10 +341,10 @@ def check_form(qst, idxs, labels, ans, units, minVals, maxVals, idx_list,
                     if float(sum50s[i] != sum50check):
 
                         if label_flag:
-
+                        
                             labelIdxMin = idxs.index(idxMins[i])
                             labelIdxMax = idxs.index(idxMaxs[i])
-
+                        
                             st.markdown('**Error in question ' + labels[i] +
                                         '**')
                             st.write(
@@ -617,6 +620,7 @@ def main():
 
         label_flag = False
 
+
     idxs = []
     labels = []
     units = []
@@ -639,6 +643,7 @@ def main():
 
             labels.append(label)
             idxs.append(idx)
+            
 
     for i in df.itertuples():
 
@@ -654,7 +659,7 @@ def main():
         if (question == quest_type):
 
             units.append(unit)
-
+            
             if minVal.is_integer():
 
                 minVal = int(minVal)
@@ -696,7 +701,6 @@ def main():
 
                 if (not pd.isnull(image)):
                     imagefile = input_dir + '/images/' + str(image)
-                    print(imagefile, os.path.exists(imagefile))
                     if os.path.exists(imagefile):
                         form2.image(input_dir + '/images/' + str(image))
 
@@ -706,7 +710,7 @@ def main():
 
                         labelIdxMin = idxs.index(idxMin)
                         labelIdxMax = idxs.index(idxMax)
-
+                        
                         longQ_NB = "**N.B.** *The sum of 50%iles for " + \
                             "questions " + \
                             labels[labelIdxMin] + "-" + labels[labelIdxMax] + \

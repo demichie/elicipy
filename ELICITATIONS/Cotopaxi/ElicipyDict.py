@@ -39,10 +39,10 @@ EW_flag = 1
 # 0 - no ERF
 # 1 - ERF original
 # 2 - ERF modified
-ERF_flag = 1
+ERF_flag = 0
 
 # flag for Cooke
-Cooke_flag = 0
+Cooke_flag = 1
 
 # parameters for Cooke
 
