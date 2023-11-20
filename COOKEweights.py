@@ -1,5 +1,5 @@
 def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
-                 overshoot, cal_power):
+                 overshoot, cal_power, Cooke_flag):
     """Compute the weights with Cooke formulation
 
     Parameters
@@ -18,6 +18,7 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
         Python list
     overshoot : float
     cal_power : float
+    Cooke_flag : integer
 
     Returns
     -------
@@ -46,62 +47,68 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
 
     # create numpy array M with the number of realizations captured in every
     # expert's bin that is formed by the provided quantiles
-    for ex in np.arange(E):
-        for i in np.arange(N):
-            if realization[i] < SQ_array[ex, 0, i]:
+    if Cooke_flag > 1:
+        
+        for ex in np.arange(E):
+            for i in np.arange(N):
+                if realization[i] < SQ_array[ex, 0, i]:
 
-                M[ex, 0] = M[ex, 0] + 1
+                    M[ex, 0] = M[ex, 0] + 1
 
-            elif realization[i] == SQ_array[ex, 0, i]:
+                elif realization[i] == SQ_array[ex, 0, i]:
 
-                M[ex, 0] = M[ex, 0] + 0.5
-                M[ex, 1] = M[ex, 1] + 0.5
+                    M[ex, 0] = M[ex, 0] + 0.5
+                    M[ex, 1] = M[ex, 1] + 0.5
 
-            elif realization[i] < SQ_array[ex, 1, i]:
+                elif realization[i] < SQ_array[ex, 1, i]:
 
-                M[ex, 1] = M[ex, 1] + 1
+                    M[ex, 1] = M[ex, 1] + 1
 
-            elif realization[i] == SQ_array[ex, 1, i]:
+                elif realization[i] == SQ_array[ex, 1, i]:
 
-                M[ex, 1] = M[ex, 1] + 0.5
-                M[ex, 2] = M[ex, 2] + 0.5
+                    M[ex, 1] = M[ex, 1] + 0.5
+                    M[ex, 2] = M[ex, 2] + 0.5
 
-            elif realization[i] < SQ_array[ex, 2, i]:
+                elif realization[i] < SQ_array[ex, 2, i]:
 
-                M[ex, 2] = M[ex, 2] + 1
+                    M[ex, 2] = M[ex, 2] + 1
 
-            elif realization[i] == SQ_array[ex, 2, i]:
+                elif realization[i] == SQ_array[ex, 2, i]:
 
-                M[ex, 2] = M[ex, 2] + 0.5
-                M[ex, 3] = M[ex, 3] + 0.5
+                    M[ex, 2] = M[ex, 2] + 0.5
+                    M[ex, 3] = M[ex, 3] + 0.5
 
-            else:
+                else:
+                    
+                    M[ex, 3] = M[ex, 3] + 1
 
-                M[ex, 3] = M[ex, 3] + 1
-    """
+    elif Cooke_flag == 1:
 
-    # create numpy array M with the number of realizations captured in every
-    # expert's bin that is formed by the provided quantiles
-    for ex in np.arange(E):
-        for i in np.arange(N):
-            if realization[i] < SQ_array[ex, 0, i]:
+        for ex in np.arange(E):
+            for i in np.arange(N):
+                if realization[i] < SQ_array[ex, 0, i]:
 
-                M[ex, 0] = M[ex, 0] + 1
+                    M[ex, 0] = M[ex, 0] + 1
 
-            elif realization[i] < SQ_array[ex, 1, i]:
+                elif realization[i] < SQ_array[ex, 1, i]:
 
-                M[ex, 1] = M[ex, 1] + 1
+                    M[ex, 1] = M[ex, 1] + 1
 
-            elif realization[i] < SQ_array[ex, 2, i]:
+                elif realization[i] < SQ_array[ex, 2, i]:
 
-                M[ex, 2] = M[ex, 2] + 1
+                    M[ex, 2] = M[ex, 2] + 1
 
-            else:
+                else:
 
-                M[ex, 3] = M[ex, 3] + 1
+                    M[ex, 3] = M[ex, 3] + 1
 
-    """
+    else:
 
+        raise ValueError(
+            "ERROR: Cooke_flag should be 1 or 2",
+            Cooke_flag,
+            )
+        
     # calculate calibration and information score for every expert
     [I_real, I_tot] = calculate_information(SQ_array, TQ_array, realization,
                                             overshoot, background_measure)

@@ -1404,11 +1404,11 @@ def answer_analysis(
     seed
 ):
 
-    if Cooke_flag:
+    if Cooke_flag > 0:
     
         W, score, information = COOKEweights(SQ_array, TQ_array, realization,
                                             alpha, global_scale, overshoot,
-                                            cal_power)
+                                            cal_power, Cooke_flag)
         print('score',score)
         print('information',information)
 
@@ -1445,6 +1445,7 @@ def answer_analysis(
                 global_scale_temp,
                 overshoot,
                 cal_power,
+                Cooke_flag
             )
 
             W_reldiff = W[:, 3] / \
@@ -1488,7 +1489,7 @@ def answer_analysis(
         print("W_erf")
         print(W_erf[:, -1])
 
-    if Cooke_flag:
+    if Cooke_flag > 0:
 
         print("")
         print("W_cooke")
@@ -1723,7 +1724,7 @@ def create_samples_and_barplot(
 
             if j >= n_SQ:
 
-                if Cooke_flag:
+                if Cooke_flag > 0:
 
                     samples[:, j - n_SQ] = C
 
@@ -1737,7 +1738,7 @@ def create_samples_and_barplot(
 
                 legendsPDF = []
 
-                if Cooke_flag:
+                if Cooke_flag > 0:
 
                     legendsPDF.append("CM" + "%9.2f" % quan05 +
                                       "%9.2f" % quan50 + "%9.2f" % quan95)
@@ -2117,7 +2118,7 @@ def main(argv):
                 n_bins,
             )
 
-            if Cooke_flag:
+            if Cooke_flag > 0:
 
                 SQ_array_DM = np.zeros((1,n_pctl,n_SQ))
 
@@ -2131,7 +2132,7 @@ def main(argv):
 
                 W_DM, score_DM, information_DM = COOKEweights(SQ_array_DM, TQ_array_DM, realization,
                                                 alpha, global_scale, overshoot,
-                                                cal_power)
+                                                cal_power, Cooke_flag)
 
                 print('information DM-Cooke', information_DM)
                 print('score DM-Cooke',score_DM)
