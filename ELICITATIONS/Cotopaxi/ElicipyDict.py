@@ -19,12 +19,15 @@ analysis = True
 target = True
 postprocessing = True
 
-# target_list = [2,3]
-# seed_list = [1,2]
+# Do not show the index of the experts in the bar plots
+nolabel_flag = False
+
+# target_list = [1,2,3,5]
+# seed_list = [1,2,3,4,5,6,7,8]
 
 # group_list = [5,6]
 
-n_sample = 5000
+n_sample = 1000
 n_bins = 10
 
 # hist_type: 'bar' or 'step'
@@ -39,7 +42,7 @@ EW_flag = 1
 # 0 - no ERF
 # 1 - ERF original
 # 2 - ERF modified
-ERF_flag = 0
+ERF_flag = 1
 
 # flag for Cooke
 Cooke_flag = 1
@@ -62,4 +65,4 @@ first_node_list = [1]
 first_node_str_list = ['']
 
 # groups for trend plots
-# trend_groups = [ [2,3] ]
+trend_groups = [ [6,7,8,9,10] ]
