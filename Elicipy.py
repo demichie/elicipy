@@ -1406,12 +1406,12 @@ def answer_analysis(
 
     if Cooke_flag > 0:
     
-        W, score, information = COOKEweights(SQ_array, TQ_array, realization,
+        W, score, information, M = COOKEweights(SQ_array, TQ_array, realization,
                                             alpha, global_scale, overshoot,
                                             cal_power, Cooke_flag)
         print('score',score)
         print('information',information)
-
+        
     else:
 
         W = np.ones((n_experts,5))
@@ -1437,7 +1437,7 @@ def answer_analysis(
             realization_temp = np.delete(realization, i)
             global_scale_temp = np.delete(global_scale, i)
 
-            W_temp, score_temp, information_temp = COOKEweights(
+            W_temp, score_temp, information_temp, M = COOKEweights(
                 SQ_temp,
                 TQ_array,
                 realization_temp,
@@ -1502,7 +1502,7 @@ def answer_analysis(
     print("Weq")
     print(Weqok)
 
-    return W, W_erf, Weqok, W_gt0, Werf_gt0, expin
+    return W, W_erf, Weqok, W_gt0, Werf_gt0, expin, M
 
 
 def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
@@ -2028,50 +2028,34 @@ def main(argv):
             # ----------------------------------------- #
             # ------------ Compute weights ------------ #
             # ----------------------------------------- #
-
+            
             if group == 0:
 
-                W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
-                    input_dir,
-                    csv_file,
-                    n_experts,
-                    n_SQ,
-                    n_TQ,
-                    SQ_array,
-                    TQ_array,
-                    realization,
-                    global_scale,
-                    global_log,
-                    alpha,
-                    overshoot,
-                    cal_power,
-                    ERF_flag,
-                    Cooke_flag,
-                    seed
-                )
+                alpha_analysis = alpha
 
             else:
 
-                # set alpha to zero
-                W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
-                    input_dir,
-                    csv_file,
-                    n_experts,
-                    n_SQ,
-                    n_TQ,
-                    SQ_array,
-                    TQ_array,
-                    realization,
-                    global_scale,
-                    global_log,
-                    alpha,
-                    overshoot,
-                    cal_power,
-                    ERF_flag,
-                    Cooke_flag,
-                    seed
+                alpha_analysis = 0.0
+                
+            W, W_erf, Weqok, W_gt0, Werf_gt0, expin, M = answer_analysis(
+                input_dir,
+                csv_file,
+                n_experts,
+                n_SQ,
+                n_TQ,
+                SQ_array,
+                TQ_array,
+                realization,
+                global_scale,
+                global_log,
+                alpha_analysis,
+                overshoot,
+                cal_power,
+                ERF_flag,
+                Cooke_flag,
+                seed
                 )
-
+            
             # ----------------------------------------- #
             # ------ Create samples and bar plots ----- #
             # ----------------------------------------- #
@@ -2120,6 +2104,25 @@ def main(argv):
 
             if Cooke_flag > 0:
 
+                if group == 0:
+
+                    W, score, information, M = COOKEweights(SQ_array, TQ_array, realization,
+                                                alpha, global_scale, overshoot,
+                                                cal_power, Cooke_flag)
+
+                    csv_name = output_dir + "/" + elicitation_name + "_score_information.csv"
+
+                    d = {"index": range(1, n_experts + 1), "score": score,
+                             "information": information,
+                             "ans < 5%ile": M[:,0],
+                             "5%ile < ans < 50%ile": M[:,1],
+                             "50%ile < ans < 95%ile": M[:,2],
+                             "ans > 95%ile": M[:,3],
+                             }
+                    df = pd.DataFrame(data=d)
+
+                    df.to_csv(csv_name, index=False)
+                
                 SQ_array_DM = np.zeros((1,n_pctl,n_SQ))
 
                 for iseed in range(n_SQ):
@@ -2130,7 +2133,7 @@ def main(argv):
                 
                 TQ_array_DM = np.zeros((1,n_pctl,0))
 
-                W_DM, score_DM, information_DM = COOKEweights(SQ_array_DM, TQ_array_DM, realization,
+                W_DM, score_DM, information_DM, M = COOKEweights(SQ_array_DM, TQ_array_DM, realization,
                                                 alpha, global_scale, overshoot,
                                                 cal_power, Cooke_flag)
 

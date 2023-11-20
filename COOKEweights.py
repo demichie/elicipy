@@ -135,7 +135,7 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
     # Normalized weight
     W[:, 4] = w / np.sum(w)
 
-    return W, C, I_real
+    return W, C, I_real, M
 
 
 def calscore(M, cal_power):
