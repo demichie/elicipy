@@ -2405,7 +2405,7 @@ def main(argv):
 
                 if W_gt0[j] > 0.0:
 
-                    cell.text = "%10.5f" % W_gt0[j]
+                    cell.text = "%6.2f" % W_gt0[j]
 
                 else:
 
