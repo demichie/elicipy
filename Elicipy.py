@@ -1525,7 +1525,7 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
             # print(i+1,str(i+1),SQ_realization[i],SQ_scale[i])
 
             print(f'{i+1:>5d} {"SQ"+str(i+1):>13} {""} ' +
-                  '{SQ_realization[i]:6e} {SQ_scale[i]:4}')
+                  f'{SQ_realization[i]:6e} {SQ_scale[i]:4}')
 
         # Reset the standard output to its original value
         sys.stdout = original_stdout
@@ -1550,19 +1550,19 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
             for i in np.arange(n_SQ):
 
                 print(f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} ' +
-                      '{"SQ"+str(i+1):>13} {SQ_scale[i]:4} ' +
-                      '{SQ_array[k, 0, i]:6e} {""} {SQ_array[k, 1, i]:6e} ' +
-                      '{" "}{SQ_array[k, 2, i]:6e}')
+                      f'{"SQ"+str(i+1):>13} {SQ_scale[i]:4} ' +
+                      f'{SQ_array[k, 0, i]:6e} {""} {SQ_array[k, 1, i]:6e} ' +
+                      f'{" "}{SQ_array[k, 2, i]:6e}')
 
             if target:
 
                 for i in np.arange(n_TQ):
 
                     print(
-                        f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d}' +
-                        '{"TQ"+str(i+1):>13} {TQ_scale[i]:4}' +
-                        '{TQ_array[k, 0, i]:6e} {""} {TQ_array[k, 1, i]:6e} ' +
-                        '{" "}{TQ_array[k, 2, i]:6e}')
+                        f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} ' +
+                        f'{"TQ"+str(i+1):>13} {TQ_scale[i]:4} ' +
+                        f'{TQ_array[k, 0, i]:6e} {""} {TQ_array[k, 1, i]:6e} ' +
+                        f'{" "}{TQ_array[k, 2, i]:6e}')
 
         # Reset the standard output to its original value
         sys.stdout = original_stdout

@@ -27,7 +27,7 @@ nolabel_flag = False
 
 # group_list = [5,6]
 
-n_sample = 1000
+n_sample = 10000
 n_bins = 10
 
 # hist_type: 'bar' or 'step'
