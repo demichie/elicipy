@@ -25,7 +25,7 @@ nolabel_flag = False
 # target_list = [1,2,3,5]
 # seed_list = [1,2,3,4,5,6,7,8]
 
-# group_list = [5,6]
+group_list = [5,6]
 
 n_sample = 10000
 n_bins = 10
@@ -45,7 +45,7 @@ EW_flag = 1
 ERF_flag = 1
 
 # flag for Cooke
-Cooke_flag = 1
+Cooke_flag = 2
 
 # parameters for Cooke
 
@@ -66,3 +66,5 @@ first_node_str_list = ['']
 
 # groups for trend plots
 trend_groups = [ [6,7,8,9,10] ]
+
+
