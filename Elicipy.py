@@ -1603,6 +1603,8 @@ def create_samples_and_barplot(
     output_dir,
     elicitation_name,
     n_bins,
+    globalSum,
+    normalizeSum,
 ):
 
     DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
@@ -1616,13 +1618,9 @@ def create_samples_and_barplot(
     q_erf = np.zeros((n_SQ + n_TQ, 4))
     q_EW = np.zeros((n_SQ + n_TQ, 4))
 
-    samples = np.zeros((n_sample, n_TQ))
-    samples_erf = np.zeros((n_sample, n_TQ))
-    samples_EW = np.zeros((n_sample, n_TQ))
-
-    print("")
-    if analysis:
-        print(" j   quan05    quan50     qmean    quan95")
+    samples = np.zeros((n_sample, n_SQ+n_TQ))
+    samples_erf = np.zeros((n_sample, n_SQ+n_TQ))
+    samples_EW = np.zeros((n_sample, n_SQ+n_TQ))
 
     del_rows = []
     keep_rows = []
@@ -1648,11 +1646,17 @@ def create_samples_and_barplot(
     legends = ["CM", "ERF", "EW"]
     legends = [legends[index] for index in keep_rows]
 
-    for j in np.arange(n_SQ + n_TQ):
 
-        if analysis:
+    if analysis:
 
-            quan05_EW, quan50_EW, qmean_EW, quan95_EW, C_EW = createSamples(
+        print('Creating samples for question')
+
+
+        for j in np.arange(n_SQ + n_TQ):
+    
+            print(j)
+
+            C_EW = createSamples(
                 DAT,
                 j,
                 Weqok,
@@ -1662,18 +1666,12 @@ def create_samples_and_barplot(
                 overshoot,
                 0,
             )
-
-            print(label_indexes[j]+ " %9.2f %9.2f %9.2f %9.2f" %
-                  (quan05_EW, quan50_EW, qmean_EW, quan95_EW))
-
-            q_EW[j, 0] = quan05_EW
-            q_EW[j, 1] = quan50_EW
-            q_EW[j, 2] = quan95_EW
-            q_EW[j, 3] = qmean_EW
-
+            
+            samples_EW[:, j] = C_EW
+            
             if Cooke_flag>0:
 
-                quan05, quan50, qmean, quan95, C = createSamples(
+                C = createSamples(
                     DAT,
                     j,
                     W[:, 4].flatten(),
@@ -1683,22 +1681,16 @@ def create_samples_and_barplot(
                     overshoot,
                     0,
                 )
-
-                print(label_indexes[j]+ " %9.2f %9.2f %9.2f %9.2f" %
-                      (quan05, quan50, qmean, quan95))
-
-                q_Cooke[j, 0] = quan05
-                q_Cooke[j, 1] = quan50
-                q_Cooke[j, 2] = quan95
-                q_Cooke[j, 3] = qmean
-
+                
             else:
+            
+                C = C_EW    
 
-                C = C_EW
-
+            samples[:, j] = C
+                
             if ERF_flag > 0:
 
-                quan05_erf, quan50_erf, qmean_erf, quan95_erf, C_erf = \
+                C_erf = \
                     createSamples(
                         DAT,
                         j,
@@ -1710,6 +1702,98 @@ def create_samples_and_barplot(
                         ERF_flag,
                     )
 
+            else:
+
+                C_erf = C_EW
+
+            samples_erf[:, j] = C_erf
+       
+    if ( normalizeSum): 
+               
+        for triplet in globalSum:
+    
+            print(triplet[0],triplet[1],triplet[2])
+        
+            sum_samples = np.sum(samples_EW[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1], axis=1)
+            sum_samples = np.expand_dims(sum_samples,axis=1)
+            samples_EW[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] /= sum_samples 
+            samples_EW[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] *= triplet[2]
+
+            sum_samples = np.sum(samples[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1], axis=1)
+            sum_samples = np.expand_dims(sum_samples,axis=1)
+            samples[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] /= sum_samples 
+            samples[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] *= triplet[2]
+
+            sum_samples = np.sum(samples_erf[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1], axis=1)
+            sum_samples = np.expand_dims(sum_samples,axis=1)
+            samples_erf[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] /= sum_samples 
+            samples_erf[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] *= triplet[2]
+
+                
+    print("")
+    if analysis:
+        print(" j   quan05    quan50     qmean    quan95")
+
+    for j in np.arange(n_SQ + n_TQ):
+
+        if analysis:
+           
+            if global_log[j]:
+
+                qmean_EW = 10.0**np.mean(np.log10(samples_EW[:,j]))
+    
+            else:
+
+                qmean_EW = np.mean(samples_EW[:,j])
+    
+            quan05_EW = np.quantile(samples_EW[:,j], 0.05)
+            quan50_EW = np.quantile(samples_EW[:,j], 0.5)
+            quan95_EW = np.quantile(samples_EW[:,j], 0.95)
+
+            print(label_indexes[j]+ " %9.2f %9.2f %9.2f %9.2f" %
+                  (quan05_EW, quan50_EW, qmean_EW, quan95_EW))
+
+            q_EW[j, 0] = quan05_EW
+            q_EW[j, 1] = quan50_EW
+            q_EW[j, 2] = quan95_EW
+            q_EW[j, 3] = qmean_EW
+
+            if Cooke_flag>0:
+
+                if global_log[j]:
+
+                    qmean = 10.0**np.mean(np.log10(samples[:,j]))
+    
+                else:
+
+                    qmean = np.mean(samples[:,j])
+    
+                quan05 = np.quantile(samples[:,j], 0.05)
+                quan50 = np.quantile(samples[:,j], 0.5)
+                quan95 = np.quantile(samples[:,j], 0.95)
+
+                print(label_indexes[j]+ " %9.2f %9.2f %9.2f %9.2f" %
+                      (quan05, quan50, qmean, quan95))
+
+                q_Cooke[j, 0] = quan05
+                q_Cooke[j, 1] = quan50
+                q_Cooke[j, 2] = quan95
+                q_Cooke[j, 3] = qmean
+
+            if ERF_flag > 0:
+
+                if global_log[j]:
+
+                    qmean_erf = 10.0**np.mean(np.log10(samples_erf[:,j]))
+    
+                else:
+
+                    qmean_erf = np.mean(samples_erf[:,j])
+    
+                quan05_erf = np.quantile(samples_erf[:,j], 0.05)
+                quan50_erf = np.quantile(samples_erf[:,j], 0.5)
+                quan95_erf = np.quantile(samples_erf[:,j], 0.95)
+                
                 print(label_indexes[j]+ " %9.2f %9.2f %9.2f %9.2f" %
                       (quan05_erf, quan50_erf, qmean_erf, quan95_erf))
 
@@ -1717,22 +1801,6 @@ def create_samples_and_barplot(
                 q_erf[j, 1] = quan50_erf
                 q_erf[j, 2] = quan95_erf
                 q_erf[j, 3] = qmean_erf
-
-            else:
-
-                C_erf = C_EW
-
-            if j >= n_SQ:
-
-                if Cooke_flag > 0:
-
-                    samples[:, j - n_SQ] = C
-
-                if ERF_flag > 0:
-
-                    samples_erf[:, j - n_SQ] = C_erf
-
-                samples_EW[:, j - n_SQ] = C_EW
 
             if (j >= n_SQ) and postprocessing:
 
@@ -1757,9 +1825,9 @@ def create_samples_and_barplot(
                     n_sample,
                     n_SQ,
                     hist_type,
-                    C,
-                    C_erf,
-                    C_EW,
+                    samples[:, j],
+                    samples_erf[:, j],
+                    samples_EW[:, j],
                     colors,
                     legends,
                     legendsPDF,
@@ -1920,6 +1988,40 @@ def main(argv):
      global_scale, global_log, label_indexes, parents, global_idxMin,
      global_idxMax, global_sum50,
      df_quest) = read_questionnaire(input_dir, csv_file, seed, target)
+
+    try:
+
+        from ElicipyDict import normalizeSum
+
+    except ImportError:
+
+        normalizeSum = False
+
+
+    globalSum_temp = zip(global_idxMin,global_idxMax,global_sum50)
+    
+    globalSum_temp = list(set(globalSum_temp))
+    
+    globalSum = []
+    for triplet in globalSum_temp:
+    
+        try:
+        
+            int(triplet[0])
+            flag = True
+            
+        except ValueError:
+        
+            flag = False
+            
+        print(flag)    
+        if flag:
+        
+            index_first = idx_list.index(int(triplet[0]))
+            index_last = idx_list.index(int(triplet[1]))
+            globalSum.append([index_first,index_last,triplet[2]])
+ 
+    print('QUI',globalSum)
 
     # Read the asnwers of all the experts
     group = 0
@@ -2100,6 +2202,8 @@ def main(argv):
                 output_dir,
                 elicitation_name,
                 n_bins,
+                globalSum,
+                normalizeSum
             )
 
             if Cooke_flag > 0:
@@ -2190,7 +2294,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples.csv"
             np.savetxt(
                 csv_name,
-                samples,
+                samples[n_SQ:-1],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",
@@ -2207,7 +2311,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples_erf.csv"
             np.savetxt(
                 csv_name,
-                samples_erf,
+                samples_erf[n_SQ:-1],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",
@@ -2219,7 +2323,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples_EW.csv"
             np.savetxt(
                 csv_name,
-                samples_EW,
+                samples_EW[n_SQ:-1],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",

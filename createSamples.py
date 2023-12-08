@@ -47,23 +47,23 @@ def createSamples(DAT, j, W, N, logSCALE, domain, overshoot, ERF_flag):
 
     if ERF_flag == 1:
 
-        quan05, quan50, qmean, quan95, C = createSamplesERF_original(
+        C = createSamplesERF_original(
             incm, mid, incM, W, N, logSCALE, domain
         )
 
     elif ERF_flag == 2:
 
-        quan05, quan50, qmean, quan95, C = createSamplesERF(
+        C = createSamplesERF(
             incm, mid, incM, W, N, logSCALE, domain
         )
 
     else:
 
-        quan05, quan50, qmean, quan95, C = createSamplesUCA2(
+        C = createSamplesUCA2(
             incm, mid, incM, W, N, logSCALE, domain, overshoot
         )
 
-    return quan05, quan50, qmean, quan95, C
+    return C
 
 
 def max_entropy(incm, mid, incM, rA, rB):
@@ -244,18 +244,12 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
     if logSCALE:
 
         C1 = 10.0**C
-        qmean = 10.0**np.mean(C)
-    
+        
     else:
 
         C1 = C
-        qmean = np.mean(C1)
-    
-    quan05 = np.quantile(C1, 0.05)
-    quan50 = np.quantile(C1, 0.5)
-    quan95 = np.quantile(C1, 0.95)
-
-    return quan05, quan50, qmean, quan95, C1
+        
+    return C1
 
 
 def createSamplesERF_original(incm, mid, incM, W, N, logSCALE, domain):
@@ -358,18 +352,12 @@ def createSamplesERF_original(incm, mid, incM, W, N, logSCALE, domain):
     if logSCALE:
 
         C1 = 10.0**C
-        qmean = 10.0**np.mean(C)
-    
+        
     else:
 
         C1 = C
-        qmean = np.mean(C1)
-
-    quan05 = np.quantile(C1, 0.05)
-    quan50 = np.quantile(C1, 0.5)
-    quan95 = np.quantile(C1, 0.95)
-
-    return quan05, quan50, qmean, quan95, C1
+        
+    return C1
 
 
 def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
@@ -451,15 +439,9 @@ def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
     if logSCALE:
 
         C1 = 10.0**C
-        qmean = 10.0**np.mean(C)
     
     else:
 
         C1 = C
-        qmean = np.mean(C1)
 
-    quan05 = np.quantile(C1, 0.05)
-    quan50 = np.quantile(C1, 0.5)
-    quan95 = np.quantile(C1, 0.95)
-
-    return quan05, quan50, qmean, quan95, C1
+    return C1
