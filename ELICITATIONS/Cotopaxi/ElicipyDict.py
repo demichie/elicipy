@@ -28,9 +28,11 @@ nolabel_flag = False
 group_list = [5,6]
 
 # groups for trend plots
-trend_groups = [ [6,7,8,9,10] ]
+trend_groups = [ [3,4,5] ]
 
 violin_groups = [ [6,7,8,9,10] ]
+
+pie_groups = [ [3,4,5],[6,7,8,9,10] ]
 
 normalizeSum = True
 
