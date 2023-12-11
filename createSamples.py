@@ -146,7 +146,7 @@ def sampleDISCR(P, N):
 
     PP[n - 1] = 1
 
-    rng = np.random.default_rng(12345)
+    rng = np.random.default_rng(seed=None)
     u = rng.random(N)
     a = np.zeros(N)
 
@@ -325,7 +325,7 @@ def createSamplesERF_original(incm, mid, incM, W, N, logSCALE, domain):
     b = np.zeros_like(incm)
     c = np.zeros_like(incm)
 
-    rng = np.random.default_rng(12345)
+    rng = np.random.default_rng(seed=None)
     u = rng.random(N)
 
     for i in range(Ne):
