@@ -27,6 +27,13 @@ nolabel_flag = False
 
 group_list = [5,6]
 
+# groups for trend plots
+trend_groups = [ [6,7,8,9,10] ]
+
+violin_groups = [ [6,7,8,9,10] ]
+
+normalizeSum = True
+
 n_sample = 10000
 n_bins = 10
 
@@ -42,7 +49,7 @@ EW_flag = 1
 # 0 - no ERF
 # 1 - ERF original
 # 2 - ERF modified
-ERF_flag = 1
+ERF_flag = 0
 
 # flag for Cooke
 Cooke_flag = 2
@@ -63,8 +70,5 @@ cal_power = 1
 # tree parameters
 first_node_list = [1]
 first_node_str_list = ['']
-
-# groups for trend plots
-trend_groups = [ [6,7,8,9,10] ]
 
 
