@@ -777,6 +777,114 @@ def create_figure_trend(
 
     return
 
+def create_figure_pie(
+    count,
+    pie_group,
+    n_SQ,
+    q_EW,
+    q_Cooke,
+    q_erf,
+    Cooke_flag,
+    ERF_flag,
+    EW_flag,
+    output_dir,
+    elicitation_name
+):
+    """Create figure for trend group (subset of target qustions)
+
+    Parameters
+    ----------
+    trend_group : list of int
+        indexes of questions for group
+    n_SQ : int
+        number of seed questions
+    q_EW : numpy array of floats
+        percentiles computed with equal weight
+    q_Cooke : numpy array of floats
+        percentiles computed with Cooke method
+    q_erf : numpy array of floats
+        percentiles computed with ERF method
+    Cooke_flag : int
+        Cooke_flag > 0 => plot the Cooke method results
+    ERF_flag : int
+        ERF_flag > 0 => plot the ERF method results
+    EW_flag : int
+        EW_flag > 0 => plot the equal weights results
+    output_dir : string
+        name of output folder
+
+    Returns
+    -------
+    none
+
+    """
+
+    ncols = 0
+    if EW_flag:
+        EW_col = ncols   
+        ncols +=1 
+    if Cooke_flag:
+        Cooke_col = ncols
+        ncols +=1
+    if ERF_flag:
+        ERF_col = ncols        
+        ncols +=1
+
+    fig, axes = plt.subplots(nrows=1, ncols=ncols, figsize=(8.0, 4.0))
+    fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.95])
+
+
+    x = np.arange(len(pie_group)) + 1
+
+    pie_group = np.array(pie_group)
+
+    labels = []
+    for i in x:
+        labels.append("TQ" + str(pie_group[i - 1]))
+
+
+    if EW_flag:
+
+        y = q_EW[pie_group + n_SQ - 1, 1]
+
+        sizes = y
+
+        axes[EW_col].pie(sizes, labels=labels, autopct='%1.1f%%')
+        axes[EW_col].set_title('EW')
+
+
+    if Cooke_flag > 0:
+
+        y = q_Cooke[pie_group + n_SQ - 1, 1]
+
+        sizes = y
+
+        axes[Cooke_col].pie(sizes, labels=labels, autopct='%1.1f%%')
+        axes[Cooke_col].set_title('Cooke')
+
+    if ERF_flag > 0:
+
+        y = q_erf[pie_group + n_SQ - 1, 1]
+
+        sizes = y
+
+        axes[ERF_col].pie(sizes, labels=labels, autopct='%1.1f%%')
+        axes[ERF_col].set_title('EW')
+
+    figname = (output_dir + "/" + elicitation_name + "_pie_" +
+               str(count + 1).zfill(2) + ".pdf")
+    fig.savefig(figname)
+
+    # images = convert_from_path(figname)
+    figname = (output_dir + "/" + elicitation_name + "_pie_" +
+               str(count + 1).zfill(2) + ".png")
+    # images[0].save(figname, "PNG")
+    fig.savefig(figname, dpi=300)
+    plt.close()
+
+    return
+
+
 
 def create_figure_answers(
     h,

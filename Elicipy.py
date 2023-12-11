@@ -18,6 +18,7 @@ from merge_csv import merge_csv
 
 from createPlots import create_fig_hist
 from createPlots import create_figure_violin
+from createPlots import create_figure_pie
 from createPlots import create_figure_trend
 from createPlots import create_figure_answers
 from createPlots import create_barplot
@@ -1568,6 +1569,29 @@ def main(argv):
                 elicitation_name,
             )
 
+        # ------------------------------------------ #
+        # ----------- Create pie figures ----------- #
+        # ------------------------------------------ #
+
+        try:
+
+            from ElicipyDict import pie_groups
+
+            print("pie_groups read", pie_groups)
+
+        except ImportError:
+
+            print("No pie group defined")
+            pie_groups = []
+
+        for count, pie_group in enumerate(pie_groups):
+        
+            print("Creating violin plots")
+
+            create_figure_pie(count,pie_group, n_SQ, q_EW, q_Cooke, q_erf, Cooke_flag,
+                              ERF_flag, EW_flag, output_dir, elicitation_name)
+
+
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
     # ----------------------------------------- #
@@ -2095,6 +2119,55 @@ def main(argv):
             text_title = "Target questions Group " + str(count + 1)
             add_title(slide, text_title)
 
+    # ----------- Pie groups slides --------#
+
+    if analysis and len(pie_groups) > 0:
+
+        slide = prs.slides.add_slide(title_slide_layout)
+
+        text_title = "Pie charts"
+
+        title_shape = slide.shapes.title
+        title_shape.text = text_title
+        title_shape.top = Inches(3.0)
+        title_shape.width = Inches(15)
+        title_shape.height = Inches(2)
+        title_para = slide.shapes.title.text_frame.paragraphs[0]
+        title_para.font.name = "Helvetica"
+        title_para.font.size = Pt(54)
+        add_date(slide)
+        add_small_logo(slide, left, top, logofile)
+
+        for count, pie_group in enumerate(pie_groups):
+
+            slide = prs.slides.add_slide(title_slide_layout)
+
+            figname = (output_dir + "/" + elicitation_name + "_pie_" +
+                       str(count + 1).zfill(2) + ".png")
+
+            text_box = ""
+            for i in pie_group:
+
+                text_box = (text_box + "TQ" + str(i) + ". " +
+                            TQ_question[i - 1] + ".\n\n")
+
+            if len(text_box) < 500:
+
+                fontsize = 18
+
+            else:
+
+                fontsize = 20.0 * np.sqrt(500.0 / len(text_box))
+
+            add_text_box(slide, left, top, text_box, fontsize)
+
+            add_date(slide)
+            add_small_logo(slide, left, top, logofile)
+            add_figure(slide, figname, left - Inches(0.34), top+ Inches(1.0), Inches(10.85))
+
+            text_title = "Target questions Group " + str(count + 1)
+            add_title(slide, text_title)
+            
     # ------------ Barplot slides ------------#
 
     for j in np.arange(n_SQ + n_TQ):
