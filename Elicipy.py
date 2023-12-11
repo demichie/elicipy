@@ -4,11 +4,6 @@ import os
 import sys
 import pandas as pd
 
-import matplotlib
-import matplotlib.pyplot as plt
-from matplotlib import rcParams
-from matplotlib.ticker import PercentFormatter
-
 from pptx.util import Inches, Pt
 from pptx.dml.color import RGBColor
 from pptx.enum.shapes import MSO_SHAPE
@@ -21,740 +16,48 @@ from COOKEweights import COOKEweights
 from ERFweights import ERFweights
 from merge_csv import merge_csv
 
-# from ElicipyDict import *
+from createPlots import create_fig_hist
+from createPlots import create_figure_violin
+from createPlots import create_figure_trend
+from createPlots import create_figure_answers
+from createPlots import create_barplot
 
 max_len_table = 21
 max_len_tableB = 18
 
 max_len_plot = 21
 
-plt.rcParams.update({"font.size": 8})
-
-rcParams["font.family"] = "sans-serif"
-rcParams["font.sans-serif"] = ["Arial"]
-
-matplotlib.use("TkAgg")
 
 
-def create_fig_hist(
-    group,
-    j,
-    n_sample,
-    n_SQ,
-    hist_type,
-    C,
-    C_erf,
-    C_EW,
-    colors,
-    legends,
-    legendsPDF,
-    global_units,
-    Cooke_flag,
-    ERF_flag,
-    EW_flag,
-    global_log,
-    global_minVal,
-    global_maxVal,
-    output_dir,
-    elicitation_name,
-    del_rows,
-    TQ_units,
-    label_indexes,
-    minval_all,
-    maxval_all,
-    n_bins,
-):
-    """Create figure with histrogram and fit and small figure
-       with PDFs only
-
-    Parameters
-    ----------
-    group : int
-        index of group of experts
-    j : int
-        index of the question
-    n_sample : int
-        number of samples used
-    n_SQ : int
-        number of seed questions
-    hist_type : string
-        string to select plot type ('step' or 'bar')
-    C : float numpy array (size n_sample)
-        array with samples for Cooke method
-    C_erf : float numpy array (size n_sample)
-        array with samples for ERF method
-    C_EW : float numpy array (size n_sample)
-        array with samples for equal weight
-    colors : list of strings
-        list with color names for plots
-    legends : list of strings
-        list with legend strings for histrograms
-    legendsPDF : list of strings
-        list with legend strings for PDFs
-    global_units : list of strings
-        list of strings for units of answers to add as xlabel
-    Cooke_flag : int
-        Cooke_flag > 0 => plot the Cooke method results
-    ERF_flag : int
-        ERF_flag > 0 => plot the ERF method results
-    EW_flag : int
-        EW_flag > 0 => plot the equal weights results
-    global_log : list of int
-        1: log scale; 0: linear scale
-    global_minVal : list of float
-        minimum allowed value for answer to question j
-    global_maxVal : list of float
-        maximum allowed value for answer to question j
-    output_dir : string
-        name of output folder
-    elicitation_name : string
-        name of the elicitation
-    del_rows : list of int
-        list of methods to skip (0:cooke, 1:ERF, 2:EW)
-    TQ_units : list of strings
-        list of strings for units of target answers to add as xlabel
-    label_indexes : list of int
-        index to use as label for the figure title
-    minval_all : list of float
-        minimum value for answers to question j among experts
-    maxval_all : list of float
-        maximum value for answers to question j among experts
-
-
-    Returns
-    -------
-    none
-
+# Print iterations progress
+def printProgressBar(iteration,
+                     total,
+                     prefix='',
+                     suffix='',
+                     decimals=1,
+                     bar_length=100):
     """
-    
-    from scipy import stats
-
-    fig = plt.figure()
-    axs_h = fig.add_subplot(111)
-    C_stack = np.stack((C, C_erf, C_EW), axis=0)
-    C_stack = np.delete(C_stack, del_rows, 0)
-    wg = np.ones_like(C_stack.T) / n_sample
-
-    if global_units[j] == "%" and global_log[j] == 0:
-
-        xmin = 0.0
-
-    else:
-
-        xmin = minval_all[j]
-
-    if global_units[j] == "%":
-
-        xmax = 100.0
-
-    else:
-
-        xmax = maxval_all[j]
-
-    if global_log[j] == 1:
-
-        bins = np.geomspace(minval_all[j], maxval_all[j], n_bins + 1)
-
-    else:
-
-        bins = np.linspace(minval_all[j], maxval_all[j], n_bins + 1)
-
-    if hist_type == "step":
-
-        (n, bins, patches) = axs_h.hist(
-            C_stack.T,
-            bins=bins,
-            weights=wg,
-            histtype="step",
-            fill=False,
-            rwidth=0.95,
-            color=colors,
-        )
-
-    elif hist_type == "bar":
-
-        (n, bins, patches) = axs_h.hist(
-            C_stack.T,
-            bins=bins,
-            weights=wg,
-            histtype="bar",
-            rwidth=0.50,
-            ec="k",
-            color=colors,
-        )
-
-    axs_h.set_xlabel(TQ_units[j - n_SQ])
-    plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
-
-    plt.xticks()[0]
-
-    axs_h2 = axs_h.twinx()
-
-    if global_log[j] == 1:
-
-        pdf_min = np.log10(minval_all[j])
-        pdf_max = np.log10(maxval_all[j])
-        pdf_C = np.log10(C)
-        pdf_C_erf = np.log10(C_erf)
-        pdf_C_EW = np.log10(C_EW)
-        pdf_spc = np.linspace(pdf_min, pdf_max, 1000)
-        pdf_scale = (pdf_max - pdf_min) / (maxval_all[j] - minval_all[j])
-        lnspc = 10**pdf_spc
-
-    else:
-
-        pdf_min = global_minVal[j]
-        pdf_max = global_maxVal[j]
-        if pdf_max == float("inf"):
-            pdf_max = maxval_all[j]
-
-        pdf_C = C
-        pdf_C_erf = C_erf
-        pdf_C_EW = C_EW
-        pdf_spc = np.linspace(pdf_min, pdf_max, 1000)
-        pdf_scale = 1.0
-        lnspc = pdf_spc
-
-    if Cooke_flag > 0:
-
-        gkde = stats.gaussian_kde(pdf_C)
-        gkde_norm = gkde.integrate_box_1d(pdf_min, pdf_max)
-        kdepdf = gkde.evaluate(pdf_spc) / gkde_norm * pdf_scale
-        axs_h2.plot(lnspc, kdepdf, "r--")
-
-    if ERF_flag > 0:
-        gkde_erf = stats.gaussian_kde(pdf_C_erf)
-        gkde_erf_norm = gkde_erf.integrate_box_1d(pdf_min, pdf_max)
-        kdepdf_erf = gkde_erf.evaluate(pdf_spc) / gkde_erf_norm * pdf_scale
-        axs_h2.plot(lnspc, kdepdf_erf, "--", color="tab:purple")
-
-    if EW_flag > 0:
-        gkde_EW = stats.gaussian_kde(pdf_C_EW)
-        gkde_EW_norm = gkde_EW.integrate_box_1d(pdf_min, pdf_max)
-        kdepdf_EW = gkde_EW.evaluate(pdf_spc) / gkde_EW_norm * pdf_scale
-        axs_h2.plot(lnspc, kdepdf_EW, "g--")
-
-    axs_h.set_xlim(xmin, xmax)
-    axs_h2.set_xlim(xmin, xmax)
-    axs_h2.set_ylabel("PDF", color="b")
-    axs_h2.set_ylim(bottom=0)
-
-    [ymin, ymax] = axs_h2.get_ylim()
-    for xbin in bins:
-
-        axs_h2.plot([xbin, xbin], [ymin, ymax], "k-", linewidth=0.2, alpha=0.1)
-
-    if global_log[j] == 1:
-
-        axs_h.set_xscale("log")
-        axs_h2.set_xscale("log")
-
-    plt.legend(legends)
-    plt.title("Target Question " + label_indexes[j])
-
-    figname = (output_dir + "/" + elicitation_name + "_hist_" +
-               str(j - n_SQ + 1).zfill(2) + ".pdf")
-    fig.savefig(figname)
-
-    # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_hist_" +
-               str(j - n_SQ + 1).zfill(2) + ".png")
-    # images[0].save(figname, "PNG")
-    fig.savefig(figname, dpi=300)
-
-    plt.close()
-
-    # CUMULATIVE PLOTS
-
-    fig_cum = plt.figure()
-    axs_cum = fig_cum.add_subplot(111)
-    axs_cum.set_xlabel(TQ_units[j - n_SQ])
-    plt.gca().yaxis.set_major_formatter(PercentFormatter(1))
-
-    plt.xticks()[0]
-
-    if Cooke_flag > 0:
-
-        kde_cum = np.cumsum(kdepdf)
-        kde_cum /= np.amax(kde_cum)
-        axs_cum.plot(lnspc, kde_cum, "r--")
-
-    if ERF_flag > 0:
-
-        kde_cum_erf = np.cumsum(kdepdf_erf)
-        kde_cum_erf /= np.amax(kde_cum_erf)
-        axs_cum.plot(lnspc, kde_cum_erf, "--", color="tab:purple")
-
-    if EW_flag > 0:
-
-        kde_cum_EW = np.cumsum(kdepdf_EW)
-        kde_cum_EW /= np.amax(kde_cum_EW)
-        axs_cum.plot(lnspc, kde_cum_EW, "g--")
-
-    axs_cum.set_xlim(xmin, xmax)
-    axs_cum.set_ylabel("Cumulative", color="b")
-    axs_cum.set_ylim(bottom=0)
-
-    if global_log[j] == 1:
-
-        axs_cum.set_xscale("log")
-
-    plt.legend(legends, prop={"size": 18})
-    
-    if group == 0:
-
-        plt.title("Target Question " + label_indexes[j], fontsize=18)
-
-    else:
-
-        plt.title("Target Question " + label_indexes[j] + " Group " +
-                  str(group),
-                  fontsize=18)    
-    
-    figname = (output_dir + "/" + elicitation_name + "_cum_group" +
-               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".pdf")
-    fig_cum.savefig(figname)
-
-    # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_cum_group" +
-               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".png")
-    # images[0].save(figname, "PNG")
-    fig_cum.savefig(figname, dpi=300)
-
-    plt.close()
-
-
-
-    # create figure with PDFs only for small inset and groups
-    fig2 = plt.figure()
-    axs_h2 = fig2.add_subplot(111)
-    axs_h2.set_xlabel(TQ_units[j - n_SQ])
-
-    if Cooke_flag > 0:
-
-        axs_h2.plot(lnspc, kdepdf, "r--", linewidth=2)
-
-    if ERF_flag > 0:
-
-        axs_h2.plot(lnspc, kdepdf_erf, "--", color="tab:purple", linewidth=2)
-
-    if EW_flag > 0:
-
-        axs_h2.plot(lnspc, kdepdf_EW, "g--", linewidth=2)
-
-    axs_h2.set_xlim(xmin, xmax)
-
-    if global_log[j] == 1:
-
-        axs_h2.set_xscale("log")
-
-    axs_h2.set_ylabel("PDF", color="b")
-
-    axs_h2.set_ylim(bottom=0)
-    plt.legend(legends, prop={"size": 18})
-
-    if group == 0:
-
-        plt.title("Target Question " + label_indexes[j], fontsize=18)
-
-    else:
-
-        plt.title("Target Question " + label_indexes[j] + " Group " +
-                  str(group),
-                  fontsize=18)
-
-    figname = (output_dir + "/" + elicitation_name + "_PDF_group" +
-               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".pdf")
-    fig2.savefig(figname)
-
-    # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_PDF_group" +
-               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".png")
-    # images[0].save(figname, "PNG")
-    fig2.savefig(figname, dpi=300)
-
-    plt.close()
-
-    return
-
-
-def create_figure_trend(
-    count,
-    trend_group,
-    n_SQ,
-    q_EW,
-    q_Cooke,
-    q_erf,
-    global_units,
-    Cooke_flag,
-    ERF_flag,
-    EW_flag,
-    global_log,
-    TQ_minVals,
-    TQ_maxVals,
-    output_dir,
-    elicitation_name,
-):
-    """Create figure for trend group (subset of target qustions)
-
-    Parameters
-    ----------
-    count : int
-        index of the group of questions
-    trend_group : list of int
-        indexes of questions for group
-    n_SQ : int
-        number of seed questions
-    q_EW : numpy array of floats
-        percentiles computed with equal weight
-    q_Cooke : numpy array of floats
-        percentiles computed with Cooke method
-    q_erf : numpy array of floats
-        percentiles computed with ERF method
-    global_units : list of strings
-        list of strings for units of answers to add as xlabel
-    Cooke_flag : int
-        Cooke_flag > 0 => plot the Cooke method results
-    ERF_flag : int
-        ERF_flag > 0 => plot the ERF method results
-    EW_flag : int
-        EW_flag > 0 => plot the equal weights results
-    global_log : list of int
-        1: log scale; 0: linear scale
-    TQ_minVals : list of float
-        minimum allowed value for answer to target questions
-    TQ_maxVals
-        maximum allowed value for answer to target questions
-    output_dir : string
-        name of output folder
-
-    Returns
-    -------
-    none
-
+    Call in a loop to create terminal progress bar
+
+    @params:
+        iteration   - Required  : current iteration (Int)
+        total       - Required  : total iterations (Int)
+        prefix      - Optional  : prefix string (Str)
+        suffix      - Optional  : suffix string (Str)
+        decimals    - Optional  : number of decimals in percent complete (Int)
+        bar_length  - Optional  : character length of bar (Int)
     """
-    fig = plt.figure()
-    axs = fig.add_subplot(111)
-
-    x = np.arange(len(trend_group)) + 1
-
-    handles = []
-
-    trend_group = np.array(trend_group)
-
-    if EW_flag:
-
-        y = q_EW[trend_group + n_SQ - 1, 1]
-        lower_error = q_EW[trend_group + n_SQ - 1, 1] - \
-            q_EW[trend_group + n_SQ - 1, 0]
-        upper_error = q_EW[trend_group + n_SQ - 1, 2] - \
-            q_EW[trend_group + n_SQ - 1, 1]
-        asymmetric_error = [lower_error, upper_error]
-
-        line1 = axs.errorbar(x - 0.1,
-                             y,
-                             yerr=asymmetric_error,
-                             fmt="go",
-                             label="EW")
-        axs.plot(x - 0.1, y - lower_error, "gx")
-        axs.plot(x - 0.1, y + upper_error, "gx")
-        handles.append(line1)
-
-    if Cooke_flag > 0:
-
-        y = q_Cooke[trend_group + n_SQ - 1, 1]
-        lower_error = (q_Cooke[trend_group + n_SQ - 1, 1] -
-                       q_Cooke[trend_group + n_SQ - 1, 0])
-        upper_error = (q_Cooke[trend_group + n_SQ - 1, 2] -
-                       q_Cooke[trend_group + n_SQ - 1, 1])
-        asymmetric_error = [lower_error, upper_error]
-
-        line2 = axs.errorbar(x, y, yerr=asymmetric_error, fmt="ro", label="CM")
-        axs.plot(x, y - lower_error, "rx")
-        axs.plot(x, y + upper_error, "rx")
-        handles.append(line2)
-
-    if ERF_flag > 0:
-
-        y = q_erf[trend_group + n_SQ - 1, 1]
-        lower_error = (q_erf[trend_group + n_SQ - 1, 1] -
-                       q_erf[trend_group + n_SQ - 1, 0])
-        upper_error = (q_erf[trend_group + n_SQ - 1, 2] -
-                       q_erf[trend_group + n_SQ - 1, 1])
-        asymmetric_error = [lower_error, upper_error]
-
-        line3 = axs.errorbar(x + 0.1,
-                             y,
-                             yerr=asymmetric_error,
-                             fmt="bo",
-                             label="ERF")
-        axs.plot(x + 0.1, y - lower_error, "bx")
-        axs.plot(x + 0.1, y + upper_error, "bx")
-        handles.append(line3)
-
-    axs.set_xticks(x)
-
-    xtick = []
-    for i in x:
-        xtick.append("TQ" + str(trend_group[i - 1]))
-
-    axs.set_xticklabels(xtick)
-
-    # ax1.set_yscale('log')
-
-    axs.set_ylim(TQ_minVals[trend_group[0]], TQ_maxVals[trend_group[0]])
-
-    # axs.grid(linewidth=0.4)
-
-    plt.title("Question Group " + str(count + 1))
-
-    axs.legend(handles=handles)
-
-    figname = (output_dir + "/" + elicitation_name + "_trend_" +
-               str(count + 1).zfill(2) + ".pdf")
-    fig.savefig(figname)
-
-    # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_trend_" +
-               str(count + 1).zfill(2) + ".png")
-    # images[0].save(figname, "PNG")
-    fig.savefig(figname, dpi=300)
-    plt.close()
-
-    return
-
-
-def create_figure(
-    h,
-    k,
-    n_experts,
-    max_len_plot,
-    n_SQ,
-    SQ_array,
-    TQ_array,
-    realization,
-    analysis,
-    Cooke_flag,
-    ERF_flag,
-    EW_flag,
-    global_units,
-    output_dir,
-    q_Cooke,
-    q_erf,
-    q_EW,
-    elicitation_name,
-    global_log,
-    label_indexes,
-    nolabel_flag
-):
-
-    idx0 = k * max_len_plot
-    idx1 = min((k + 1) * max_len_plot, n_experts)
-
-    if h >= n_SQ:
-
-        j = h - n_SQ
-        Q_array = TQ_array[idx0:idx1, :, j]
-        string = "Target"
-
-        xmin = np.amin(TQ_array[:, 0, j])
-        xmax = np.amax(TQ_array[:, 2, j])
-
-    else:
-
-        j = h
-        Q_array = SQ_array[idx0:idx1, :, j]
-        string = "Seed"
-
-        xmin = np.amin(SQ_array[:, 0, j])
-        xmin = np.minimum(xmin, realization[h])
-        xmax = np.amax(SQ_array[:, 2, j])
-        xmax = np.maximum(xmax, realization[h])
-
-    if global_log[h] == 1:
-
-        log_xmin = np.log(xmin)
-        log_xmax = np.log(xmax)
-
-        delta_logx = 0.05 * (log_xmax - log_xmin)
-        log_xmin -= delta_logx
-        log_xmax += delta_logx
-
-        xmin = np.exp(log_xmin)
-        xmax = np.exp(log_xmax)
-
-    else:
-
-        deltax = 0.05 * (xmax - xmin)
-        xmin -= deltax
-        xmax += deltax
-
-    x = Q_array[:, 1]
-    y = np.arange(idx1 - idx0) + 1
-
-    # creating error
-    x_errormax = Q_array[:, 2] - Q_array[:, 1]
-    x_errormin = Q_array[:, 1] - Q_array[:, 0]
-
-    x_error = [x_errormin, x_errormax]
-
-    fig = plt.figure()
-    axs = fig.add_subplot(111)
-    axs.errorbar(x, y, xerr=x_error, fmt="bo")
-    axs.plot(x - x_errormin, y, "bx")
-    axs.plot(x + x_errormax, y, "bx")
-
-    ytick = []
-    for i in y:
-        if nolabel_flag:
-            ytick.append("")
-        else:
-            ytick.append("Exp." + str(int(i + idx0)))
-
-    yerror = idx1 - idx0
-    if analysis:
-
-        if Cooke_flag > 0:
-
-            yerror = yerror + 1
-            axs.errorbar(
-                q_Cooke[h, 1],
-                yerror,
-                xerr=[[q_Cooke[h, 1] - q_Cooke[h, 0]],
-                      [q_Cooke[h, 2] - q_Cooke[h, 1]]],
-                fmt="ro",
-            )
-            axs.plot(q_Cooke[h, 0], yerror, "rx")
-            axs.plot(q_Cooke[h, 2], yerror, "rx")
-            axs.plot(q_Cooke[h, 3], yerror, "r*")
-
-            ytick.append("DM-Cooke")
-
-            if global_log[h] == 1:
-
-                txt_Cooke = "%.2E" % q_Cooke[h, 1]
-
-            elif q_Cooke[h, 2] < 0.01:
-                txt_Cooke = "%5.3e" % q_Cooke[h, 1]
-            elif q_Cooke[h, 2] > 999:
-                txt_Cooke = "%5.2e" % q_Cooke[h, 1]
-            else:
-                txt_Cooke = "%6.2f" % q_Cooke[h, 1]
-
-            if h >= n_SQ:
-                axs.annotate(txt_Cooke, (q_Cooke[h, 1] * 0.99, yerror + 0.15))
-
-        if ERF_flag > 0:
-
-            yerror = yerror + 1
-            axs.errorbar(
-                q_erf[h, 1],
-                [yerror],
-                xerr=[[q_erf[h, 1] - q_erf[h, 0]],
-                      [q_erf[h, 2] - q_erf[h, 1]]],
-                fmt="o",
-                color="tab:purple",
-            )
-            axs.plot(q_erf[h, 0], yerror, "x", color="tab:purple")
-            axs.plot(q_erf[h, 2], yerror, "x", color="tab:purple")
-            axs.plot(q_erf[h, 3], yerror, "*", color="tab:purple")
-
-            ytick.append("DM-ERF")
-
-            if global_log[h] == 1:
-
-                txt_erf = "%.2E" % q_erf[h, 1]
-
-            elif q_erf[h, 2] < 0.01:
-                txt_erf = "%5.3e" % q_erf[h, 1]
-            elif q_erf[h, 2] > 999:
-                txt_erf = "%5.2e" % q_erf[h, 1]
-            else:
-                txt_erf = "%6.2f" % q_erf[h, 1]
-
-            if h >= n_SQ:
-                axs.annotate(txt_erf, (q_erf[h, 1] * 0.99, yerror + 0.15))
-
-        if EW_flag > 0:
-
-            yerror = yerror + 1
-            axs.errorbar(
-                [q_EW[h, 1]],
-                [yerror],
-                xerr=[[q_EW[h, 1] - q_EW[h, 0]], [q_EW[h, 2] - q_EW[h, 1]]],
-                fmt="go",
-            )
-
-            axs.plot(q_EW[h, 0], yerror, "gx")
-            axs.plot(q_EW[h, 2], yerror, "gx")
-            axs.plot(q_EW[h, 3], yerror, "g*")
-
-            ytick.append("DM-Equal")
-
-            if global_log[h] == 1:
-
-                txt_EW = "%.2E" % q_EW[h, 1]
-
-            elif q_EW[h, 2] < 0.01:
-                txt_EW = "%5.3e" % q_EW[h, 1]
-            elif q_EW[h, 2] > 999:
-                txt_EW = "%5.2e" % q_EW[h, 1]
-            else:
-                txt_EW = "%6.2f" % q_EW[h, 1]
-
-            if h >= n_SQ:
-                axs.annotate(txt_EW, (q_EW[h, 1] * 0.99, yerror + 0.15))
-
-        if h < n_SQ:
-
-            if realization[j] > 999:
-                txt = "%5.2e" % realization[h]
-            else:
-                txt = "%6.2f" % realization[h]
-            
-            yerror = yerror + 1
-            axs.plot(realization[h], yerror, "kx")
-            axs.annotate(txt, (realization[h] * 0.99, yerror + 0.15))
-
-            ytick.append("Realization")
-
-    else:
-
-        if h < n_SQ:
-
-            axs.plot(realization[h], idx1 - idx0 + 1, "kx")
-            axs.annotate(txt, (realization[j] * 0.99, idx1 - idx0 + 1 + 0.15))
-            ytick.append("Realization")
-
-    y = np.arange(len(ytick)) + 1
-
-    ytick_tuple = tuple(i for i in ytick)
-    axs.set_yticks(y)
-
-    axs.set_yticklabels(ytick_tuple)
-    axs.set_xlabel(global_units[h])
-
-    if global_log[h] == 1:
-
-        axs.set_xscale("log")
-
-    axs.set_ylim(0.5, len(ytick) + 1.0)
-    axs.set_xlim(xmin, xmax)
-
-    axs.grid(linewidth=0.4)
-
-    plt.title(string + " Question " + label_indexes[h])
-    figname = (output_dir + "/" + elicitation_name + "_" + string + "_" +
-               str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) + ".pdf")
-    fig.savefig(figname)
-
-    # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_" + string + "_" +
-               str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) + ".png")
-    # images[0].save(figname, "PNG")
-    fig.savefig(figname, dpi=300)
-    plt.close()
-
+    str_format = "{0:." + str(decimals) + "f}"
+    percents = str_format.format(100 * (iteration / float(total)))
+    filled_length = int(round(bar_length * iteration / float(total)))
+    bar = '█' * filled_length + '-' * (bar_length - filled_length)
+
+    sys.stdout.write('\r%s |%s| %s%s %s' %
+                     (prefix, bar, percents, '%', suffix)),
+
+    if iteration == total:
+        sys.stdout.write('\n')
+    sys.stdout.flush()
 
 def add_date(slide):
 
@@ -781,12 +84,12 @@ def add_small_logo(slide, left, top, logofile):
                              width=Inches(0.8))
 
 
-def add_figure(slide, figname, left, top):
+def add_figure(slide, figname, left, top, width):
 
     img = slide.shapes.add_picture(figname,
                                    left + Inches(3.4),
                                    top,
-                                   width=Inches(10))
+                                   width=width)
 
     slide.shapes._spTree.insert(2, img._element)
 
@@ -1569,43 +872,10 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
 
     return
 
-
-def create_samples_and_barplot(
-    group,
-    n_experts,
-    n_SQ,
-    n_TQ,
-    n_pctl,
-    SQ_array,
-    TQ_array,
-    n_sample,
-    W,
-    W_erf,
-    Weqok,
-    W_gt0,
-    Werf_gt0,
-    expin,
-    global_log,
-    global_minVal,
-    global_maxVal,
-    global_units,
-    TQ_units,
-    label_indexes,
-    minval_all,
-    maxval_all,
-    postprocessing,
-    analysis,
-    ERF_flag,
-    Cooke_flag,
-    EW_flag,
-    overshoot,
-    hist_type,
-    output_dir,
-    elicitation_name,
-    n_bins,
-    globalSum,
-    normalizeSum,
-):
+def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_sample, W,
+                   W_erf, Weqok, W_gt0, Werf_gt0, expin, global_log, 
+                   global_minVal, global_maxVal, label_indexes,
+                   ERF_flag, Cooke_flag, EW_flag, overshoot, globalSum, normalizeSum):
 
     DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
 
@@ -1622,91 +892,63 @@ def create_samples_and_barplot(
     samples_erf = np.zeros((n_sample, n_SQ+n_TQ))
     samples_EW = np.zeros((n_sample, n_SQ+n_TQ))
 
-    del_rows = []
-    keep_rows = []
+    print('Creating samples for question')
 
-    if Cooke_flag == 0:
-        del_rows.append(int(0))
-    else:
-        keep_rows.append(int(0))
-
-    if ERF_flag == 0:
-        del_rows.append(int(1))
-    else:
-        keep_rows.append(int(1))
-
-    if EW_flag == 0:
-        del_rows.append(int(2))
-    else:
-        keep_rows.append(int(2))
-
-    colors = ["tomato", "purple", "springgreen"]
-    colors = [colors[index] for index in keep_rows]
-
-    legends = ["CM", "ERF", "EW"]
-    legends = [legends[index] for index in keep_rows]
-
-
-    if analysis:
-
-        print('Creating samples for question')
-
-
-        for j in np.arange(n_SQ + n_TQ):
+    for j in np.arange(n_SQ + n_TQ):
     
-            print(j)
+        printProgressBar(j,n_SQ + n_TQ-1)
 
-            C_EW = createSamples(
+        C_EW = createSamples(
+            DAT,
+            j,
+            Weqok,
+            n_sample,
+            global_log[j],
+            [global_minVal[j], global_maxVal[j]],
+            overshoot,
+            0,
+        )
+            
+        samples_EW[:, j] = C_EW
+            
+        if Cooke_flag>0:
+
+            C = createSamples(
                 DAT,
                 j,
-                Weqok,
+                W[:, 4].flatten(),
                 n_sample,
                 global_log[j],
                 [global_minVal[j], global_maxVal[j]],
                 overshoot,
                 0,
             )
+                
+        else:
             
-            samples_EW[:, j] = C_EW
-            
-            if Cooke_flag>0:
+            C = C_EW    
 
-                C = createSamples(
+        samples[:, j] = C
+                
+        if ERF_flag > 0:
+
+            C_erf = \
+                createSamples(
                     DAT,
                     j,
-                    W[:, 4].flatten(),
+                    W_erf[:, 4].flatten(),
                     n_sample,
                     global_log[j],
                     [global_minVal[j], global_maxVal[j]],
                     overshoot,
-                    0,
+                    ERF_flag,
                 )
-                
-            else:
-            
-                C = C_EW    
 
-            samples[:, j] = C
-                
-            if ERF_flag > 0:
+        else:
 
-                C_erf = \
-                    createSamples(
-                        DAT,
-                        j,
-                        W_erf[:, 4].flatten(),
-                        n_sample,
-                        global_log[j],
-                        [global_minVal[j], global_maxVal[j]],
-                        overshoot,
-                        ERF_flag,
-                    )
+            C_erf = C_EW
 
-            else:
-
-                C_erf = C_EW
-
-            samples_erf[:, j] = C_erf
+        samples_erf[:, j] = C_erf
        
     if ( normalizeSum): 
                
@@ -1728,125 +970,76 @@ def create_samples_and_barplot(
             sum_samples = np.expand_dims(sum_samples,axis=1)
             samples_erf[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] /= sum_samples 
             samples_erf[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] *= triplet[2]
-
                 
     print("")
-    if analysis:
-        print(" j   quan05    quan50     qmean    quan95")
+    print("Computing quantiles and mean")
+    print(" j   quan05    quan50     qmean    quan95")
 
     for j in np.arange(n_SQ + n_TQ):
 
-        if analysis:
-           
+        if global_log[j]:
+
+            qmean_EW = 10.0**np.mean(np.log10(samples_EW[:,j]))
+    
+        else:
+
+            qmean_EW = np.mean(samples_EW[:,j])
+    
+        quan05_EW = np.quantile(samples_EW[:,j], 0.05)
+        quan50_EW = np.quantile(samples_EW[:,j], 0.5)
+        quan95_EW = np.quantile(samples_EW[:,j], 0.95)
+
+        print(label_indexes[j]+ " %.2E %.2E %.2E %.2E" %
+              (quan05_EW, quan50_EW, qmean_EW, quan95_EW))
+
+        q_EW[j, 0] = quan05_EW
+        q_EW[j, 1] = quan50_EW
+        q_EW[j, 2] = quan95_EW
+        q_EW[j, 3] = qmean_EW
+
+        if Cooke_flag>0:
+
             if global_log[j]:
 
-                qmean_EW = 10.0**np.mean(np.log10(samples_EW[:,j]))
+                qmean = 10.0**np.mean(np.log10(samples[:,j]))
     
             else:
 
-                qmean_EW = np.mean(samples_EW[:,j])
+                qmean = np.mean(samples[:,j])
     
-            quan05_EW = np.quantile(samples_EW[:,j], 0.05)
-            quan50_EW = np.quantile(samples_EW[:,j], 0.5)
-            quan95_EW = np.quantile(samples_EW[:,j], 0.95)
+            quan05 = np.quantile(samples[:,j], 0.05)
+            quan50 = np.quantile(samples[:,j], 0.5)
+            quan95 = np.quantile(samples[:,j], 0.95)
 
-            print(label_indexes[j]+ " %9.2f %9.2f %9.2f %9.2f" %
-                  (quan05_EW, quan50_EW, qmean_EW, quan95_EW))
+            print(label_indexes[j]+ " %.2E %.2E %.2E %.2E" %
+                  (quan05, quan50, qmean, quan95))
 
-            q_EW[j, 0] = quan05_EW
-            q_EW[j, 1] = quan50_EW
-            q_EW[j, 2] = quan95_EW
-            q_EW[j, 3] = qmean_EW
+            q_Cooke[j, 0] = quan05
+            q_Cooke[j, 1] = quan50
+            q_Cooke[j, 2] = quan95
+            q_Cooke[j, 3] = qmean
 
-            if Cooke_flag>0:
+        if ERF_flag > 0:
 
-                if global_log[j]:
+            if global_log[j]:
 
-                    qmean = 10.0**np.mean(np.log10(samples[:,j]))
+                qmean_erf = 10.0**np.mean(np.log10(samples_erf[:,j]))
     
-                else:
+            else:
 
-                    qmean = np.mean(samples[:,j])
+                qmean_erf = np.mean(samples_erf[:,j])
     
-                quan05 = np.quantile(samples[:,j], 0.05)
-                quan50 = np.quantile(samples[:,j], 0.5)
-                quan95 = np.quantile(samples[:,j], 0.95)
-
-                print(label_indexes[j]+ " %9.2f %9.2f %9.2f %9.2f" %
-                      (quan05, quan50, qmean, quan95))
-
-                q_Cooke[j, 0] = quan05
-                q_Cooke[j, 1] = quan50
-                q_Cooke[j, 2] = quan95
-                q_Cooke[j, 3] = qmean
-
-            if ERF_flag > 0:
-
-                if global_log[j]:
-
-                    qmean_erf = 10.0**np.mean(np.log10(samples_erf[:,j]))
-    
-                else:
-
-                    qmean_erf = np.mean(samples_erf[:,j])
-    
-                quan05_erf = np.quantile(samples_erf[:,j], 0.05)
-                quan50_erf = np.quantile(samples_erf[:,j], 0.5)
-                quan95_erf = np.quantile(samples_erf[:,j], 0.95)
+            quan05_erf = np.quantile(samples_erf[:,j], 0.05)
+            quan50_erf = np.quantile(samples_erf[:,j], 0.5)
+            quan95_erf = np.quantile(samples_erf[:,j], 0.95)
                 
-                print(label_indexes[j]+ " %9.2f %9.2f %9.2f %9.2f" %
-                      (quan05_erf, quan50_erf, qmean_erf, quan95_erf))
+            print(label_indexes[j]+ " %.2E %.2E %.2E %.2E" %
+                  (quan05_erf, quan50_erf, qmean_erf, quan95_erf))
 
-                q_erf[j, 0] = quan05_erf
-                q_erf[j, 1] = quan50_erf
-                q_erf[j, 2] = quan95_erf
-                q_erf[j, 3] = qmean_erf
-
-            if (j >= n_SQ) and postprocessing:
-
-                legendsPDF = []
-
-                if Cooke_flag > 0:
-
-                    legendsPDF.append("CM" + "%9.2f" % quan05 +
-                                      "%9.2f" % quan50 + "%9.2f" % quan95)
-                if ERF_flag > 0:
-
-                    legendsPDF.append("ERF" + "%9.2f" % quan05_erf +
-                                      "%9.2f" % quan50_erf +
-                                      "%9.2f" % quan95_erf)
-
-                legendsPDF.append("EW" + "%9.2f" % quan05_EW +
-                                  "%9.2f" % quan50_EW + "%9.2f" % quan95_EW)
-
-                create_fig_hist(
-                    group,
-                    j,
-                    n_sample,
-                    n_SQ,
-                    hist_type,
-                    samples[:, j],
-                    samples_erf[:, j],
-                    samples_EW[:, j],
-                    colors,
-                    legends,
-                    legendsPDF,
-                    global_units,
-                    Cooke_flag,
-                    ERF_flag,
-                    EW_flag,
-                    global_log,
-                    global_minVal,
-                    global_maxVal,
-                    output_dir,
-                    elicitation_name,
-                    del_rows,
-                    TQ_units,
-                    label_indexes,
-                    minval_all,
-                    maxval_all,
-                    n_bins,
-                )
+            q_erf[j, 0] = quan05_erf
+            q_erf[j, 1] = quan50_erf
+            q_erf[j, 2] = quan95_erf
+            q_erf[j, 3] = qmean_erf
 
     return q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW
 
@@ -2140,71 +1333,28 @@ def main(argv):
                 alpha_analysis = 0.0
                 
             W, W_erf, Weqok, W_gt0, Werf_gt0, expin, M = answer_analysis(
-                input_dir,
-                csv_file,
-                n_experts,
-                n_SQ,
-                n_TQ,
-                SQ_array,
-                TQ_array,
-                realization,
-                global_scale,
-                global_log,
-                alpha_analysis,
-                overshoot,
-                cal_power,
-                ERF_flag,
-                Cooke_flag,
-                seed
-                )
+                input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
+                TQ_array, realization, global_scale, global_log,
+                alpha_analysis, overshoot, cal_power, ERF_flag, Cooke_flag,
+                seed)
             
             # ----------------------------------------- #
             # ------ Create samples and bar plots ----- #
             # ----------------------------------------- #
-
-            (
-                q_Cooke,
-                q_erf,
-                q_EW,
-                samples,
-                samples_erf,
-                samples_EW,
-            ) = create_samples_and_barplot(
-                group,
-                n_experts,
-                n_SQ,
-                n_TQ,
-                n_pctl,
-                SQ_array,
-                TQ_array,
-                n_sample,
-                W,
-                W_erf,
-                Weqok,
-                W_gt0,
-                Werf_gt0,
-                expin,
-                global_log,
-                global_minVal,
-                global_maxVal,
-                global_units,
-                TQ_units,
-                label_indexes,
-                minval_all,
-                maxval_all,
-                postprocessing,
-                analysis,
-                ERF_flag,
-                Cooke_flag,
-                EW_flag,
-                overshoot,
-                hist_type,
-                output_dir,
-                elicitation_name,
-                n_bins,
-                globalSum,
-                normalizeSum
-            )
+            
+            q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = create_samples(group, 
+                   n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_sample, W,
+                   W_erf, Weqok, W_gt0, Werf_gt0, expin, global_log, 
+                   global_minVal, global_maxVal, label_indexes,
+                   ERF_flag, Cooke_flag, EW_flag, overshoot, globalSum, normalizeSum)
+             
+            print("Creating distribution plots")
+                   
+            create_barplot(group, n_SQ, n_TQ, n_sample, global_log, global_minVal, 
+                   global_maxVal, global_units, TQ_units, label_indexes,
+                   minval_all, maxval_all, ERF_flag,
+                   Cooke_flag, EW_flag, hist_type, output_dir, elicitation_name,
+                   n_bins, q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW)       
 
             if Cooke_flag > 0:
 
@@ -2241,8 +1391,8 @@ def main(argv):
                                                 alpha, global_scale, overshoot,
                                                 cal_power, Cooke_flag)
 
-                print('information DM-Cooke', information_DM)
-                print('score DM-Cooke',score_DM)
+                print('Information DM-Cooke', information_DM)
+                print('Score DM-Cooke',score_DM)
                 
             if len(group_list) > 1:
 
@@ -2356,11 +1506,54 @@ def main(argv):
             trend_groups = []
 
         for count, trend_group in enumerate(trend_groups):
+        
+            print("Creating trend plots")
+
 
             create_figure_trend(
                 count,
                 trend_group,
                 n_SQ,
+                q_EW,
+                q_Cooke,
+                q_erf,
+                global_units,
+                Cooke_flag,
+                ERF_flag,
+                EW_flag,
+                global_log,
+                TQ_minVals,
+                TQ_maxVals,
+                output_dir,
+                elicitation_name,
+            )
+
+        # ------------------------------------------ #
+        # --------- Create violin figures ---------- #
+        # ------------------------------------------ #
+
+        try:
+
+            from ElicipyDict import violin_groups
+
+            print("violin_groups read", violin_groups)
+
+        except ImportError:
+
+            print("No violin group defined")
+            violin_groups = []
+
+        for count, violin_group in enumerate(violin_groups):
+        
+            print("Creating violin plots")
+
+            create_figure_violin(
+                count,
+                violin_group,
+                n_SQ,
+                samples_EW,
+                samples,
+                samples_erf,
                 q_EW,
                 q_Cooke,
                 q_erf,
@@ -2381,11 +1574,15 @@ def main(argv):
 
     n_panels = int(np.ceil(n_experts / max_len_plot))
 
-    for h in np.arange(n_SQ + n_TQ):
+    print("Creating answer plots")
 
+    for h in np.arange(n_SQ + n_TQ):
+ 
+        printProgressBar(h, n_SQ+n_TQ-1)
+           
         for k in np.arange(n_panels):
 
-            create_figure(
+            create_figure_answers(
                 h,
                 k,
                 n_experts,
@@ -2408,6 +1605,9 @@ def main(argv):
                 label_indexes,
                 nolabel_flag
             )
+
+    print("End Creating answer plots")
+
 
     # ----------------------------------------- #
     # ------- Create .pptx presentation ------- #
@@ -2619,7 +1819,7 @@ def main(argv):
             figname = (output_dir + "/" + elicitation_name + "_" + string +
                        "_" + str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) +
                        ".png")
-            add_figure(slide, figname, left, top)
+            add_figure(slide, figname, left, top, Inches(10))
 
             if analysis and (string == "Target"):
 
@@ -2841,7 +2041,56 @@ def main(argv):
 
             add_date(slide)
             add_small_logo(slide, left, top, logofile)
-            add_figure(slide, figname, left - Inches(0.8), top)
+            add_figure(slide, figname, left - Inches(0.8), top, Inches(10))
+
+            text_title = "Target questions Group " + str(count + 1)
+            add_title(slide, text_title)
+
+    # ----------- Violin groups slides --------#
+
+    if analysis and len(violin_groups) > 0:
+
+        slide = prs.slides.add_slide(title_slide_layout)
+
+        text_title = "Violin plots"
+
+        title_shape = slide.shapes.title
+        title_shape.text = text_title
+        title_shape.top = Inches(3.0)
+        title_shape.width = Inches(15)
+        title_shape.height = Inches(2)
+        title_para = slide.shapes.title.text_frame.paragraphs[0]
+        title_para.font.name = "Helvetica"
+        title_para.font.size = Pt(54)
+        add_date(slide)
+        add_small_logo(slide, left, top, logofile)
+
+        for count, violin_group in enumerate(violin_groups):
+
+            slide = prs.slides.add_slide(title_slide_layout)
+
+            figname = (output_dir + "/" + elicitation_name + "_violin_" +
+                       str(count + 1).zfill(2) + ".png")
+
+            text_box = ""
+            for i in violin_group:
+
+                text_box = (text_box + "TQ" + str(i) + ". " +
+                            TQ_question[i - 1] + ".\n\n")
+
+            if len(text_box) < 500:
+
+                fontsize = 18
+
+            else:
+
+                fontsize = 20.0 * np.sqrt(500.0 / len(text_box))
+
+            add_text_box(slide, left, top, text_box, fontsize)
+
+            add_date(slide)
+            add_small_logo(slide, left, top, logofile)
+            add_figure(slide, figname, left - Inches(0.34), top+ Inches(1.0), Inches(10.85))
 
             text_title = "Target questions Group " + str(count + 1)
             add_title(slide, text_title)
@@ -2890,7 +2139,7 @@ def main(argv):
 
                 add_date(slide)
                 add_small_logo(slide, left, top, logofile)
-                add_figure(slide, figname, left - Inches(0.8), top)
+                add_figure(slide, figname, left - Inches(0.8), top, Inches(10))
 
                 text_title = TQ_question[j - n_SQ]
                 add_title(slide, text_title)

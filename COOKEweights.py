@@ -214,7 +214,7 @@ def calculate_information(SQ_array, TQ_array, realization, overshoot,
     # loop over seed questions
     for i in np.arange(N):
 
-        print('seed index', i)
+        # print('seed index', i)
 
         lowval[i] = np.minimum(np.amin(SQ_array[:, :, i]), realization[i])
         highval[i] = np.maximum(np.amax(SQ_array[:, :, i]), realization[i])
