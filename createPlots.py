@@ -845,7 +845,7 @@ def create_figure_pie(
 
     if EW_flag:
 
-        y = q_EW[pie_group + n_SQ - 1, 1]
+        y = q_EW[pie_group + n_SQ - 1, 3]
 
         sizes = y
 
@@ -855,7 +855,7 @@ def create_figure_pie(
 
     if Cooke_flag > 0:
 
-        y = q_Cooke[pie_group + n_SQ - 1, 1]
+        y = q_Cooke[pie_group + n_SQ - 1, 3]
 
         sizes = y
 
@@ -864,7 +864,7 @@ def create_figure_pie(
 
     if ERF_flag > 0:
 
-        y = q_erf[pie_group + n_SQ - 1, 1]
+        y = q_erf[pie_group + n_SQ - 1, 3]
 
         sizes = y
 
