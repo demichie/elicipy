@@ -805,7 +805,7 @@ def answer_analysis(
     print("Weq")
     print(Weqok)
 
-    return W, W_erf, Weqok, W_gt0, Werf_gt0, expin, M
+    return W, W_erf, Weqok, W_gt0, Werf_gt0, expin
 
 
 def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
@@ -1332,7 +1332,7 @@ def main(argv):
 
                 alpha_analysis = 0.0
                 
-            W, W_erf, Weqok, W_gt0, Werf_gt0, expin, M = answer_analysis(
+            W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
                 input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
                 TQ_array, realization, global_scale, global_log,
                 alpha_analysis, overshoot, cal_power, ERF_flag, Cooke_flag,
