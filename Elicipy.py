@@ -1104,6 +1104,8 @@ def main(argv):
             print("repository", repository)
         path = current_path + "/ELICITATIONS/" + repository
 
+    print('')
+
     os.chdir(path)
     if verbose:
         print("Path: ", path)
@@ -1512,7 +1514,7 @@ def main(argv):
         # --------- Create trend. figures ---------- #
         # ------------------------------------------ #
 
-        counter_plot = 1
+        counter_plot = 0
         try:
 
             from ElicipyDict import trend_groups
@@ -1528,7 +1530,7 @@ def main(argv):
 
         if len(trend_groups) > 0:
 
-            print("STEP" + str(4 + counter_plot + 2 * len(group_list)) +
+            print("STEP" + str(3 + counter_plot + 2 * len(group_list)) +
                   ": Creating trend plots")
             counter_plot += 1
 
@@ -1571,7 +1573,7 @@ def main(argv):
 
         if len(violin_groups) > 0:
 
-            print("STEP" + str(4 + counter_plot + 2 * len(group_list)) +
+            print("STEP" + str(3 + counter_plot + 2 * len(group_list)) +
                   ": Creating violin plots")
             counter_plot += 1
 
@@ -1617,7 +1619,7 @@ def main(argv):
 
         if len(pie_groups) > 0:
 
-            print("STEP" + str(4 + counter_plot + 2 * len(group_list)) +
+            print("STEP" + str(3 + counter_plot + 2 * len(group_list)) +
                   ": Creating pie charts")
             counter_plot += 1
 
@@ -1633,7 +1635,7 @@ def main(argv):
 
     n_panels = int(np.ceil(n_experts / max_len_plot))
 
-    print("STEP" + str(4 + counter_plot + 2 * len(group_list) - 1) +
+    print("STEP" + str(3 + counter_plot + 2 * len(group_list) ) +
           ": Creating answer plots")
 
     for h in np.arange(n_SQ + n_TQ):
@@ -1652,6 +1654,9 @@ def main(argv):
     # ----------------------------------------- #
     # ------- Create .pptx presentation ------- #
     # ----------------------------------------- #
+
+    print("STEP" + str(4 + counter_plot + 2 * len(group_list) ) +
+          ": Creating presentation")
 
     prs = Presentation()
     prs.slide_width = Inches(16)
