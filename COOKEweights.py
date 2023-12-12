@@ -48,7 +48,7 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
     # create numpy array M with the number of realizations captured in every
     # expert's bin that is formed by the provided quantiles
     if Cooke_flag > 1:
-        
+
         for ex in np.arange(E):
             for i in np.arange(N):
                 if realization[i] < SQ_array[ex, 0, i]:
@@ -79,7 +79,7 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
                     M[ex, 3] = M[ex, 3] + 0.5
 
                 else:
-                    
+
                     M[ex, 3] = M[ex, 3] + 1
 
     elif Cooke_flag == 1:
@@ -107,8 +107,8 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
         raise ValueError(
             "ERROR: Cooke_flag should be 1 or 2",
             Cooke_flag,
-            )
-        
+        )
+
     # calculate calibration and information score for every expert
     [I_real, I_tot] = calculate_information(SQ_array, TQ_array, realization,
                                             overshoot, background_measure)
@@ -174,8 +174,16 @@ def calscore(M, cal_power):
         elif len(S) == 6:
             P = np.array([0.05, 0.20, 0.25, 0.25, 0.20, 0.05])
 
-        E1 = S * np.log(S / P)
-        MI = np.sum(E1[~np.isnan(E1)])
+        # E1 = S * np.log(S / P)
+        # MI = np.sum(E1[~np.isnan(E1)])
+
+        # New lines: 2023/12/12
+        E1 = np.zeros_like(P)
+        for i, Si in enumerate(S):
+            if Si > 0:
+                E1[i] = Si * np.log(Si / P[i])
+        MI = np.sum(E1)
+
         E = 2.0 * N * MI * cal_power
         CS = chi2.sf(E, len(S) - 1)
 

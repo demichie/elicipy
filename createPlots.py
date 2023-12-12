@@ -8,44 +8,14 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from matplotlib.ticker import PercentFormatter
 
-plt.rcParams.update({"font.size": 8})
+from tools import printProgressBar
 
+plt.rcParams.update({"font.size": 8})
 
 rcParams["font.family"] = "sans-serif"
 rcParams["font.sans-serif"] = ["Arial"]
 
 matplotlib.use("TkAgg")
-
-
-# Print iterations progress
-def printProgressBar(iteration,
-                     total,
-                     prefix='',
-                     suffix='',
-                     decimals=1,
-                     bar_length=100):
-    """
-    Call in a loop to create terminal progress bar
-
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : number of decimals in percent complete (Int)
-        bar_length  - Optional  : character length of bar (Int)
-    """
-    str_format = "{0:." + str(decimals) + "f}"
-    percents = str_format.format(100 * (iteration / float(total)))
-    filled_length = int(round(bar_length * iteration / float(total)))
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
-
-    sys.stdout.write('\r%s |%s| %s%s %s' %
-                     (prefix, bar, percents, '%', suffix)),
-
-    if iteration == total:
-        sys.stdout.write('\n')
-    sys.stdout.flush()
 
 
 def create_fig_hist(
@@ -138,7 +108,7 @@ def create_fig_hist(
     none
 
     """
-    
+
     from scipy import stats
 
     fig = plt.figure()
@@ -312,7 +282,7 @@ def create_fig_hist(
         axs_cum.set_xscale("log")
 
     plt.legend(legends, prop={"size": 18})
-    
+
     if group == 0:
 
         plt.title("Target Question " + label_indexes[j], fontsize=18)
@@ -321,8 +291,8 @@ def create_fig_hist(
 
         plt.title("Target Question " + label_indexes[j] + " Group " +
                   str(group),
-                  fontsize=18)    
-    
+                  fontsize=18)
+
     figname = (output_dir + "/" + elicitation_name + "_cum_group" +
                str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".pdf")
     fig_cum.savefig(figname)
@@ -334,8 +304,6 @@ def create_fig_hist(
     fig_cum.savefig(figname, dpi=300)
 
     plt.close()
-
-
 
     # create figure with PDFs only for small inset and groups
     fig2 = plt.figure()
@@ -388,6 +356,7 @@ def create_fig_hist(
     plt.close()
 
     return
+
 
 def create_figure_violin(
     count,
@@ -449,33 +418,33 @@ def create_figure_violin(
     """
     x = np.arange(len(violin_group)) + 1
     xmin = 0.5
-    xmax = len(violin_group)+0.5
+    xmax = len(violin_group) + 0.5
 
     violin_group = np.array(violin_group)
 
     ncols = 0
     if EW_flag:
-        EW_col = ncols   
-        ncols +=1 
+        EW_col = ncols
+        ncols += 1
     if Cooke_flag:
         Cooke_col = ncols
-        ncols +=1
+        ncols += 1
     if ERF_flag:
-        ERF_col = ncols        
-        ncols +=1
+        ERF_col = ncols
+        ncols += 1
 
     fig, axes = plt.subplots(nrows=1, ncols=ncols, figsize=(8.0, 4.0))
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.95])
 
     if EW_flag:
 
-        y = samples_EW[:,violin_group + n_SQ - 1]
+        y = samples_EW[:, violin_group + n_SQ - 1]
 
         vp_EW = axes[EW_col].violinplot(y,
-                   showmeans=False,
-                   showmedians=False,
-                   widths=0.25)
-                   
+                                        showmeans=False,
+                                        showmedians=False,
+                                        widths=0.25)
+
         axes[EW_col].set_title('EW')
 
         axes[EW_col].set_xticks(x)
@@ -486,17 +455,18 @@ def create_figure_violin(
 
         axes[EW_col].set_xticklabels(xtick)
 
-        axes[EW_col].set_xlim(xmin,xmax)
-        axes[EW_col].set_ylim(TQ_minVals[violin_group[0]], TQ_maxVals[violin_group[0]])
-                
+        axes[EW_col].set_xlim(xmin, xmax)
+        axes[EW_col].set_ylim(TQ_minVals[violin_group[0]],
+                              TQ_maxVals[violin_group[0]])
+
         # Set the color of the violin patches
         for pc in vp_EW['bodies']:
             pc.set_facecolor('g')
             pc.set_edgecolor('g')
             pc.set_linewidth(0.25)
-            
+
         # Make all the violin statistics marks red:
-        for partname in ('cbars','cmins','cmaxes'):
+        for partname in ('cbars', 'cmins', 'cmaxes'):
             vp = vp_EW[partname]
             vp.set_edgecolor('g')
 
@@ -508,24 +478,23 @@ def create_figure_violin(
         asymmetric_error = [lower_error, upper_error]
 
         line1 = axes[EW_col].errorbar(x,
-                             y,
-                             yerr=asymmetric_error,
-                             fmt="go",
-                             markersize='4',
-                             label="EW")
-        axes[EW_col].plot(x, y - lower_error, "gx",markersize='4')
-        axes[EW_col].plot(x, y + upper_error, "gx",markersize='4')
-
+                                      y,
+                                      yerr=asymmetric_error,
+                                      fmt="go",
+                                      markersize='4',
+                                      label="EW")
+        axes[EW_col].plot(x, y - lower_error, "gx", markersize='4')
+        axes[EW_col].plot(x, y + upper_error, "gx", markersize='4')
 
     if Cooke_flag > 0:
 
-        y = samples[:,violin_group + n_SQ - 1]
+        y = samples[:, violin_group + n_SQ - 1]
 
         vp_Cooke = axes[Cooke_col].violinplot(y,
-                   showmeans=False,
-                   showmedians=False,
-                   widths=0.25)
-                   
+                                              showmeans=False,
+                                              showmedians=False,
+                                              widths=0.25)
+
         axes[Cooke_col].set_title('Cooke')
 
         axes[Cooke_col].set_xticks(x)
@@ -536,9 +505,9 @@ def create_figure_violin(
 
         axes[Cooke_col].set_xticklabels(xtick)
 
-        axes[Cooke_col].set_xlim(xmin,xmax)
-        axes[Cooke_col].set_ylim(TQ_minVals[violin_group[0]], TQ_maxVals[violin_group[0]])
-
+        axes[Cooke_col].set_xlim(xmin, xmax)
+        axes[Cooke_col].set_ylim(TQ_minVals[violin_group[0]],
+                                 TQ_maxVals[violin_group[0]])
 
         # Set the color of the violin patches
         for pc in vp_Cooke['bodies']:
@@ -547,7 +516,7 @@ def create_figure_violin(
             pc.set_linewidth(0.25)
 
         # Make all the violin statistics marks red:
-        for partname in ('cbars','cmins','cmaxes'):
+        for partname in ('cbars', 'cmins', 'cmaxes'):
             vp = vp_Cooke[partname]
             vp.set_edgecolor('r')
 
@@ -559,23 +528,23 @@ def create_figure_violin(
         asymmetric_error = [lower_error, upper_error]
 
         line1 = axes[Cooke_col].errorbar(x,
-                             y,
-                             yerr=asymmetric_error,
-                             fmt="ro",
-                             markersize='4',
-                             label="EW")
-        axes[Cooke_col].plot(x, y - lower_error, "rx",markersize='4')
-        axes[Cooke_col].plot(x, y + upper_error, "rx",markersize='4')
+                                         y,
+                                         yerr=asymmetric_error,
+                                         fmt="ro",
+                                         markersize='4',
+                                         label="EW")
+        axes[Cooke_col].plot(x, y - lower_error, "rx", markersize='4')
+        axes[Cooke_col].plot(x, y + upper_error, "rx", markersize='4')
 
     if ERF_flag > 0:
 
-        y = samples_erf[:,violin_group + n_SQ - 1]
+        y = samples_erf[:, violin_group + n_SQ - 1]
 
         vp_ERF = axes[ERF_col].violinplot(y,
-                   showmeans=False,
-                   showmedians=True,
-                   widths=0.25)
-                   
+                                          showmeans=False,
+                                          showmedians=True,
+                                          widths=0.25)
+
         axes[ERF_col].set_title('ERF')
 
         axes[ERF_col].set_xticks(x)
@@ -586,8 +555,9 @@ def create_figure_violin(
 
         axes[ERF_col].set_xticklabels(xtick)
 
-        axes[ERF_col].set_xlim(xmin,xmax)
-        axes[ERF_col].set_ylim(TQ_minVals[violin_group[0]], TQ_maxVals[violin_group[0]])
+        axes[ERF_col].set_xlim(xmin, xmax)
+        axes[ERF_col].set_ylim(TQ_minVals[violin_group[0]],
+                               TQ_maxVals[violin_group[0]])
 
         # Set the color of the violin patches
         for pc in vp_ERF['bodies']:
@@ -596,7 +566,7 @@ def create_figure_violin(
             pc.set_linewidth(0.25)
 
         # Make all the violin statistics marks red:
-        for partname in ('cbars','cmins','cmaxes','cmedians'):
+        for partname in ('cbars', 'cmins', 'cmaxes', 'cmedians'):
             vp = vp_ERF[partname]
             vp.set_edgecolor('b')
 
@@ -608,16 +578,16 @@ def create_figure_violin(
         asymmetric_error = [lower_error, upper_error]
 
         line1 = axes[ERF_col].errorbar(x,
-                             y,
-                             yerr=asymmetric_error,
-                             fmt="bo",
-                             markersize='4',
-                             label="EW")
-        axes[ERF_col].plot(x, y - lower_error, "bx",markersize='4')
-        axes[ERF_col].plot(x, y + upper_error, "bx",markersize='4')
+                                       y,
+                                       yerr=asymmetric_error,
+                                       fmt="bo",
+                                       markersize='4',
+                                       label="EW")
+        axes[ERF_col].plot(x, y - lower_error, "bx", markersize='4')
+        axes[ERF_col].plot(x, y + upper_error, "bx", markersize='4')
 
     # axs.grid(linewidth=0.4)
-    
+
     figname = (output_dir + "/" + elicitation_name + "_violin_" +
                str(count + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
@@ -777,19 +747,9 @@ def create_figure_trend(
 
     return
 
-def create_figure_pie(
-    count,
-    pie_group,
-    n_SQ,
-    q_EW,
-    q_Cooke,
-    q_erf,
-    Cooke_flag,
-    ERF_flag,
-    EW_flag,
-    output_dir,
-    elicitation_name
-):
+
+def create_figure_pie(count, pie_group, n_SQ, q_EW, q_Cooke, q_erf, Cooke_flag,
+                      ERF_flag, EW_flag, output_dir, elicitation_name):
     """Create figure for trend group (subset of target qustions)
 
     Parameters
@@ -821,18 +781,17 @@ def create_figure_pie(
 
     ncols = 0
     if EW_flag:
-        EW_col = ncols   
-        ncols +=1 
+        EW_col = ncols
+        ncols += 1
     if Cooke_flag:
         Cooke_col = ncols
-        ncols +=1
+        ncols += 1
     if ERF_flag:
-        ERF_col = ncols        
-        ncols +=1
+        ERF_col = ncols
+        ncols += 1
 
     fig, axes = plt.subplots(nrows=1, ncols=ncols, figsize=(8.0, 4.0))
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.95])
-
 
     x = np.arange(len(pie_group)) + 1
 
@@ -842,7 +801,6 @@ def create_figure_pie(
     for i in x:
         labels.append("TQ" + str(pie_group[i - 1]))
 
-
     if EW_flag:
 
         y = q_EW[pie_group + n_SQ - 1, 3]
@@ -851,7 +809,6 @@ def create_figure_pie(
 
         axes[EW_col].pie(sizes, labels=labels, autopct='%1.1f%%')
         axes[EW_col].set_title('EW')
-
 
     if Cooke_flag > 0:
 
@@ -885,30 +842,11 @@ def create_figure_pie(
     return
 
 
-
-def create_figure_answers(
-    h,
-    k,
-    n_experts,
-    max_len_plot,
-    n_SQ,
-    SQ_array,
-    TQ_array,
-    realization,
-    analysis,
-    Cooke_flag,
-    ERF_flag,
-    EW_flag,
-    global_units,
-    output_dir,
-    q_Cooke,
-    q_erf,
-    q_EW,
-    elicitation_name,
-    global_log,
-    label_indexes,
-    nolabel_flag
-):
+def create_figure_answers(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
+                          TQ_array, realization, analysis, Cooke_flag,
+                          ERF_flag, EW_flag, global_units, output_dir, q_Cooke,
+                          q_erf, q_EW, elicitation_name, global_log,
+                          label_indexes, nolabel_flag):
 
     idx0 = k * max_len_plot
     idx1 = min((k + 1) * max_len_plot, n_experts)
@@ -1073,7 +1011,7 @@ def create_figure_answers(
                 txt = "%5.2e" % realization[h]
             else:
                 txt = "%6.2f" % realization[h]
-            
+
             yerror = yerror + 1
             axs.plot(realization[h], yerror, "kx")
             axs.annotate(txt, (realization[h] * 0.99, yerror + 0.15))
@@ -1118,11 +1056,11 @@ def create_figure_answers(
     plt.close()
 
 
-def create_barplot(group, n_SQ, n_TQ, n_sample, global_log, global_minVal, 
+def create_barplot(group, n_SQ, n_TQ, n_sample, global_log, global_minVal,
                    global_maxVal, global_units, TQ_units, label_indexes,
-                   minval_all, maxval_all, ERF_flag,
-                   Cooke_flag, EW_flag, hist_type, output_dir, elicitation_name,
-                   n_bins, q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW):
+                   minval_all, maxval_all, ERF_flag, Cooke_flag, EW_flag,
+                   hist_type, output_dir, elicitation_name, n_bins, q_Cooke,
+                   q_erf, q_EW, samples, samples_erf, samples_EW):
 
     del_rows = []
     keep_rows = []
@@ -1148,32 +1086,30 @@ def create_barplot(group, n_SQ, n_TQ, n_sample, global_log, global_minVal,
     legends = ["CM", "ERF", "EW"]
     legends = [legends[index] for index in keep_rows]
 
-    for j in np.arange(n_SQ,n_SQ + n_TQ):
+    for j in np.arange(n_SQ, n_SQ + n_TQ):
 
-        printProgressBar(j-n_SQ,n_TQ-1)
+        printProgressBar(j - n_SQ, n_TQ - 1, prefix='      ')
 
         legendsPDF = []
 
         if Cooke_flag > 0:
 
             legendsPDF.append("CM" + "%9.2f" % q_Cooke[j, 0] +
-                                      "%9.2f" % q_Cooke[j, 1] + "%9.2f" % q_Cooke[j, 2])
+                              "%9.2f" % q_Cooke[j, 1] +
+                              "%9.2f" % q_Cooke[j, 2])
         if ERF_flag > 0:
 
             legendsPDF.append("ERF" + "%9.2f" % q_erf[j, 0] +
-                              "%9.2f" % q_erf[j, 1] +
-                              "%9.2f" % q_erf[j, 2])
+                              "%9.2f" % q_erf[j, 1] + "%9.2f" % q_erf[j, 2])
 
-        legendsPDF.append("EW" + "%9.2f" % q_EW[j, 0] +
-                          "%9.2f" % q_EW[j, 1] + "%9.2f" % q_EW[j, 2])
+        legendsPDF.append("EW" + "%9.2f" % q_EW[j, 0] + "%9.2f" % q_EW[j, 1] +
+                          "%9.2f" % q_EW[j, 2])
 
         create_fig_hist(group, j, n_sample, n_SQ, hist_type, samples[:, j],
-                samples_erf[:, j], samples_EW[:, j], colors, legends,
-                legendsPDF, global_units, Cooke_flag, ERF_flag, EW_flag,
-                global_log, global_minVal, global_maxVal, output_dir,
-                elicitation_name, del_rows, TQ_units, label_indexes,
-                minval_all, maxval_all, n_bins)
+                        samples_erf[:, j], samples_EW[:, j], colors, legends,
+                        legendsPDF, global_units, Cooke_flag, ERF_flag,
+                        EW_flag, global_log, global_minVal, global_maxVal,
+                        output_dir, elicitation_name, del_rows, TQ_units,
+                        label_indexes, minval_all, maxval_all, n_bins)
 
     return
-
-

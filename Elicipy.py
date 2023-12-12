@@ -23,42 +23,13 @@ from createPlots import create_figure_trend
 from createPlots import create_figure_answers
 from createPlots import create_barplot
 
+from tools import printProgressBar
+
 max_len_table = 21
 max_len_tableB = 18
 
 max_len_plot = 21
 
-
-
-# Print iterations progress
-def printProgressBar(iteration,
-                     total,
-                     prefix='',
-                     suffix='',
-                     decimals=1,
-                     bar_length=100):
-    """
-    Call in a loop to create terminal progress bar
-
-    @params:
-        iteration   - Required  : current iteration (Int)
-        total       - Required  : total iterations (Int)
-        prefix      - Optional  : prefix string (Str)
-        suffix      - Optional  : suffix string (Str)
-        decimals    - Optional  : number of decimals in percent complete (Int)
-        bar_length  - Optional  : character length of bar (Int)
-    """
-    str_format = "{0:." + str(decimals) + "f}"
-    percents = str_format.format(100 * (iteration / float(total)))
-    filled_length = int(round(bar_length * iteration / float(total)))
-    bar = '█' * filled_length + '-' * (bar_length - filled_length)
-
-    sys.stdout.write('\r%s |%s| %s%s %s' %
-                     (prefix, bar, percents, '%', suffix)),
-
-    if iteration == total:
-        sys.stdout.write('\n')
-    sys.stdout.flush()
 
 def add_date(slide):
 
@@ -143,6 +114,8 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
                  df_indexes_TQ, seed, target, output_dir, elicitation_name,
                  write_flag, label_indexes):
 
+    verbose = False
+
     try:
 
         from ElicipyDict import label_flag
@@ -158,7 +131,7 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
     merge_csv(input_dir, seed, target, group, csv_file, label_flag, write_flag)
 
     if seed:
-        
+
         # seeds file name
         filename = input_dir + "/seed.csv"
 
@@ -188,7 +161,8 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
 
             NS_SQ.append(name + surname)
 
-        print("NS_SQ", NS_SQ)
+        if verbose:
+            print("NS_SQ", NS_SQ)
 
         csv_name = output_dir + "/" + elicitation_name + "_experts.csv"
 
@@ -232,17 +206,19 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
             n_SQ = len(df_indexes_SQ)
             # print('SQ_array',SQ_array)
 
-        for i in np.arange(n_SQ):
-        
-            print("")
-            print("Seed question ", label_indexes[i])
-            print(SQ_array[:, :, i])
-                    
+        if verbose:
+
+            for i in np.arange(n_SQ):
+
+                print("")
+                print("Seed question ", label_indexes[i])
+                print(SQ_array[:, :, i])
+
     else:
 
         n_SQ = 0
         df_indexes_SQ = []
-                    
+
     if target:
 
         filename = input_dir + "/target.csv"
@@ -265,26 +241,28 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
 
             NS_TQ.append(name + surname)
 
-        if seed:    
+        if seed:
 
             sorted_idx = []
 
             # loop to search for matches between experts in seed and target
             for SQ_name in NS_SQ:
 
-                index = NS_TQ.index(difflib.get_close_matches(SQ_name, NS_TQ)[0])
+                index = NS_TQ.index(
+                    difflib.get_close_matches(SQ_name, NS_TQ)[0])
                 sorted_idx.append(index)
 
-            print("Sorted list of experts to match the order of seeds:",
-                sorted_idx)
+            if verbose:
+                print("Sorted list of experts to match the order of seeds:",
+                      sorted_idx)
 
-            print(NS_SQ)
-            print([NS_TQ[s_idx] for s_idx in sorted_idx])
+                print(NS_SQ)
+                print([NS_TQ[s_idx] for s_idx in sorted_idx])
 
         else:
 
             sorted_idx = range(len(NS_TQ))
-            
+
         # create a 2D numpy array with the answers to the target questions
         cols_as_np = df_TQ[df_TQ.columns[4:]].to_numpy()
 
@@ -322,21 +300,22 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
             n_TQ = len(df_indexes_TQ)
             # print('TQ_array',TQ_array)
 
-        for i in np.arange(n_TQ):
+        if verbose:
 
-            print("Target question ", label_indexes[i+n_SQ])
-            print(TQ_array[:, :, i])
-            
+            for i in np.arange(n_TQ):
+
+                print("Target question ", label_indexes[i + n_SQ])
+                print(TQ_array[:, :, i])
+
     else:
-        
+
         n_TQ = 0
         TQ_array = np.zeros((n_experts, n_pctl, n_TQ))
 
     if not seed:
-        
+
         SQ_array = np.zeros((n_experts, n_pctl, n_SQ))
 
-        
     return n_experts, n_SQ, n_TQ, SQ_array, TQ_array
 
 
@@ -362,6 +341,10 @@ def read_questionnaire(input_dir, csv_file, seed, target):
 
     """
 
+    verbose = False
+
+    print("STEP1: Reading questionnaire")
+
     try:
 
         from ElicipyDict import label_flag
@@ -376,20 +359,22 @@ def read_questionnaire(input_dir, csv_file, seed, target):
     quest_type = df_read["QUEST_TYPE"].to_list()
     n_SQ = quest_type.count("seed")
 
-    print(quest_type)
+    if verbose:
+        print(quest_type)
 
     try:
 
         from ElicipyDict import seed_list
 
-        print("seed_list read", seed_list)
+        if verbose:
+            print("seed_list read", seed_list)
 
     except ImportError:
 
-        print("ImportError")
         seed_list = list(df_read["IDX"])[0:n_SQ]
 
-    print("seed_list", seed_list)
+    if verbose:
+        print("seed_list", seed_list)
 
     # extract the seed questions with index in
     # seed_list (from column IDX)
@@ -397,31 +382,33 @@ def read_questionnaire(input_dir, csv_file, seed, target):
 
     for idx in seed_list[:]:
 
-        indices = df_read.index[
-            (df_read["IDX"] == idx)
-            & (df_read.QUEST_TYPE.str.contains("seed"))]
-            
+        indices = df_read.index[(df_read["IDX"] == idx)
+                                & (df_read.QUEST_TYPE.str.contains("seed"))]
+
         new_indexes.append(indices[0])
 
     df_SQ = df_read.iloc[new_indexes]
     df_indexes_SQ = np.array(new_indexes).astype(int)
 
-    print("df_indexes_SQ", df_indexes_SQ)
+    if verbose:
+        print("df_indexes_SQ", df_indexes_SQ)
 
     if target:
 
         try:
 
             from ElicipyDict import target_list
-
-            print("target_list read", target_list)
+            if verbose:
+                print("target_list read", target_list)
 
         except ImportError:
 
-            print("ImportError")
+            if verbose:
+                print("ImportError")
             target_list = list(df_read["IDX"])[n_SQ:]
 
-        print("target_list", target_list)
+        if verbose:
+            print("target_list", target_list)
 
         # extract the target questions with index in
         # target_list (from column IDX)
@@ -436,13 +423,15 @@ def read_questionnaire(input_dir, csv_file, seed, target):
             new_indexes.append(indices[0])
 
         df_TQ = df_read.iloc[new_indexes]
-        df_indexes_TQ = np.array(new_indexes).astype(int)-n_SQ
+        df_indexes_TQ = np.array(new_indexes).astype(int) - n_SQ
 
-        print("df_indexes_TQ", df_indexes_TQ)
+        if verbose:
+            print("df_indexes_TQ", df_indexes_TQ)
 
         if seed:
 
-            df_quest = df_SQ.append(df_TQ)
+            # df_quest = df_SQ.append(df_TQ)
+            df_quest = pd.concat([df_SQ, df_TQ])
 
         else:
 
@@ -459,7 +448,8 @@ def read_questionnaire(input_dir, csv_file, seed, target):
         label_indexes = np.asarray(df_quest["IDX"])
         label_indexes = label_indexes.astype(str).tolist()
 
-    print("label_indexes", label_indexes)
+    if verbose:
+        print("label_indexes", label_indexes)
 
     data_top = df_quest.head()
 
@@ -475,7 +465,8 @@ def read_questionnaire(input_dir, csv_file, seed, target):
 
             langs.append(string2)
 
-    print("Languages:", langs)
+    if verbose:
+        print("Languages:", langs)
 
     try:
 
@@ -578,25 +569,29 @@ def read_questionnaire(input_dir, csv_file, seed, target):
             SQ_minVals.append(minVal)
             SQ_maxVals.append(maxVal)
 
-            if idxMin>0:
-                df_min = df_quest.loc[(df_quest['IDX'] == idxMin) & (df_quest['QUEST_TYPE'] == 'seed')]
+            if idxMin > 0:
+                df_min = df_quest.loc[(df_quest['IDX'] == idxMin)
+                                      & (df_quest['QUEST_TYPE'] == 'seed')]
                 global_idxMin.append(str(df_min['LABEL'].iloc[0]))
             else:
-                 global_idxMin.append('')
+                global_idxMin.append('')
 
-            if idxMax>0:
-                df_max = df_quest.loc[(df_quest['IDX'] == idxMax) & (df_quest['QUEST_TYPE'] == 'seed')]
+            if idxMax > 0:
+                df_max = df_quest.loc[(df_quest['IDX'] == idxMax)
+                                      & (df_quest['QUEST_TYPE'] == 'seed')]
                 global_idxMax.append(str(df_max['LABEL'].iloc[0]))
             else:
                 global_idxMax.append('')
-            
+
             global_sum50.append(sum50)
 
     # print on screen the units
-    print("Seed_units = ", SQ_units)
+    if verbose:
+        print("Seed_units = ", SQ_units)
 
     # print on screen the units
-    print("Seed_scales = ", SQ_scale)
+    if verbose:
+        print("Seed_scales = ", SQ_scale)
 
     # list with the "title" of the target questions
     TQ_question = []
@@ -656,25 +651,29 @@ def read_questionnaire(input_dir, csv_file, seed, target):
                 idx_list.append(int(idx))
                 parents.append(int(parent))
 
-                if (idxMin>0) and (question == "target"):
-                    df_min = df_quest.loc[(df_quest['IDX'] == idxMin) & (df_quest['QUEST_TYPE'] == 'target')]
+                if (idxMin > 0) and (question == "target"):
+                    df_min = df_quest.loc[(df_quest['IDX'] == idxMin) &
+                                          (df_quest['QUEST_TYPE'] == 'target')]
                     global_idxMin.append(str(df_min['LABEL'].iloc[0]))
                 else:
                     global_idxMin.append('')
 
-                if idxMax>0 and  question == "target":
-                    df_max = df_quest.loc[(df_quest['IDX'] == idxMax) & (df_quest['QUEST_TYPE'] == 'target')]
+                if idxMax > 0 and question == "target":
+                    df_max = df_quest.loc[(df_quest['IDX'] == idxMax) &
+                                          (df_quest['QUEST_TYPE'] == 'target')]
                     global_idxMax.append(str(df_max['LABEL'].iloc[0]))
                 else:
                     global_idxMax.append('')
-                    
+
                 global_sum50.append(sum50)
 
         # print on screen the units
-        print("Target units = ", TQ_units)
+        if verbose:
+            print("Target units = ", TQ_units)
 
         # print on screen the units
-        print("Target scales = ", TQ_scale)
+        if verbose:
+            print("Target scales = ", TQ_scale)
 
         global_scale = SQ_scale + TQ_scale
 
@@ -689,46 +688,37 @@ def read_questionnaire(input_dir, csv_file, seed, target):
             global_idxMin, global_idxMax, global_sum50, df_quest)
 
 
-def answer_analysis(
-    input_dir,
-    csv_file,
-    n_experts,
-    n_SQ,
-    n_TQ,
-    SQ_array,
-    TQ_array,
-    realization,
-    global_scale,
-    global_log,
-    alpha,
-    overshoot,
-    cal_power,
-    ERF_flag,
-    Cooke_flag,
-    seed
-):
+def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
+                    TQ_array, realization, global_scale, global_log, alpha,
+                    overshoot, cal_power, ERF_flag, Cooke_flag, seed):
+
+    verbose = False
 
     if Cooke_flag > 0:
-    
-        W, score, information, M = COOKEweights(SQ_array, TQ_array, realization,
-                                            alpha, global_scale, overshoot,
-                                            cal_power, Cooke_flag)
-        print('score',score)
-        print('information',information)
-        
+
+        W, score, information, M = COOKEweights(SQ_array, TQ_array,
+                                                realization, alpha,
+                                                global_scale, overshoot,
+                                                cal_power, Cooke_flag)
+
+        if verbose:
+
+            print('score', score)
+            print('information', information)
+
     else:
 
-        W = np.ones((n_experts,5))
+        W = np.ones((n_experts, 5))
         score = np.zeros(n_experts)
         information = np.zeros(n_experts)
-        
+
     if ERF_flag:
-        
+
         W_erf, score_erf = ERFweights(realization, SQ_array)
 
     else:
 
-        W_erf = np.ones((n_experts,5))
+        W_erf = np.ones((n_experts, 5))
         score_erf = np.zeros(n_experts)
 
     sensitivity = False
@@ -742,15 +732,8 @@ def answer_analysis(
             global_scale_temp = np.delete(global_scale, i)
 
             W_temp, score_temp, information_temp, M = COOKEweights(
-                SQ_temp,
-                TQ_array,
-                realization_temp,
-                alpha,
-                global_scale_temp,
-                overshoot,
-                cal_power,
-                Cooke_flag
-            )
+                SQ_temp, TQ_array, realization_temp, alpha, global_scale_temp,
+                overshoot, cal_power, Cooke_flag)
 
             W_reldiff = W[:, 3] / \
                 np.sum(W[:, 3]) - W_temp[:, 3] / np.sum(W_temp[:, 3])
@@ -787,24 +770,26 @@ def answer_analysis(
     W_gt0 = [round((x * 100.0), 5) for x in W_gt0_01]
     Werf_gt0 = [round((x * 100.0), 5) for x in Werf_gt0_01]
 
-    if ERF_flag > 0:
+    if verbose:
+
+        if ERF_flag > 0:
+
+            print("")
+            print("W_erf")
+            print(W_erf[:, -1])
+
+        if Cooke_flag > 0:
+
+            print("")
+            print("W_cooke")
+            print(W[:, -1])
+            print("score", score)
+            print("information", information)
+            print("unNormalized weight", W[:, 3])
 
         print("")
-        print("W_erf")
-        print(W_erf[:, -1])
-
-    if Cooke_flag > 0:
-
-        print("")
-        print("W_cooke")
-        print(W[:, -1])
-        print("score", score)
-        print("information", information)
-        print("unNormalized weight", W[:, 3])
-
-    print("")
-    print("Weq")
-    print(Weqok)
+        print("Weq")
+        print(Weqok)
 
     return W, W_erf, Weqok, W_gt0, Werf_gt0, expin
 
@@ -865,18 +850,22 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
                     print(
                         f'{k+1:5d} {"Exp"+str(k+1):>8} {i+1:4d} ' +
                         f'{"TQ"+str(i+1):>13} {TQ_scale[i]:4} ' +
-                        f'{TQ_array[k, 0, i]:6e} {""} {TQ_array[k, 1, i]:6e} ' +
-                        f'{" "}{TQ_array[k, 2, i]:6e}')
+                        f'{TQ_array[k, 0, i]:6e} {""} {TQ_array[k, 1, i]:6e} '
+                        + f'{" "}{TQ_array[k, 2, i]:6e}')
 
         # Reset the standard output to its original value
         sys.stdout = original_stdout
 
     return
 
-def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_sample, W,
-                   W_erf, Weqok, W_gt0, Werf_gt0, expin, global_log, 
-                   global_minVal, global_maxVal, label_indexes,
-                   ERF_flag, Cooke_flag, EW_flag, overshoot, globalSum, normalizeSum):
+
+def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array,
+                   n_sample, W, W_erf, Weqok, W_gt0, Werf_gt0, expin,
+                   global_log, global_minVal, global_maxVal, label_indexes,
+                   ERF_flag, Cooke_flag, EW_flag, overshoot, globalSum,
+                   normalizeSum):
+
+    verbose = False
 
     DAT = np.zeros((n_experts * (n_SQ + n_TQ), n_pctl + 2))
 
@@ -889,15 +878,15 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_s
     q_erf = np.zeros((n_SQ + n_TQ, 4))
     q_EW = np.zeros((n_SQ + n_TQ, 4))
 
-    samples = np.zeros((n_sample, n_SQ+n_TQ))
-    samples_erf = np.zeros((n_sample, n_SQ+n_TQ))
-    samples_EW = np.zeros((n_sample, n_SQ+n_TQ))
+    samples = np.zeros((n_sample, n_SQ + n_TQ))
+    samples_erf = np.zeros((n_sample, n_SQ + n_TQ))
+    samples_EW = np.zeros((n_sample, n_SQ + n_TQ))
 
-    print('Creating samples for question')
+    print('       Creating samples for questions')
 
     for j in np.arange(n_SQ + n_TQ):
-    
-        printProgressBar(j,n_SQ + n_TQ-1)
+
+        printProgressBar(j, n_SQ + n_TQ - 1, prefix='      ')
 
         C_EW = createSamples(
             DAT,
@@ -909,10 +898,10 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_s
             overshoot,
             0,
         )
-            
+
         samples_EW[:, j] = C_EW
-            
-        if Cooke_flag>0:
+
+        if Cooke_flag > 0:
 
             C = createSamples(
                 DAT,
@@ -924,13 +913,13 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_s
                 overshoot,
                 0,
             )
-                
+
         else:
-            
-            C = C_EW    
+
+            C = C_EW
 
         samples[:, j] = C
-                
+
         if ERF_flag > 0:
 
             C_erf = \
@@ -950,70 +939,83 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_s
             C_erf = C_EW
 
         samples_erf[:, j] = C_erf
-       
-    if ( normalizeSum): 
-               
+
+    if (normalizeSum):
+
         for triplet in globalSum:
-    
-            print(triplet[0],triplet[1],triplet[2])
-        
-            sum_samples = np.sum(samples_EW[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1], axis=1)
-            sum_samples = np.expand_dims(sum_samples,axis=1)
-            samples_EW[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] /= sum_samples 
-            samples_EW[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] *= triplet[2]
 
-            sum_samples = np.sum(samples[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1], axis=1)
-            sum_samples = np.expand_dims(sum_samples,axis=1)
-            samples[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] /= sum_samples 
-            samples[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] *= triplet[2]
+            # print(triplet[0],triplet[1],triplet[2])
 
-            sum_samples = np.sum(samples_erf[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1], axis=1)
-            sum_samples = np.expand_dims(sum_samples,axis=1)
-            samples_erf[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] /= sum_samples 
-            samples_erf[:,n_SQ+triplet[0]:n_SQ+triplet[1]+1] *= triplet[2]
-                
-    print("")
-    print("Computing quantiles and mean")
-    print(" j   quan05    quan50     qmean    quan95")
+            sum_samples = np.sum(samples_EW[:, n_SQ + triplet[0]:n_SQ +
+                                            triplet[1] + 1],
+                                 axis=1)
+            sum_samples = np.expand_dims(sum_samples, axis=1)
+            samples_EW[:,
+                       n_SQ + triplet[0]:n_SQ + triplet[1] + 1] /= sum_samples
+            samples_EW[:,
+                       n_SQ + triplet[0]:n_SQ + triplet[1] + 1] *= triplet[2]
+
+            sum_samples = np.sum(samples[:, n_SQ + triplet[0]:n_SQ +
+                                         triplet[1] + 1],
+                                 axis=1)
+            sum_samples = np.expand_dims(sum_samples, axis=1)
+            samples[:, n_SQ + triplet[0]:n_SQ + triplet[1] + 1] /= sum_samples
+            samples[:, n_SQ + triplet[0]:n_SQ + triplet[1] + 1] *= triplet[2]
+
+            sum_samples = np.sum(samples_erf[:, n_SQ + triplet[0]:n_SQ +
+                                             triplet[1] + 1],
+                                 axis=1)
+            sum_samples = np.expand_dims(sum_samples, axis=1)
+            samples_erf[:,
+                        n_SQ + triplet[0]:n_SQ + triplet[1] + 1] /= sum_samples
+            samples_erf[:,
+                        n_SQ + triplet[0]:n_SQ + triplet[1] + 1] *= triplet[2]
+
+    print("       Computing quantiles and mean")
+
+    if verbose:
+        print(" j   quan05    quan50     qmean    quan95")
 
     for j in np.arange(n_SQ + n_TQ):
 
         if global_log[j]:
 
-            qmean_EW = 10.0**np.mean(np.log10(samples_EW[:,j]))
-    
+            qmean_EW = 10.0**np.mean(np.log10(samples_EW[:, j]))
+
         else:
 
-            qmean_EW = np.mean(samples_EW[:,j])
-    
-        quan05_EW = np.quantile(samples_EW[:,j], 0.05)
-        quan50_EW = np.quantile(samples_EW[:,j], 0.5)
-        quan95_EW = np.quantile(samples_EW[:,j], 0.95)
+            qmean_EW = np.mean(samples_EW[:, j])
 
-        print(label_indexes[j]+ " %.2E %.2E %.2E %.2E" %
-              (quan05_EW, quan50_EW, qmean_EW, quan95_EW))
+        quan05_EW = np.quantile(samples_EW[:, j], 0.05)
+        quan50_EW = np.quantile(samples_EW[:, j], 0.5)
+        quan95_EW = np.quantile(samples_EW[:, j], 0.95)
+
+        if verbose:
+            print(label_indexes[j] + " %.2E %.2E %.2E %.2E" %
+                  (quan05_EW, quan50_EW, qmean_EW, quan95_EW))
 
         q_EW[j, 0] = quan05_EW
         q_EW[j, 1] = quan50_EW
         q_EW[j, 2] = quan95_EW
         q_EW[j, 3] = qmean_EW
 
-        if Cooke_flag>0:
+        if Cooke_flag > 0:
 
             if global_log[j]:
 
-                qmean = 10.0**np.mean(np.log10(samples[:,j]))
-    
+                qmean = 10.0**np.mean(np.log10(samples[:, j]))
+
             else:
 
-                qmean = np.mean(samples[:,j])
-    
-            quan05 = np.quantile(samples[:,j], 0.05)
-            quan50 = np.quantile(samples[:,j], 0.5)
-            quan95 = np.quantile(samples[:,j], 0.95)
+                qmean = np.mean(samples[:, j])
 
-            print(label_indexes[j]+ " %.2E %.2E %.2E %.2E" %
-                  (quan05, quan50, qmean, quan95))
+            quan05 = np.quantile(samples[:, j], 0.05)
+            quan50 = np.quantile(samples[:, j], 0.5)
+            quan95 = np.quantile(samples[:, j], 0.95)
+
+            if verbose:
+                print(label_indexes[j] + " %.2E %.2E %.2E %.2E" %
+                      (quan05, quan50, qmean, quan95))
 
             q_Cooke[j, 0] = quan05
             q_Cooke[j, 1] = quan50
@@ -1024,18 +1026,19 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_s
 
             if global_log[j]:
 
-                qmean_erf = 10.0**np.mean(np.log10(samples_erf[:,j]))
-    
+                qmean_erf = 10.0**np.mean(np.log10(samples_erf[:, j]))
+
             else:
 
-                qmean_erf = np.mean(samples_erf[:,j])
-    
-            quan05_erf = np.quantile(samples_erf[:,j], 0.05)
-            quan50_erf = np.quantile(samples_erf[:,j], 0.5)
-            quan95_erf = np.quantile(samples_erf[:,j], 0.95)
-                
-            print(label_indexes[j]+ " %.2E %.2E %.2E %.2E" %
-                  (quan05_erf, quan50_erf, qmean_erf, quan95_erf))
+                qmean_erf = np.mean(samples_erf[:, j])
+
+            quan05_erf = np.quantile(samples_erf[:, j], 0.05)
+            quan50_erf = np.quantile(samples_erf[:, j], 0.5)
+            quan95_erf = np.quantile(samples_erf[:, j], 0.95)
+
+            if verbose:
+                print(label_indexes[j] + " %.2E %.2E %.2E %.2E" %
+                      (quan05_erf, quan50_erf, qmean_erf, quan95_erf))
 
             q_erf[j, 0] = quan05_erf
             q_erf[j, 1] = quan50_erf
@@ -1046,6 +1049,8 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_s
 
 
 def main(argv):
+
+    verbose = False
 
     current_path = os.getcwd()
 
@@ -1089,17 +1094,19 @@ def main(argv):
 
         while cond:
 
-            userinput = int(input("Enter Elicitation Number\n"))
+            userinput = int(input("Enter Elicitation Number: "))
             cond = not (userinput in range(len(elicitation_list[1])))
             if cond:
                 print("Integer between 0 and ", len(elicitation_list[1]) - 1)
 
         repository = elicitation_list[1][userinput]
-        print("repository", repository)
+        if verbose:
+            print("repository", repository)
         path = current_path + "/ELICITATIONS/" + repository
 
     os.chdir(path)
-    print("Path: ", path)
+    if verbose:
+        print("Path: ", path)
     sys.path.append(path)
 
     from ElicipyDict import output_dir
@@ -1117,15 +1124,15 @@ def main(argv):
     from ElicipyDict import postprocessing
     from ElicipyDict import hist_type
     from ElicipyDict import n_bins
-    
-    if (Cooke_flag>0 or ERF_flag>0):
+
+    if (Cooke_flag > 0 or ERF_flag > 0):
 
         seed = True
 
     else:
 
         seed = False
-        
+
     try:
 
         from ElicipyDict import nolabel_flag
@@ -1134,7 +1141,6 @@ def main(argv):
 
         nolabel_flag = False
 
-    
     try:
 
         from ElicipyDict import group_list
@@ -1191,38 +1197,37 @@ def main(argv):
 
         normalizeSum = False
 
+    globalSum_temp = zip(global_idxMin, global_idxMax, global_sum50)
 
-    globalSum_temp = zip(global_idxMin,global_idxMax,global_sum50)
-    
     globalSum_temp = list(set(globalSum_temp))
-    
+
     globalSum = []
     for triplet in globalSum_temp:
-    
+
         try:
-        
+
             int(triplet[0])
             flag = True
-            
+
         except ValueError:
-        
+
             flag = False
-            
-        print(flag)    
+
+        # print(flag)
         if flag:
-        
+
             index_first = idx_list.index(int(triplet[0]))
             index_last = idx_list.index(int(triplet[1]))
-            globalSum.append([index_first,index_last,triplet[2]])
- 
-    print('QUI',globalSum)
+            globalSum.append([index_first, index_last, triplet[2]])
 
     # Read the asnwers of all the experts
     group = 0
     write_flag = True
+
+    print("STEP2: Reading all answers to define ranges")
     n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
-        input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ,
-        seed, target, output_dir, elicitation_name, write_flag, label_indexes)
+        input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ, seed,
+        target, output_dir, elicitation_name, write_flag, label_indexes)
 
     save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
                  SQ_realization, SQ_scale, SQ_array, TQ_scale, TQ_array)
@@ -1243,10 +1248,12 @@ def main(argv):
     global_longQuestion = SQ_LongQuestion + TQ_LongQuestion
     global_shortQuestion = SQ_question + TQ_question
 
-    print("")
-    print("Answer ranges")
+    if verbose:
+        print("")
+        print("Answer ranges")
 
-    print(df_indexes_SQ, df_indexes_TQ)
+    if verbose:
+        print(df_indexes_SQ, df_indexes_TQ)
 
     for i in range(n_SQ + n_TQ):
 
@@ -1273,9 +1280,8 @@ def main(argv):
         minval_all[i] = np.maximum(minval_all[i], global_minVal[i])
         maxval_all[i] = np.minimum(maxval_all[i], global_maxVal[i])
 
-        print(i, minval_all[i], maxval_all[i])
-
-    print("")
+        if verbose:
+            print(i, minval_all[i], maxval_all[i])
 
     q_Cooke = np.zeros((len(global_scale), 4))
     q_erf = np.zeros((len(global_scale), 4))
@@ -1292,9 +1298,13 @@ def main(argv):
         # Read the asnwers of the experts
         write_flag = False
 
+        print("STEP" + str(3 + 2 * count) + ": Reading answers for group ",
+              count)
+
         n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
             input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ,
-            seed, target, output_dir, elicitation_name, write_flag, label_indexes)
+            seed, target, output_dir, elicitation_name, write_flag,
+            label_indexes)
 
         if not target:
 
@@ -1303,14 +1313,16 @@ def main(argv):
             TQ_array = np.zeros((n_experts, n_pctl, n_TQ))
 
         if seed:
-            
+
             realization = np.zeros(TQ_array.shape[2] + SQ_array.shape[2])
             realization[0:SQ_array.shape[2]] = SQ_realization
 
-            print("")
-            print("Realization")
-            print(realization)
-            print()
+            if verbose:
+
+                print("")
+                print("Realization")
+                print(realization)
+                print()
 
         else:
 
@@ -1320,11 +1332,11 @@ def main(argv):
 
             tree = {"IDX": idx_list, "SHORT_Q": TQ_question}
             df_tree = pd.DataFrame(data=tree)
-            
+
             # ----------------------------------------- #
             # ------------ Compute weights ------------ #
             # ----------------------------------------- #
-            
+
             if group == 0:
 
                 alpha_analysis = alpha
@@ -1332,31 +1344,33 @@ def main(argv):
             else:
 
                 alpha_analysis = 0.0
-                
+
             W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
-                input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
-                TQ_array, realization, global_scale, global_log,
-                alpha_analysis, overshoot, cal_power, ERF_flag, Cooke_flag,
-                seed)
-            
+                input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
+                realization, global_scale, global_log, alpha_analysis,
+                overshoot, cal_power, ERF_flag, Cooke_flag, seed)
+
             # ----------------------------------------- #
             # ------ Create samples and bar plots ----- #
             # ----------------------------------------- #
-            
-            q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = create_samples(group, 
-                   n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array, n_sample, W,
-                   W_erf, Weqok, W_gt0, Werf_gt0, expin, global_log, 
-                   global_minVal, global_maxVal, label_indexes,
-                   ERF_flag, Cooke_flag, EW_flag, overshoot, globalSum, normalizeSum)
-             
-            print("Creating distribution plots")
-                   
-            create_barplot(group, n_SQ, n_TQ, n_sample, global_log, global_minVal, 
-                   global_maxVal, global_units, TQ_units, label_indexes,
-                   minval_all, maxval_all, ERF_flag,
-                   Cooke_flag, EW_flag, hist_type, output_dir, elicitation_name,
-                   n_bins, q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW)       
 
+            q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = create_samples(
+                group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array,
+                n_sample, W, W_erf, Weqok, W_gt0, Werf_gt0, expin, global_log,
+                global_minVal, global_maxVal, label_indexes, ERF_flag,
+                Cooke_flag, EW_flag, overshoot, globalSum, normalizeSum)
+
+            print(
+                "STEP" + str(4 + 2 * count) +
+                ": Creating distribution plots for group ", count)
+
+            create_barplot(group, n_SQ, n_TQ, n_sample, global_log,
+                           global_minVal, global_maxVal, global_units,
+                           TQ_units, label_indexes, minval_all, maxval_all,
+                           ERF_flag, Cooke_flag, EW_flag, hist_type,
+                           output_dir, elicitation_name, n_bins, q_Cooke,
+                           q_erf, q_EW, samples, samples_erf, samples_EW)
+            """
             if Cooke_flag > 0:
 
                 if group == 0:
@@ -1378,6 +1392,7 @@ def main(argv):
 
                     df.to_csv(csv_name, index=False)
                 
+                
                 SQ_array_DM = np.zeros((1,n_pctl,n_SQ))
 
                 for iseed in range(n_SQ):
@@ -1395,6 +1410,8 @@ def main(argv):
                 print('Information DM-Cooke', information_DM)
                 print('Score DM-Cooke',score_DM)
                 
+            """
+
             if len(group_list) > 1:
 
                 q_Cooke_groups[:, :, count] = q_Cooke
@@ -1495,21 +1512,27 @@ def main(argv):
         # --------- Create trend. figures ---------- #
         # ------------------------------------------ #
 
+        counter_plot = 1
         try:
 
             from ElicipyDict import trend_groups
 
-            print("trend_groups read", trend_groups)
+            if verbose:
+                print("trend_groups read", trend_groups)
 
         except ImportError:
 
-            print("No trend group defined")
+            if verbose:
+                print("No trend group defined")
             trend_groups = []
 
-        for count, trend_group in enumerate(trend_groups):
-        
-            print("Creating trend plots")
+        if len(trend_groups) > 0:
 
+            print("STEP" + str(4 + counter_plot + 2 * len(group_list)) +
+                  ": Creating trend plots")
+            counter_plot += 1
+
+        for count, trend_group in enumerate(trend_groups):
 
             create_figure_trend(
                 count,
@@ -1537,16 +1560,22 @@ def main(argv):
 
             from ElicipyDict import violin_groups
 
-            print("violin_groups read", violin_groups)
+            if verbose:
+                print("violin_groups read", violin_groups)
 
         except ImportError:
 
-            print("No violin group defined")
+            if verbose:
+                print("No violin group defined")
             violin_groups = []
 
+        if len(violin_groups) > 0:
+
+            print("STEP" + str(4 + counter_plot + 2 * len(group_list)) +
+                  ": Creating violin plots")
+            counter_plot += 1
+
         for count, violin_group in enumerate(violin_groups):
-        
-            print("Creating violin plots")
 
             create_figure_violin(
                 count,
@@ -1577,20 +1606,26 @@ def main(argv):
 
             from ElicipyDict import pie_groups
 
-            print("pie_groups read", pie_groups)
+            if verbose:
+                print("pie_groups read", pie_groups)
 
         except ImportError:
 
-            print("No pie group defined")
+            if verbose:
+                print("No pie group defined")
             pie_groups = []
 
+        if len(pie_groups) > 0:
+
+            print("STEP" + str(4 + counter_plot + 2 * len(group_list)) +
+                  ": Creating pie charts")
+            counter_plot += 1
+
         for count, pie_group in enumerate(pie_groups):
-        
-            print("Creating violin plots")
 
-            create_figure_pie(count,pie_group, n_SQ, q_EW, q_Cooke, q_erf, Cooke_flag,
-                              ERF_flag, EW_flag, output_dir, elicitation_name)
-
+            create_figure_pie(count, pie_group, n_SQ, q_EW, q_Cooke, q_erf,
+                              Cooke_flag, ERF_flag, EW_flag, output_dir,
+                              elicitation_name)
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
@@ -1598,40 +1633,21 @@ def main(argv):
 
     n_panels = int(np.ceil(n_experts / max_len_plot))
 
-    print("Creating answer plots")
+    print("STEP" + str(4 + counter_plot + 2 * len(group_list) - 1) +
+          ": Creating answer plots")
 
     for h in np.arange(n_SQ + n_TQ):
- 
-        printProgressBar(h, n_SQ+n_TQ-1)
-           
+
+        printProgressBar(h, n_SQ + n_TQ - 1, prefix='      ')
+
         for k in np.arange(n_panels):
 
-            create_figure_answers(
-                h,
-                k,
-                n_experts,
-                max_len_plot,
-                n_SQ,
-                SQ_array,
-                TQ_array,
-                realization,
-                analysis,
-                Cooke_flag,
-                ERF_flag,
-                EW_flag,
-                global_units,
-                output_dir,
-                q_Cooke,
-                q_erf,
-                q_EW,
-                elicitation_name,
-                global_log,
-                label_indexes,
-                nolabel_flag
-            )
-
-    print("End Creating answer plots")
-
+            create_figure_answers(h, k, n_experts, max_len_plot, n_SQ,
+                                  SQ_array, TQ_array, realization, analysis,
+                                  Cooke_flag, ERF_flag, EW_flag, global_units,
+                                  output_dir, q_Cooke, q_erf, q_EW,
+                                  elicitation_name, global_log, label_indexes,
+                                  nolabel_flag)
 
     # ----------------------------------------- #
     # ------- Create .pptx presentation ------- #
@@ -1771,9 +1787,9 @@ def main(argv):
     # ------------- Answers slides ------------#
 
     if seed:
-        
+
         slide = prs.slides.add_slide(title_slide_layout)
-    
+
         text_title = "Seed Answers"
 
         title_shape = slide.shapes.title
@@ -2114,7 +2130,8 @@ def main(argv):
 
             add_date(slide)
             add_small_logo(slide, left, top, logofile)
-            add_figure(slide, figname, left - Inches(0.34), top+ Inches(1.0), Inches(10.85))
+            add_figure(slide, figname, left - Inches(0.34), top + Inches(1.0),
+                       Inches(10.85))
 
             text_title = "Target questions Group " + str(count + 1)
             add_title(slide, text_title)
@@ -2163,11 +2180,12 @@ def main(argv):
 
             add_date(slide)
             add_small_logo(slide, left, top, logofile)
-            add_figure(slide, figname, left - Inches(0.34), top+ Inches(1.0), Inches(10.85))
+            add_figure(slide, figname, left - Inches(0.34), top + Inches(1.0),
+                       Inches(10.85))
 
             text_title = "Target questions Group " + str(count + 1)
             add_title(slide, text_title)
-            
+
     # ------------ Barplot slides ------------#
 
     for j in np.arange(n_SQ + n_TQ):
