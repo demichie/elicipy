@@ -217,12 +217,16 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
                         print(
                             "Keeping the answers with more recent timestamp:")
 
-                    combined_seed_csv["First Name"].iloc[
-                        previous] = combined_seed_csv["First Name"].iloc[
-                            current]
-                    combined_seed_csv["Last Name"].iloc[
-                        previous] = combined_seed_csv["Last Name"].iloc[
-                            current]
+                    combined_seed_csv.iloc[
+                        previous,
+                        combined_seed_csv.columns.
+                        get_loc("First Name")] = combined_seed_csv[
+                            "First Name"].iloc[current]
+                    combined_seed_csv.iloc[
+                        previous,
+                        combined_seed_csv.columns.
+                        get_loc("Last Name")] = combined_seed_csv[
+                            "Last Name"].iloc[current]
 
                     if time0 > time1:
 
@@ -407,7 +411,13 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
         combined_target_csv = pd.concat(
             [pd.read_csv(f) for f in target_filenames])
 
-        combined_target_csv.insert(loc=0, column="timestamp", value=timestamp)
+        timestamp_series = pd.Series(timestamp, name='timestamp')
+
+        # Reset the index of combined_target_csv to avoid the "Reindexing" error
+        combined_target_csv = combined_target_csv.reset_index(drop=True)
+
+        combined_target_csv = pd.concat(
+            [timestamp_series, combined_target_csv], axis=1)
 
         combined_target_csv.sort_values(by='timestamp',
                                         ascending=False,
