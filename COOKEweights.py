@@ -86,15 +86,15 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
 
         for ex in np.arange(E):
             for i in np.arange(N):
-                if realization[i] < SQ_array[ex, 0, i]:
+                if realization[i] <= SQ_array[ex, 0, i]:
 
                     M[ex, 0] = M[ex, 0] + 1
 
-                elif realization[i] < SQ_array[ex, 1, i]:
+                elif realization[i] <= SQ_array[ex, 1, i]:
 
                     M[ex, 1] = M[ex, 1] + 1
 
-                elif realization[i] < SQ_array[ex, 2, i]:
+                elif realization[i] <= SQ_array[ex, 2, i]:
 
                     M[ex, 2] = M[ex, 2] + 1
 
