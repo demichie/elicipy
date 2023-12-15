@@ -804,7 +804,7 @@ def save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
     # Save a reference to the original standard output
     original_stdout = sys.stdout
 
-    filename = input_dir + "/seed.rls"
+    filename = input_dir + "/seed_and_target.rls"
 
     with open(filename, "w") as f:
         sys.stdout = f  # Change the standard output to the file we created.
