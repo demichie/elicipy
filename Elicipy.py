@@ -1332,6 +1332,11 @@ def main(argv):
 
         if analysis:
 
+            delta_perc = np.zeros((n_experts, n_TQ))
+
+            delta_perc[:,:] = TQ_array[:,2,:] - TQ_array[:,0,:]
+            delta_perc_mean = np.mean(delta_perc,axis=0)
+            
             tree = {"IDX": idx_list, "SHORT_Q": TQ_question}
             df_tree = pd.DataFrame(data=tree)
 
@@ -1361,6 +1366,28 @@ def main(argv):
                 n_sample, W, W_erf, Weqok, W_gt0, Werf_gt0, expin, global_log,
                 global_minVal, global_maxVal, label_indexes, ERF_flag,
                 Cooke_flag, EW_flag, overshoot, globalSum, normalizeSum)
+
+            try:
+
+                from ElicipyDict import delta_ratio_flag
+
+            except ImportError:
+
+                delta_ratio_flag = False
+               
+            if delta_ratio_flag:   
+                
+                if Cooke_flag > 0:
+                    delta_q_Cooke = q_Cooke[n_SQ:,2] - q_Cooke[n_SQ:,0]
+                    delta_ratio_Cooke = delta_perc_mean/delta_q_Cooke
+                
+                if ERF_flag > 0:
+                    delta_q_erf = q_erf[n_SQ:,2] - q_erf[n_SQ:,0]
+                    delta_ratio_erf = delta_perc_mean/delta_q_erf
+             
+                if EW_flag > 0:   
+                    delta_q_EW = q_EW[n_SQ:,2] - q_EW[n_SQ:,0]
+                    delta_ratio_EW = delta_perc_mean/delta_q_EW
 
             print(
                 "STEP" + str(4 + 2 * count) +
@@ -2041,6 +2068,115 @@ def main(argv):
 
             text_title = "Percentiles of target questions"
             add_title(slide, text_title)
+
+    # ------------- Delta ratio slides -------------#
+
+    if analysis and target and delta_ratio_flag:
+
+        slide = prs.slides.add_slide(title_slide_layout)
+
+        text_title = "Target TEST ANALYSIS"
+
+        title_shape = slide.shapes.title
+        title_shape.text = text_title
+        title_shape.top = Inches(3.0)
+        title_shape.width = Inches(15)
+        title_shape.height = Inches(2)
+        title_para = slide.shapes.title.text_frame.paragraphs[0]
+        title_para.font.name = "Helvetica"
+        title_para.font.size = Pt(54)
+        add_date(slide)
+        add_small_logo(slide, left, top, logofile)
+
+        n_tables = int(np.ceil(n_TQ / max_len_tableB))
+
+        for i_table in range(n_tables):
+
+            slide = prs.slides.add_slide(prs.slide_layouts[5])
+
+            fisrt_j = i_table * max_len_tableB
+            last_j = np.minimum((i_table + 1) * max_len_tableB, n_TQ)
+
+            n_columns = 1
+
+            if Cooke_flag > 0:
+
+                n_columns += 1
+
+            if EW_flag > 0:
+
+                n_columns += 1
+
+            if ERF_flag > 0:
+
+                n_columns += 1
+
+            # ---add table to slide---
+            x, y, cx = Inches(1), Inches(2), Inches(14)
+            shape = slide.shapes.add_table(
+                last_j - fisrt_j + 1,
+                n_columns,
+                x,
+                y,
+                cx,
+                MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT,
+            )
+            table = shape.table
+
+            cell = table.cell(0, 1)
+            cell.text = "Delta ratio (EW)"
+
+            j_column = 1
+
+            if Cooke_flag > 0:
+
+                cell = table.cell(0, j_column + 1)
+                cell.text = "Delta ratio  (Cooke)"
+
+                j_column += 1
+
+            if ERF_flag > 0:
+
+                cell = table.cell(0, j_column + 1)
+                cell.text = "Delta ratio  (ERF)"
+
+            for h in np.arange(fisrt_j, last_j):
+
+                h_mod = np.remainder(h, max_len_tableB)
+
+                j = h + n_SQ
+
+                cell = table.cell(h_mod + 1, 0)
+                cell.text = "TQ " + label_indexes[j]
+
+                cell = table.cell(h_mod + 1, 1)
+                cell.text = "%.2E" % delta_ratio_EW[h]
+
+                j_column = 1
+
+                if Cooke_flag > 0:
+
+                    cell = table.cell(h_mod + 1, j_column + 1)
+                    cell.text = "%.2E" % delta_ratio_Cooke[h]
+
+                    j_column += 1
+
+                if ERF_flag > 0:
+
+                    cell = table.cell(h_mod + 1, j_column + 1)
+                    cell.text = "%.2E" % delta_ratio_erf[h]
+
+            for cell in iter_cells(table):
+                for paragraph in cell.text_frame.paragraphs:
+                    for run in paragraph.runs:
+                        run.font.size = Pt(14)
+
+            add_date(slide)
+            add_small_logo(slide, left, top, logofile)
+
+            text_title = "Target questions TEST ANALYSIS"
+            add_title(slide, text_title)
+
 
     # ----------- Trend groups slides --------#
 
