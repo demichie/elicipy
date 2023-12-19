@@ -1332,11 +1332,6 @@ def main(argv):
 
         if analysis:
 
-            delta_perc = np.zeros((n_experts, n_TQ))
-
-            delta_perc[:,:] = TQ_array[:,2,:] - TQ_array[:,0,:]
-            delta_perc_mean = np.mean(delta_perc,axis=0)
-            
             tree = {"IDX": idx_list, "SHORT_Q": TQ_question}
             df_tree = pd.DataFrame(data=tree)
 
@@ -1374,20 +1369,71 @@ def main(argv):
             except ImportError:
 
                 delta_ratio_flag = False
-               
-            if delta_ratio_flag:   
-                
-                if Cooke_flag > 0:
-                    delta_q_Cooke = q_Cooke[n_SQ:,2] - q_Cooke[n_SQ:,0]
-                    delta_ratio_Cooke = delta_perc_mean/delta_q_Cooke
-                
-                if ERF_flag > 0:
-                    delta_q_erf = q_erf[n_SQ:,2] - q_erf[n_SQ:,0]
-                    delta_ratio_erf = delta_perc_mean/delta_q_erf
-             
-                if EW_flag > 0:   
-                    delta_q_EW = q_EW[n_SQ:,2] - q_EW[n_SQ:,0]
-                    delta_ratio_EW = delta_perc_mean/delta_q_EW
+
+            if delta_ratio_flag:
+
+                delta_ratio_Cooke = np.zeros(n_TQ)
+                delta_ratio_erf = np.zeros(n_TQ)
+                delta_ratio_EW = np.zeros(n_TQ)
+
+                for j in range(n_TQ):
+
+                    delta_perc = np.zeros(n_experts)
+
+                    if global_log[n_SQ + j]:
+
+                        delta_perc[:] = np.log10(TQ_array[:, 2, j]) - np.log10(
+                            TQ_array[:, 0, j])
+
+                    else:
+
+                        delta_perc[:] = TQ_array[:, 2, j] - TQ_array[:, 0, j]
+
+                    delta_perc_mean = np.mean(delta_perc, axis=0)
+
+                    if Cooke_flag > 0:
+
+                        if global_log[n_SQ + j]:
+
+                            delta_q_Cooke = np.log10(
+                                q_Cooke[n_SQ + j, 2]) - np.log10(
+                                    q_Cooke[n_SQ + j, 0])
+
+                        else:
+
+                            delta_q_Cooke = q_Cooke[n_SQ + j,
+                                                    2] - q_Cooke[n_SQ + j, 0]
+
+                        delta_ratio_Cooke[j] = delta_perc_mean / delta_q_Cooke
+
+                    if ERF_flag > 0:
+
+                        if global_log[n_SQ + j]:
+
+                            delta_q_erf = np.log10(
+                                q_erf[n_SQ + j, 2]) - np.log10(q_erf[n_SQ + j,
+                                                                     0])
+
+                        else:
+
+                            delta_q_erf = q_erf[n_SQ + j, 2] - q_erf[n_SQ + j,
+                                                                     0]
+
+                        delta_ratio_erf[j] = delta_perc_mean / delta_q_erf
+
+                    if EW_flag > 0:
+
+                        if global_log[n_SQ + j]:
+
+                            delta_q_EW = np.log10(
+                                q_EW[n_SQ + j, 2]) - np.log10(q_EW[n_SQ + j,
+                                                                   0])
+
+                        else:
+
+                            delta_q_EW = q_EW[n_SQ + j, 2] - q_EW[n_SQ + j, 0]
+
+                        delta_ratio_EW[j] = delta_perc_mean / delta_q_EW
 
             print(
                 "STEP" + str(4 + 2 * count) +
@@ -1662,7 +1708,7 @@ def main(argv):
 
     n_panels = int(np.ceil(n_experts / max_len_plot))
 
-    print("STEP" + str(3 + counter_plot + 2 * len(group_list) ) +
+    print("STEP" + str(3 + counter_plot + 2 * len(group_list)) +
           ": Creating answer plots")
 
     for h in np.arange(n_SQ + n_TQ):
@@ -1682,7 +1728,7 @@ def main(argv):
     # ------- Create .pptx presentation ------- #
     # ----------------------------------------- #
 
-    print("STEP" + str(4 + counter_plot + 2 * len(group_list) ) +
+    print("STEP" + str(4 + counter_plot + 2 * len(group_list)) +
           ": Creating presentation")
 
     prs = Presentation()
@@ -2176,7 +2222,6 @@ def main(argv):
 
             text_title = "Target questions TEST ANALYSIS"
             add_title(slide, text_title)
-
 
     # ----------- Trend groups slides --------#
 
