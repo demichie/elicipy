@@ -22,8 +22,12 @@ from createPlots import create_figure_pie
 from createPlots import create_figure_trend
 from createPlots import create_figure_answers
 from createPlots import create_barplot
+from createPlots import create_figure_index
 
 from tools import printProgressBar
+
+# from krippendorff_alpha import calculate_alpha
+from computeIndex import calculate_index
 
 max_len_table = 21
 max_len_tableB = 18
@@ -99,7 +103,10 @@ def add_text_box(slide, left, top, text_box, font_size):
                                      height=Inches(5))
     tf = txBox.text_frame
     tf.text = text_box
-    tf.paragraphs[0].font.size = Pt(font_size)
+    for par in tf.paragraphs:
+
+       par.font.size = Pt(font_size)
+       # tf.paragraphs[0].font.size = Pt(font_size)
     # tf.text = 'prova'
     tf.word_wrap = True
 
@@ -1191,6 +1198,111 @@ def main(argv):
      global_idxMax, global_sum50,
      df_quest) = read_questionnaire(input_dir, csv_file, seed, target)
 
+    
+
+    # Read an renumber index_groups
+    try:
+
+        from ElicipyDict import index_groups
+    
+    except ImportError:
+    
+        index_groups = []
+     
+    df_quest.reset_index(inplace=True,drop=True)
+
+    for count,group in enumerate(index_groups):
+
+        new_indexes_group = []        
+
+        for idx in group:
+            
+            indices = df_quest.index[
+                (df_quest["IDX"] == idx)
+                & (df_quest.QUEST_TYPE.str.contains("target"))]
+
+            new_indexes_group.append(int(indices[0]))
+            
+        index_groups[count] = new_indexes_group
+
+    # Read an renumber trend_groups
+    try:
+
+        from ElicipyDict import trend_groups
+    
+    except ImportError:
+    
+        trend_groups = []
+ 
+    df_quest.reset_index(inplace=True,drop=True)
+    
+    for count,group in enumerate(trend_groups):
+
+        new_trend_group = []        
+
+        for idx in group:
+            
+            indices = df_quest.index[
+                (df_quest["IDX"] == idx)
+                & (df_quest.QUEST_TYPE.str.contains("target"))]
+
+            new_trend_group.append(int(indices[0]))
+            
+        trend_groups[count] = new_trend_group
+
+    # Read an renumber violin_groups
+    try:
+
+        from ElicipyDict import violin_groups
+    
+    except ImportError:
+    
+        violin_groups = []
+     
+    df_quest.reset_index(inplace=True,drop=True)
+    
+    for count,group in enumerate(violin_groups):
+
+        new_violin_group = []        
+
+        for idx in group:
+            
+            indices = df_quest.index[
+                (df_quest["IDX"] == idx)
+                & (df_quest.QUEST_TYPE.str.contains("target"))]
+
+            new_violin_group.append(int(indices[0]))
+            
+        violin_groups[count] = new_violin_group
+
+    
+    # Read an renumber pie_groups
+    try:
+
+        from ElicipyDict import pie_groups
+    
+    except ImportError:
+    
+        pie_groups = []
+     
+    df_quest.reset_index(inplace=True,drop=True)
+    
+    for count,group in enumerate(pie_groups):
+
+        new_pie_group = []        
+
+        for idx in group:
+            
+            indices = df_quest.index[
+                (df_quest["IDX"] == idx)
+                & (df_quest.QUEST_TYPE.str.contains("target"))]
+
+            new_pie_group.append(int(indices[0]))
+            
+        pie_groups[count] = new_pie_group
+
+    
+            
     try:
 
         from ElicipyDict import normalizeSum
@@ -1233,6 +1345,22 @@ def main(argv):
 
     save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
                  SQ_realization, SQ_scale, SQ_array, TQ_scale, TQ_array)
+
+
+    # alpha_nominal, alpha_interval = calculate_alpha(TQ_array, overshoot,TQ_scale)
+
+    
+    weight = np.ones(n_experts)
+    indexMean, indexStd, indexQuantiles = calculate_index(TQ_array, weight,TQ_scale)
+    
+    
+    # for i in range(n_TQ):
+
+        # print("TQ " + label_indexes[i+n_SQ],indexMean[i],indexStd[i],indexQuantiles[i,:])
+        # string = "%.2E, " % indexMean[i] + "%.2E, " % indexStd[i] + "Target"
+        # print(string) 
+    # print(ciao)   
+    
 
     minval_all = np.zeros(n_SQ + n_TQ)
     minval_all[0:n_SQ] = np.amin(SQ_array[:, 0, :], axis=0)
@@ -1584,22 +1712,65 @@ def main(argv):
     if analysis:
 
         # ------------------------------------------ #
-        # --------- Create trend. figures ---------- #
+        # ---------- Create index figures ---------- #
         # ------------------------------------------ #
 
+        indexMean_EW, indexStd_EW, indexQuantiles_EW = calculate_index(TQ_array, Weqok,TQ_scale)
+
+        if Cooke_flag > 0:
+        
+            indexMean_Cooke, indexStd_Cooke, indexQuantiles_Cooke = calculate_index(TQ_array, W_gt0,TQ_scale)
+            
+        else: 
+            
+            indexMean_Cooke = indexMean_EW    
+            indexStd_Cooke = indexStd_EW    
+            indexQuantiles_Cooke = indexQuantiles_EW    
+
+        if ERF_flag > 0:
+
+            indexMean_erf, indexStd_erf, indexQuantiles_erf = calculate_index(TQ_array, Werf_gt0,TQ_scale)
+
+        else: 
+            
+            indexMean_erf = indexMean_EW    
+            indexStd_erf = indexStd_EW
+            indexQuantiles_erf = indexQuantiles_EW    
+
         counter_plot = 0
-        try:
 
-            from ElicipyDict import trend_groups
+        if len(index_groups) > 0:
 
-            if verbose:
-                print("trend_groups read", trend_groups)
+            print("STEP" + str(3 + counter_plot + 2 * len(group_list)) +
+                  ": Creating index plots")
+            counter_plot += 1
 
-        except ImportError:
+        for count, index_group in enumerate(index_groups):
 
-            if verbose:
-                print("No trend group defined")
-            trend_groups = []
+            create_figure_index(
+                count,
+                index_group,
+                n_SQ,
+                label_indexes,
+                indexMean_EW,indexStd_EW,
+                indexMean_Cooke,indexStd_Cooke,
+                indexMean_erf,indexStd_erf,
+                indexQuantiles_EW,
+                indexQuantiles_Cooke,
+                indexQuantiles_erf,
+                global_units,
+                Cooke_flag,
+                ERF_flag,
+                EW_flag,
+                global_log,
+                output_dir,
+                elicitation_name,
+            )
+
+
+        # ------------------------------------------ #
+        # --------- Create trend. figures ---------- #
+        # ------------------------------------------ #
 
         if len(trend_groups) > 0:
 
@@ -1613,6 +1784,7 @@ def main(argv):
                 count,
                 trend_group,
                 n_SQ,
+                label_indexes,
                 q_EW,
                 q_Cooke,
                 q_erf,
@@ -1631,19 +1803,6 @@ def main(argv):
         # --------- Create violin figures ---------- #
         # ------------------------------------------ #
 
-        try:
-
-            from ElicipyDict import violin_groups
-
-            if verbose:
-                print("violin_groups read", violin_groups)
-
-        except ImportError:
-
-            if verbose:
-                print("No violin group defined")
-            violin_groups = []
-
         if len(violin_groups) > 0:
 
             print("STEP" + str(3 + counter_plot + 2 * len(group_list)) +
@@ -1656,6 +1815,7 @@ def main(argv):
                 count,
                 violin_group,
                 n_SQ,
+                label_indexes,
                 samples_EW,
                 samples,
                 samples_erf,
@@ -1677,19 +1837,6 @@ def main(argv):
         # ----------- Create pie figures ----------- #
         # ------------------------------------------ #
 
-        try:
-
-            from ElicipyDict import pie_groups
-
-            if verbose:
-                print("pie_groups read", pie_groups)
-
-        except ImportError:
-
-            if verbose:
-                print("No pie group defined")
-            pie_groups = []
-
         if len(pie_groups) > 0:
 
             print("STEP" + str(3 + counter_plot + 2 * len(group_list)) +
@@ -1698,7 +1845,7 @@ def main(argv):
 
         for count, pie_group in enumerate(pie_groups):
 
-            create_figure_pie(count, pie_group, n_SQ, q_EW, q_Cooke, q_erf,
+            create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke, q_erf,
                               Cooke_flag, ERF_flag, EW_flag, output_dir,
                               elicitation_name)
 
@@ -2223,6 +2370,55 @@ def main(argv):
             text_title = "Target questions TEST ANALYSIS"
             add_title(slide, text_title)
 
+    # ----------- Index groups slides --------#
+
+    if analysis and len(index_groups) > 0:
+
+        slide = prs.slides.add_slide(title_slide_layout)
+
+        text_title = "Index plots"
+
+        title_shape = slide.shapes.title
+        title_shape.text = text_title
+        title_shape.top = Inches(3.0)
+        title_shape.width = Inches(15)
+        title_shape.height = Inches(2)
+        title_para = slide.shapes.title.text_frame.paragraphs[0]
+        title_para.font.name = "Helvetica"
+        title_para.font.size = Pt(54)
+        add_date(slide)
+        add_small_logo(slide, left, top, logofile)
+
+        for count, index_group in enumerate(index_groups):
+
+            slide = prs.slides.add_slide(title_slide_layout)
+
+            figname = (output_dir + "/" + elicitation_name + "_index_" +
+                       str(count + 1).zfill(2) + ".png")
+
+            text_box = ""
+            for i in index_group:
+
+                text_box = (text_box + "TQ" + label_indexes[i] + ". " +
+                            TQ_question[i - n_SQ] + ".\n\n")
+
+            if len(index_group) < 6:
+
+                fontsize = 18
+
+            else:
+
+                fontsize = 18.0 * np.sqrt(6.0 / len(index_group))
+
+            add_text_box(slide, left, top, text_box, fontsize)
+
+            add_date(slide)
+            add_small_logo(slide, left, top, logofile)
+            add_figure(slide, figname, left - Inches(0.8), top, Inches(10))
+
+            text_title = "Target questions Group " + str(count + 1)
+            add_title(slide, text_title)
+
     # ----------- Trend groups slides --------#
 
     if analysis and len(trend_groups) > 0:
@@ -2252,16 +2448,16 @@ def main(argv):
             text_box = ""
             for i in trend_group:
 
-                text_box = (text_box + "TQ" + str(i) + ". " +
-                            TQ_question[i - 1] + ".\n\n")
+                text_box = (text_box + "TQ" + label_indexes[i] + ". " +
+                            TQ_question[i - n_SQ] + ".\n\n")
 
-            if len(text_box) < 500:
+            if len(trend_group) < 6:
 
                 fontsize = 18
 
             else:
 
-                fontsize = 20.0 * np.sqrt(500.0 / len(text_box))
+                fontsize = 18.0 * np.sqrt(6.0 / len(trend_group))
 
             add_text_box(slide, left, top, text_box, fontsize)
 
@@ -2301,16 +2497,16 @@ def main(argv):
             text_box = ""
             for i in violin_group:
 
-                text_box = (text_box + "TQ" + str(i) + ". " +
-                            TQ_question[i - 1] + ".\n\n")
+                text_box = (text_box + "TQ" + label_indexes[i] + ". " +
+                            TQ_question[i - n_SQ] + ".\n\n")
 
-            if len(text_box) < 500:
+            if len(violin_group) < 6:
 
                 fontsize = 18
 
             else:
 
-                fontsize = 20.0 * np.sqrt(500.0 / len(text_box))
+                fontsize = 18.0 * np.sqrt(6.0 / len(violin_group))
 
             add_text_box(slide, left, top, text_box, fontsize)
 
@@ -2351,16 +2547,17 @@ def main(argv):
             text_box = ""
             for i in pie_group:
 
-                text_box = (text_box + "TQ" + str(i) + ". " +
-                            TQ_question[i - 1] + ".\n\n")
+                text_box = (text_box + "TQ" + label_indexes[i] + ". " +
+                            TQ_question[i - n_SQ] + ".\n\n")
 
-            if len(text_box) < 500:
+            if len(pie_group) < 6:
 
                 fontsize = 18
 
             else:
 
-                fontsize = 20.0 * np.sqrt(500.0 / len(text_box))
+                fontsize = 18.0 * np.sqrt(6.0 / len(pie_group))
+
 
             add_text_box(slide, left, top, text_box, fontsize)
 

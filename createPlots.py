@@ -362,6 +362,7 @@ def create_figure_violin(
     count,
     violin_group,
     n_SQ,
+    label_indexes,
     samples_EW,
     samples,
     samples_erf,
@@ -438,7 +439,7 @@ def create_figure_violin(
 
     if EW_flag:
 
-        y = samples_EW[:, violin_group + n_SQ - 1]
+        y = samples_EW[:, violin_group]
 
         vp_EW = axes[EW_col].violinplot(y,
                                         showmeans=False,
@@ -450,14 +451,14 @@ def create_figure_violin(
         axes[EW_col].set_xticks(x)
 
         xtick = []
-        for i in x:
-            xtick.append("TQ" + str(violin_group[i - 1]))
+        for i in violin_group:
+            xtick.append("TQ" + label_indexes[i])
 
         axes[EW_col].set_xticklabels(xtick)
 
         axes[EW_col].set_xlim(xmin, xmax)
-        axes[EW_col].set_ylim(TQ_minVals[violin_group[0]],
-                              TQ_maxVals[violin_group[0]])
+        axes[EW_col].set_ylim(TQ_minVals[violin_group[0]-n_SQ],
+                              TQ_maxVals[violin_group[0]-n_SQ])
 
         # Set the color of the violin patches
         for pc in vp_EW['bodies']:
@@ -470,11 +471,11 @@ def create_figure_violin(
             vp = vp_EW[partname]
             vp.set_edgecolor('g')
 
-        y = q_EW[violin_group + n_SQ - 1, 1]
-        lower_error = q_EW[violin_group + n_SQ - 1, 1] - \
-            q_EW[violin_group + n_SQ - 1, 0]
-        upper_error = q_EW[violin_group + n_SQ - 1, 2] - \
-            q_EW[violin_group + n_SQ - 1, 1]
+        y = q_EW[violin_group, 1]
+        lower_error = q_EW[violin_group, 1] - \
+            q_EW[violin_group, 0]
+        upper_error = q_EW[violin_group, 2] - \
+            q_EW[violin_group, 1]
         asymmetric_error = [lower_error, upper_error]
 
         line1 = axes[EW_col].errorbar(x,
@@ -488,7 +489,7 @@ def create_figure_violin(
 
     if Cooke_flag > 0:
 
-        y = samples[:, violin_group + n_SQ - 1]
+        y = samples[:, violin_group]
 
         vp_Cooke = axes[Cooke_col].violinplot(y,
                                               showmeans=False,
@@ -500,14 +501,14 @@ def create_figure_violin(
         axes[Cooke_col].set_xticks(x)
 
         xtick = []
-        for i in x:
-            xtick.append("TQ" + str(violin_group[i - 1]))
+        for i in violin_group:
+            xtick.append("TQ" + label_indexes[i])
 
         axes[Cooke_col].set_xticklabels(xtick)
 
         axes[Cooke_col].set_xlim(xmin, xmax)
-        axes[Cooke_col].set_ylim(TQ_minVals[violin_group[0]],
-                                 TQ_maxVals[violin_group[0]])
+        axes[Cooke_col].set_ylim(TQ_minVals[violin_group[0]-n_SQ],
+                                 TQ_maxVals[violin_group[0]-n_SQ])
 
         # Set the color of the violin patches
         for pc in vp_Cooke['bodies']:
@@ -520,11 +521,11 @@ def create_figure_violin(
             vp = vp_Cooke[partname]
             vp.set_edgecolor('r')
 
-        y = q_Cooke[violin_group + n_SQ - 1, 1]
-        lower_error = q_Cooke[violin_group + n_SQ - 1, 1] - \
-            q_Cooke[violin_group + n_SQ - 1, 0]
-        upper_error = q_EW[violin_group + n_SQ - 1, 2] - \
-            q_Cooke[violin_group + n_SQ - 1, 1]
+        y = q_Cooke[violin_group, 1]
+        lower_error = q_Cooke[violin_group, 1] - \
+            q_Cooke[violin_group, 0]
+        upper_error = q_EW[violin_group, 2] - \
+            q_Cooke[violin_group, 1]
         asymmetric_error = [lower_error, upper_error]
 
         line1 = axes[Cooke_col].errorbar(x,
@@ -538,7 +539,7 @@ def create_figure_violin(
 
     if ERF_flag > 0:
 
-        y = samples_erf[:, violin_group + n_SQ - 1]
+        y = samples_erf[:, violin_group]
 
         vp_ERF = axes[ERF_col].violinplot(y,
                                           showmeans=False,
@@ -550,14 +551,14 @@ def create_figure_violin(
         axes[ERF_col].set_xticks(x)
 
         xtick = []
-        for i in x:
-            xtick.append("TQ" + str(violin_group[i - 1]))
+        for i in violin_group:
+            xtick.append("TQ" + label_indexes[i])
 
         axes[ERF_col].set_xticklabels(xtick)
 
         axes[ERF_col].set_xlim(xmin, xmax)
-        axes[ERF_col].set_ylim(TQ_minVals[violin_group[0]],
-                               TQ_maxVals[violin_group[0]])
+        axes[ERF_col].set_ylim(TQ_minVals[violin_group[0]-n_SQ],
+                               TQ_maxVals[violin_group[0]-n_SQ])
 
         # Set the color of the violin patches
         for pc in vp_ERF['bodies']:
@@ -570,11 +571,11 @@ def create_figure_violin(
             vp = vp_ERF[partname]
             vp.set_edgecolor('b')
 
-        y = q_erf[violin_group + n_SQ - 1, 1]
-        lower_error = q_erf[violin_group + n_SQ - 1, 1] - \
-            q_erf[violin_group + n_SQ - 1, 0]
-        upper_error = q_erf[violin_group + n_SQ - 1, 2] - \
-            q_erf[violin_group + n_SQ - 1, 1]
+        y = q_erf[violin_group, 1]
+        lower_error = q_erf[violin_group, 1] - \
+            q_erf[violin_group, 0]
+        upper_error = q_erf[violin_group, 2] - \
+            q_erf[violin_group, 1]
         asymmetric_error = [lower_error, upper_error]
 
         line1 = axes[ERF_col].errorbar(x,
@@ -602,10 +603,174 @@ def create_figure_violin(
     return
 
 
+def create_figure_index(
+    count,
+    index_group,
+    n_SQ,
+    label_indexes,
+    indexMean_EW,indexStd_EW,
+    indexMean_Cooke,indexStd_Cooke,
+    indexMean_erf,indexStd_erf,
+    indexQuantiles_EW,
+    indexQuantiles_Cooke,
+    indexQuantiles_erf,
+    global_units,
+    Cooke_flag,
+    ERF_flag,
+    EW_flag,
+    global_log,
+    output_dir,
+    elicitation_name,
+):
+    """Create figure for trend group (subset of target qustions)
+
+    Parameters
+    ----------
+    count : int
+        index of the group of questions
+    trend_group : list of int
+        indexes of questions for group
+    n_SQ : int
+        number of seed questions
+    q_EW : numpy array of floats
+        percentiles computed with equal weight
+    q_Cooke : numpy array of floats
+        percentiles computed with Cooke method
+    q_erf : numpy array of floats
+        percentiles computed with ERF method
+    global_units : list of strings
+        list of strings for units of answers to add as xlabel
+    Cooke_flag : int
+        Cooke_flag > 0 => plot the Cooke method results
+    ERF_flag : int
+        ERF_flag > 0 => plot the ERF method results
+    EW_flag : int
+        EW_flag > 0 => plot the equal weights results
+    global_log : list of int
+        1: log scale; 0: linear scale
+    TQ_minVals : list of float
+        minimum allowed value for answer to target questions
+    TQ_maxVals
+        maximum allowed value for answer to target questions
+    output_dir : string
+        name of output folder
+
+    Returns
+    -------
+    none
+
+    """
+    fig = plt.figure()
+    axs = fig.add_subplot(111)
+
+    y = - np.arange(len(index_group))
+
+    handles = []
+
+    index_group = np.array(index_group)
+
+    if EW_flag:
+
+        """
+        x = indexMean_EW[index_group-n_SQ]
+        lower_error = indexStd_EW[index_group-n_SQ]
+        upper_error = indexStd_EW[index_group-n_SQ]
+        error = [lower_error, upper_error]
+        """
+        x = indexQuantiles_EW[index_group-n_SQ,1]
+        lower_error = x-indexQuantiles_EW[index_group-n_SQ,0]
+        upper_error = indexQuantiles_EW[index_group-n_SQ,2]-x
+        error = [lower_error, upper_error]
+        
+
+        line1 = axs.errorbar(x,
+                             y - 0.1,
+                             xerr=error,
+                             fmt="go",
+                             label="EW")
+        axs.plot(x - lower_error, y - 0.1, "gx")
+        axs.plot(x + upper_error, y - 0.1, "gx")
+        axs.plot(indexMean_EW[index_group-n_SQ], y - 0.1, "g*")
+        handles.append(line1)
+
+    if Cooke_flag > 0:
+
+        """"
+        x = indexMean_Cooke[index_group-n_SQ]
+        lower_error = indexStd_Cooke[index_group-n_SQ]
+        upper_error = indexStd_Cooke[index_group-n_SQ]
+        error = [lower_error, upper_error]
+        """
+        x = indexQuantiles_Cooke[index_group-n_SQ,1]
+        lower_error = x-indexQuantiles_Cooke[index_group-n_SQ,0]
+        upper_error = indexQuantiles_Cooke[index_group-n_SQ,2]-x
+        error = [lower_error, upper_error]
+        
+
+        line2 = axs.errorbar(x, y, xerr=error, fmt="ro", label="CM")
+        axs.plot(x - lower_error, y, "rx")
+        axs.plot(x + upper_error, y, "rx")
+        axs.plot(indexMean_Cooke[index_group-n_SQ], y, "r*")
+        handles.append(line2)
+
+    if ERF_flag > 0:
+
+        """
+        x = indexMean_erf[index_group-n_SQ]
+        lower_error = indexStd_erf[index_group-n_SQ]
+        upper_error = indexStd_erf[index_group-n_SQ]
+        error = [lower_error, upper_error]
+        """
+        x = indexQuantiles_erf[index_group-n_SQ,1]
+        lower_error = x-indexQuantiles_erf[index_group-n_SQ,0]
+        upper_error = indexQuantiles_erf[index_group-n_SQ,2]-x
+        error = [lower_error, upper_error]
+        
+
+        line3 = axs.errorbar(x,
+                             y + 0.1,
+                             xerr=error,
+                             fmt="bo",
+                             label="ERF")
+        axs.plot(x - lower_error, y + 0.1, "bx")
+        axs.plot(x + upper_error, y + 0.1, "bx")
+        axs.plot(indexMean_erf[index_group-n_SQ], y + 0.1, "b*")
+        handles.append(line3)
+
+    axs.set_yticks(y)
+    axs.grid(axis = 'x')
+
+    ytick = []
+    for i in index_group:
+        ytick.append("TQ" + label_indexes[i])
+
+    axs.set_yticklabels(ytick)
+
+    axs.set_xlim(-1.0,1.0)
+
+    plt.title("Question Group " + str(count + 1))
+
+    axs.legend(handles=handles)
+
+    figname = (output_dir + "/" + elicitation_name + "_index_" +
+               str(count + 1).zfill(2) + ".pdf")
+    fig.savefig(figname)
+
+    # images = convert_from_path(figname)
+    figname = (output_dir + "/" + elicitation_name + "_index_" +
+               str(count + 1).zfill(2) + ".png")
+    # images[0].save(figname, "PNG")
+    fig.savefig(figname, dpi=300)
+    plt.close()
+
+    return
+
+
 def create_figure_trend(
     count,
     trend_group,
     n_SQ,
+    label_indexes,
     q_EW,
     q_Cooke,
     q_erf,
@@ -668,11 +833,11 @@ def create_figure_trend(
 
     if EW_flag:
 
-        y = q_EW[trend_group + n_SQ - 1, 1]
-        lower_error = q_EW[trend_group + n_SQ - 1, 1] - \
-            q_EW[trend_group + n_SQ - 1, 0]
-        upper_error = q_EW[trend_group + n_SQ - 1, 2] - \
-            q_EW[trend_group + n_SQ - 1, 1]
+        y = q_EW[trend_group, 1]
+        lower_error = q_EW[trend_group, 1] - \
+            q_EW[trend_group, 0]
+        upper_error = q_EW[trend_group, 2] - \
+            q_EW[trend_group, 1]
         asymmetric_error = [lower_error, upper_error]
 
         line1 = axs.errorbar(x - 0.1,
@@ -686,11 +851,11 @@ def create_figure_trend(
 
     if Cooke_flag > 0:
 
-        y = q_Cooke[trend_group + n_SQ - 1, 1]
-        lower_error = (q_Cooke[trend_group + n_SQ - 1, 1] -
-                       q_Cooke[trend_group + n_SQ - 1, 0])
-        upper_error = (q_Cooke[trend_group + n_SQ - 1, 2] -
-                       q_Cooke[trend_group + n_SQ - 1, 1])
+        y = q_Cooke[trend_group, 1]
+        lower_error = (q_Cooke[trend_group, 1] -
+                       q_Cooke[trend_group, 0])
+        upper_error = (q_Cooke[trend_group, 2] -
+                       q_Cooke[trend_group, 1])
         asymmetric_error = [lower_error, upper_error]
 
         line2 = axs.errorbar(x, y, yerr=asymmetric_error, fmt="ro", label="CM")
@@ -700,11 +865,11 @@ def create_figure_trend(
 
     if ERF_flag > 0:
 
-        y = q_erf[trend_group + n_SQ - 1, 1]
-        lower_error = (q_erf[trend_group + n_SQ - 1, 1] -
-                       q_erf[trend_group + n_SQ - 1, 0])
-        upper_error = (q_erf[trend_group + n_SQ - 1, 2] -
-                       q_erf[trend_group + n_SQ - 1, 1])
+        y = q_erf[trend_group, 1]
+        lower_error = (q_erf[trend_group, 1] -
+                       q_erf[trend_group, 0])
+        upper_error = (q_erf[trend_group, 2] -
+                       q_erf[trend_group, 1])
         asymmetric_error = [lower_error, upper_error]
 
         line3 = axs.errorbar(x + 0.1,
@@ -719,14 +884,14 @@ def create_figure_trend(
     axs.set_xticks(x)
 
     xtick = []
-    for i in x:
-        xtick.append("TQ" + str(trend_group[i - 1]))
+    for i in trend_group:
+        xtick.append("TQ" + label_indexes[i])
 
     axs.set_xticklabels(xtick)
 
     # ax1.set_yscale('log')
 
-    axs.set_ylim(TQ_minVals[trend_group[0]], TQ_maxVals[trend_group[0]])
+    axs.set_ylim(TQ_minVals[trend_group[0]-n_SQ], TQ_maxVals[trend_group[0]-n_SQ])
 
     # axs.grid(linewidth=0.4)
 
@@ -748,7 +913,7 @@ def create_figure_trend(
     return
 
 
-def create_figure_pie(count, pie_group, n_SQ, q_EW, q_Cooke, q_erf, Cooke_flag,
+def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke, q_erf, Cooke_flag,
                       ERF_flag, EW_flag, output_dir, elicitation_name):
     """Create figure for trend group (subset of target qustions)
 
@@ -793,17 +958,18 @@ def create_figure_pie(count, pie_group, n_SQ, q_EW, q_Cooke, q_erf, Cooke_flag,
     fig, axes = plt.subplots(nrows=1, ncols=ncols, figsize=(8.0, 4.0))
     fig.tight_layout(rect=[0.0, 0.0, 1.0, 0.95])
 
-    x = np.arange(len(pie_group)) + 1
+    # x = np.arange(len(pie_group)) + 1
+
+    labels = []
+    for i in pie_group:
+        labels.append("TQ" + label_indexes[i])
+
 
     pie_group = np.array(pie_group)
 
-    labels = []
-    for i in x:
-        labels.append("TQ" + str(pie_group[i - 1]))
-
     if EW_flag:
 
-        y = q_EW[pie_group + n_SQ - 1, 3]
+        y = q_EW[pie_group, 3]
 
         sizes = y
 
@@ -812,7 +978,7 @@ def create_figure_pie(count, pie_group, n_SQ, q_EW, q_Cooke, q_erf, Cooke_flag,
 
     if Cooke_flag > 0:
 
-        y = q_Cooke[pie_group + n_SQ - 1, 3]
+        y = q_Cooke[pie_group, 3]
 
         sizes = y
 
@@ -821,7 +987,7 @@ def create_figure_pie(count, pie_group, n_SQ, q_EW, q_Cooke, q_erf, Cooke_flag,
 
     if ERF_flag > 0:
 
-        y = q_erf[pie_group + n_SQ - 1, 3]
+        y = q_erf[pie_group, 3]
 
         sizes = y
 
@@ -856,6 +1022,8 @@ def create_figure_answers(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
         j = h - n_SQ
         Q_array = TQ_array[idx0:idx1, :, j]
         string = "Target"
+        string_title = string
+        # string_title = "%.2E, " % indexMean[j] + "%.2E, " % indexStd[j] + "Target"
 
         xmin = np.amin(TQ_array[:, 0, j])
         xmax = np.amax(TQ_array[:, 2, j])
@@ -865,6 +1033,7 @@ def create_figure_answers(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
         j = h
         Q_array = SQ_array[idx0:idx1, :, j]
         string = "Seed"
+        string_title = string
 
         xmin = np.amin(SQ_array[:, 0, j])
         xmin = np.minimum(xmin, realization[h])
@@ -1043,7 +1212,7 @@ def create_figure_answers(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
 
     axs.grid(linewidth=0.4)
 
-    plt.title(string + " Question " + label_indexes[h])
+    plt.title(string_title + " Question " + label_indexes[h])
     figname = (output_dir + "/" + elicitation_name + "_" + string + "_" +
                str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
