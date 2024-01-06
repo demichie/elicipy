@@ -47,65 +47,104 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
 
     # create numpy array M with the number of realizations captured in every
     # expert's bin that is formed by the provided quantiles
-    if Cooke_flag > 1:
-
-        for ex in np.arange(E):
-            for i in np.arange(N):
-                if realization[i] < SQ_array[ex, 0, i]:
-
-                    M[ex, 0] = M[ex, 0] + 1
-
-                elif realization[i] == SQ_array[ex, 0, i]:
-
-                    M[ex, 0] = M[ex, 0] + 0.5
-                    M[ex, 1] = M[ex, 1] + 0.5
-
-                elif realization[i] < SQ_array[ex, 1, i]:
-
-                    M[ex, 1] = M[ex, 1] + 1
-
-                elif realization[i] == SQ_array[ex, 1, i]:
-
-                    M[ex, 1] = M[ex, 1] + 0.5
-                    M[ex, 2] = M[ex, 2] + 0.5
-
-                elif realization[i] < SQ_array[ex, 2, i]:
-
-                    M[ex, 2] = M[ex, 2] + 1
-
-                elif realization[i] == SQ_array[ex, 2, i]:
-
-                    M[ex, 2] = M[ex, 2] + 0.5
-                    M[ex, 3] = M[ex, 3] + 0.5
-
-                else:
-
-                    M[ex, 3] = M[ex, 3] + 1
-
-    elif Cooke_flag == 1:
+    if Cooke_flag == 1:
 
         for ex in np.arange(E):
             for i in np.arange(N):
                 if realization[i] <= SQ_array[ex, 0, i]:
 
-                    M[ex, 0] = M[ex, 0] + 1
+                    M[ex, 0] += 1
 
                 elif realization[i] <= SQ_array[ex, 1, i]:
 
-                    M[ex, 1] = M[ex, 1] + 1
+                    M[ex, 1] += 1
 
                 elif realization[i] <= SQ_array[ex, 2, i]:
 
-                    M[ex, 2] = M[ex, 2] + 1
+                    M[ex, 2] += 1
 
                 else:
 
-                    M[ex, 3] = M[ex, 3] + 1
+                    M[ex, 3] += 1
+
+    elif Cooke_flag == 2:
+
+        for ex in np.arange(E):
+            for i in np.arange(N):
+                if realization[i] < SQ_array[ex, 0, i]:
+
+                    M[ex, 0] += 1
+
+                elif realization[i] == SQ_array[ex, 0, i]:
+
+                    M[ex, 0] += 0.5
+                    M[ex, 1] += 0.5
+
+                elif realization[i] < SQ_array[ex, 1, i]:
+
+                    M[ex, 1] += 1
+
+                elif realization[i] == SQ_array[ex, 1, i]:
+
+                    M[ex, 1] += 0.5
+                    M[ex, 2] += 0.5
+
+                elif realization[i] < SQ_array[ex, 2, i]:
+
+                    M[ex, 2] += 1
+
+                elif realization[i] == SQ_array[ex, 2, i]:
+
+                    M[ex, 2] += 0.5
+                    M[ex, 3] += 0.5
+
+                else:
+
+                    M[ex, 3] += 1
+
+    elif Cooke_flag == 3:
+
+        for ex in np.arange(E):
+
+            for i in np.arange(N):
+
+                if background_measure[i] == "uni":
+
+                    val05 = SQ_array[ex, 0, i]
+                    val50 = SQ_array[ex, 1, i]
+                    val95 = SQ_array[ex, 2, i]
+                    real = realization[i]
+
+                else:
+
+                    val05 = np.log(SQ_array[ex, 0, i])
+                    val50 = np.log(SQ_array[ex, 1, i])
+                    val95 = np.log(SQ_array[ex, 2, i])
+                    real = np.log(realization[i])
+
+                total_span = (val95 - val05) / 0.90
+                interval_width = total_span / N
+
+                real_min = real - 0.5 * interval_width
+                real_max = real + 0.5 * interval_width
+
+                M[ex, 0] += max(
+                    0,
+                    (min(val05, real_max) - real_min)) / (real_max - real_min)
+                M[ex, 1] += max(0,
+                                (min(val50, real_max) -
+                                 max(val05, real_min))) / (real_max - real_min)
+                M[ex, 2] += max(0,
+                                (min(val95, real_max) -
+                                 max(val50, real_min))) / (real_max - real_min)
+                M[ex, 3] += max(
+                    0,
+                    (real_max - max(val95, real_min))) / (real_max - real_min)
 
     else:
 
         raise ValueError(
-            "ERROR: Cooke_flag should be 1 or 2",
+            "ERROR: Cooke_flag should be 1, 2 or 3",
             Cooke_flag,
         )
 
