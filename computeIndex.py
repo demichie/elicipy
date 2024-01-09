@@ -10,6 +10,8 @@ def weighted_quantile(values, quantiles, sample_weight=None,
     :param old_style: if True, will correct output to be consistent
         with numpy.percentile.
     :return: numpy.array with computed quantiles.
+    from:
+    https://stackoverflow.com/questions/21844024/weighted-percentile-using-numpy
     """
     
     import numpy as np
