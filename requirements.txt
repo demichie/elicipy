@@ -1,6 +1,6 @@
 streamlit==1.18.1
 pandas==1.4.4
-pygithub==1.57
+pygithub==2.1.1
 click==8.0.4
 altair==4.2.2
 cryptography==37.0.1
