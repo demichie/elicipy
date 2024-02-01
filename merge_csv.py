@@ -164,7 +164,7 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
         flname_seed = []
         for f, l in zip(fname, lname):
 
-            flname_seed.append(f + " " + l)
+            flname_seed.append(str(f) + " " + str(l))
 
         if verbose:
             print("Seed experts:", flname_seed)
@@ -183,8 +183,8 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
             for f, l in zip(fname, lname):
 
-                flname_seed.append(f + " " + l)
-                lfname_seed.append(l + " " + f)
+                flname_seed.append(str(f) + " " + str(l))
+                lfname_seed.append(str(l) + " " + str(f))
 
             test_list = range(len(flname_seed))
             res = list(combinations(test_list, 2))
@@ -440,8 +440,8 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
             for f, l in zip(fname, lname):
 
-                flname_target.append(f + " " + l)
-                lfname_target.append(l + " " + f)
+                flname_target.append(str(f) + " " + str(l))
+                lfname_target.append(str(l) + " " + str(f))
 
             test_list = range(len(flname_target))
             res = list(combinations(test_list, 2))
