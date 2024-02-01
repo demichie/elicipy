@@ -1191,6 +1191,11 @@ def create_figure_answers(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
 
         if h < n_SQ:
 
+            if realization[j] > 999:
+                txt = "%5.2e" % realization[h]
+            else:
+                txt = "%6.2f" % realization[h]
+
             axs.plot(realization[h], idx1 - idx0 + 1, "kx")
             axs.annotate(txt, (realization[j] * 0.99, idx1 - idx0 + 1 + 0.15))
             ytick.append("Realization")
