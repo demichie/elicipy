@@ -466,7 +466,7 @@ def create_figure_violin(
             pc.set_edgecolor('g')
             pc.set_linewidth(0.25)
 
-        # Make all the violin statistics marks red:
+        # Make all the violin statistics marks green:
         for partname in ('cbars', 'cmins', 'cmaxes'):
             vp = vp_EW[partname]
             vp.set_edgecolor('g')
@@ -524,7 +524,7 @@ def create_figure_violin(
         y = q_Cooke[violin_group, 1]
         lower_error = q_Cooke[violin_group, 1] - \
             q_Cooke[violin_group, 0]
-        upper_error = q_EW[violin_group, 2] - \
+        upper_error = q_Cooke[violin_group, 2] - \
             q_Cooke[violin_group, 1]
         asymmetric_error = [lower_error, upper_error]
 
@@ -566,8 +566,8 @@ def create_figure_violin(
             pc.set_edgecolor('b')
             pc.set_linewidth(0.25)
 
-        # Make all the violin statistics marks red:
-        for partname in ('cbars', 'cmins', 'cmaxes', 'cmedians'):
+        # Make all the violin statistics marks blue:
+        for partname in ('cbars', 'cmins', 'cmaxes'):
             vp = vp_ERF[partname]
             vp.set_edgecolor('b')
 
