@@ -992,7 +992,7 @@ def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke, q_er
         sizes = y
 
         axes[ERF_col].pie(sizes, labels=labels, autopct='%1.1f%%')
-        axes[ERF_col].set_title('EW')
+        axes[ERF_col].set_title('ERF')
 
     figname = (output_dir + "/" + elicitation_name + "_pie_" +
                str(count + 1).zfill(2) + ".pdf")
