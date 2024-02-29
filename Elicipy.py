@@ -1665,7 +1665,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples.csv"
             np.savetxt(
                 csv_name,
-                samples[n_SQ:-1],
+                samples[:,n_SQ:],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",
@@ -1682,7 +1682,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples_erf.csv"
             np.savetxt(
                 csv_name,
-                samples_erf[n_SQ:-1],
+                samples_erf[:,n_SQ:],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",
@@ -1694,7 +1694,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples_EW.csv"
             np.savetxt(
                 csv_name,
-                samples_EW[n_SQ:-1],
+                samples_EW[:,n_SQ:],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",
