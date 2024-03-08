@@ -16,7 +16,7 @@ from COOKEweights import COOKEweights
 from ERFweights import ERFweights
 from merge_csv import merge_csv
 
-from createPlots import create_fig_hist
+# from createPlots import create_fig_hist
 from createPlots import create_figure_violin
 from createPlots import create_figure_pie
 from createPlots import create_figure_trend
@@ -105,8 +105,8 @@ def add_text_box(slide, left, top, text_box, font_size):
     tf.text = text_box
     for par in tf.paragraphs:
 
-       par.font.size = Pt(font_size)
-       # tf.paragraphs[0].font.size = Pt(font_size)
+        par.font.size = Pt(font_size)
+        # tf.paragraphs[0].font.size = Pt(font_size)
     # tf.text = 'prova'
     tf.word_wrap = True
 
@@ -726,7 +726,7 @@ def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
     else:
 
         W_erf = np.ones((n_experts, 5))
-        score_erf = np.zeros(n_experts)
+        # score_erf = np.zeros(n_experts)
 
     sensitivity = False
 
@@ -1198,111 +1198,106 @@ def main(argv):
      global_idxMax, global_sum50,
      df_quest) = read_questionnaire(input_dir, csv_file, seed, target)
 
-    
-
     # Read an renumber index_groups
     try:
 
         from ElicipyDict import index_groups
-    
+
     except ImportError:
-    
+
         index_groups = []
-     
-    df_quest.reset_index(inplace=True,drop=True)
 
-    for count,group in enumerate(index_groups):
+    df_quest.reset_index(inplace=True, drop=True)
 
-        new_indexes_group = []        
+    for count, group in enumerate(index_groups):
+
+        new_indexes_group = []
 
         for idx in group:
-            
+
             indices = df_quest.index[
                 (df_quest["IDX"] == idx)
                 & (df_quest.QUEST_TYPE.str.contains("target"))]
 
             new_indexes_group.append(int(indices[0]))
-            
+
         index_groups[count] = new_indexes_group
 
     # Read an renumber trend_groups
     try:
 
         from ElicipyDict import trend_groups
-    
-    except ImportError:
-    
-        trend_groups = []
- 
-    df_quest.reset_index(inplace=True,drop=True)
-    
-    for count,group in enumerate(trend_groups):
 
-        new_trend_group = []        
+    except ImportError:
+
+        trend_groups = []
+
+    df_quest.reset_index(inplace=True, drop=True)
+
+    for count, group in enumerate(trend_groups):
+
+        new_trend_group = []
 
         for idx in group:
-            
+
             indices = df_quest.index[
                 (df_quest["IDX"] == idx)
                 & (df_quest.QUEST_TYPE.str.contains("target"))]
 
             new_trend_group.append(int(indices[0]))
-            
+
         trend_groups[count] = new_trend_group
 
     # Read an renumber violin_groups
     try:
 
         from ElicipyDict import violin_groups
-    
-    except ImportError:
-    
-        violin_groups = []
-     
-    df_quest.reset_index(inplace=True,drop=True)
-    
-    for count,group in enumerate(violin_groups):
 
-        new_violin_group = []        
+    except ImportError:
+
+        violin_groups = []
+
+    df_quest.reset_index(inplace=True, drop=True)
+
+    for count, group in enumerate(violin_groups):
+
+        new_violin_group = []
 
         for idx in group:
-            
+
             indices = df_quest.index[
                 (df_quest["IDX"] == idx)
                 & (df_quest.QUEST_TYPE.str.contains("target"))]
 
             new_violin_group.append(int(indices[0]))
-            
+
         violin_groups[count] = new_violin_group
 
-    
     # Read an renumber pie_groups
     try:
 
         from ElicipyDict import pie_groups
-    
-    except ImportError:
-    
-        pie_groups = []
-     
-    df_quest.reset_index(inplace=True,drop=True)
-    
-    for count,group in enumerate(pie_groups):
 
-        new_pie_group = []        
+    except ImportError:
+
+        pie_groups = []
+
+    df_quest.reset_index(inplace=True, drop=True)
+
+    for count, group in enumerate(pie_groups):
+
+        new_pie_group = []
 
         for idx in group:
-            
+
             indices = df_quest.index[
                 (df_quest["IDX"] == idx)
                 & (df_quest.QUEST_TYPE.str.contains("target"))]
 
             new_pie_group.append(int(indices[0]))
-            
+
         pie_groups[count] = new_pie_group
 
-    
-            
     try:
 
         from ElicipyDict import normalizeSum
@@ -1346,21 +1341,20 @@ def main(argv):
     save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
                  SQ_realization, SQ_scale, SQ_array, TQ_scale, TQ_array)
 
+    # alpha_nominal, alpha_interval = /
+    # calculate_alpha(TQ_array, overshoot,TQ_scale)
 
-    # alpha_nominal, alpha_interval = calculate_alpha(TQ_array, overshoot,TQ_scale)
-
-    
     weight = np.ones(n_experts)
-    indexMean, indexStd, indexQuantiles = calculate_index(TQ_array, weight,TQ_scale)
-    
-    
+    indexMean, indexStd, indexQuantiles = calculate_index(
+        TQ_array, weight, TQ_scale)
+
     # for i in range(n_TQ):
 
-        # print("TQ " + label_indexes[i+n_SQ],indexMean[i],indexStd[i],indexQuantiles[i,:])
-        # string = "%.2E, " % indexMean[i] + "%.2E, " % indexStd[i] + "Target"
-        # print(string) 
-    # print(ciao)   
-    
+    # print("TQ " + label_indexes[i+n_SQ],indexMean[i],indexStd[i], /
+    # indexQuantiles[i,:])
+    # string = "%.2E, " % indexMean[i] + "%.2E, " % indexStd[i] + "Target"
+    # print(string)
+    # print(ciao)
 
     minval_all = np.zeros(n_SQ + n_TQ)
     minval_all[0:n_SQ] = np.amin(SQ_array[:, 0, :], axis=0)
@@ -1484,11 +1478,13 @@ def main(argv):
             # ------ Create samples and bar plots ----- #
             # ----------------------------------------- #
 
-            q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = create_samples(
-                group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array,
-                n_sample, W, W_erf, Weqok, W_gt0, Werf_gt0, expin, global_log,
-                global_minVal, global_maxVal, label_indexes, ERF_flag,
-                Cooke_flag, EW_flag, overshoot, globalSum, normalizeSum)
+            q_Cooke, q_erf, q_EW, samples, samples_erf, samples_EW = \
+                create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array,
+                               TQ_array, n_sample, W, W_erf, Weqok, W_gt0,
+                               Werf_gt0, expin, global_log, global_minVal,
+                               global_maxVal, label_indexes, ERF_flag,
+                               Cooke_flag, EW_flag, overshoot, globalSum,
+                               normalizeSum)
 
             try:
 
@@ -1573,47 +1569,6 @@ def main(argv):
                            ERF_flag, Cooke_flag, EW_flag, hist_type,
                            output_dir, elicitation_name, n_bins, q_Cooke,
                            q_erf, q_EW, samples, samples_erf, samples_EW)
-            """
-            if Cooke_flag > 0:
-
-                if group == 0:
-
-                    W, score, information, M = COOKEweights(SQ_array, TQ_array, realization,
-                                                alpha, global_scale, overshoot,
-                                                cal_power, Cooke_flag)
-
-                    csv_name = output_dir + "/" + elicitation_name + "_score_information.csv"
-
-                    d = {"index": range(1, n_experts + 1), "score": score,
-                             "information": information,
-                             "ans < 5%ile": M[:,0],
-                             "5%ile < ans < 50%ile": M[:,1],
-                             "50%ile < ans < 95%ile": M[:,2],
-                             "ans > 95%ile": M[:,3],
-                             }
-                    df = pd.DataFrame(data=d)
-
-                    df.to_csv(csv_name, index=False)
-                
-                
-                SQ_array_DM = np.zeros((1,n_pctl,n_SQ))
-
-                for iseed in range(n_SQ):
-
-                    SQ_array_DM[0,0,iseed] = q_Cooke[iseed,0]
-                    SQ_array_DM[0,1,iseed] = q_Cooke[iseed,1]
-                    SQ_array_DM[0,2,iseed] = q_Cooke[iseed,2]
-                
-                TQ_array_DM = np.zeros((1,n_pctl,0))
-
-                W_DM, score_DM, information_DM, M = COOKEweights(SQ_array_DM, TQ_array_DM, realization,
-                                                alpha, global_scale, overshoot,
-                                                cal_power, Cooke_flag)
-
-                print('Information DM-Cooke', information_DM)
-                print('Score DM-Cooke',score_DM)
-                
-            """
 
             if len(group_list) > 1:
 
@@ -1665,7 +1620,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples.csv"
             np.savetxt(
                 csv_name,
-                samples[:,n_SQ:],
+                samples[:, n_SQ:],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",
@@ -1682,7 +1637,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples_erf.csv"
             np.savetxt(
                 csv_name,
-                samples_erf[:,n_SQ:],
+                samples_erf[:, n_SQ:],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",
@@ -1694,7 +1649,7 @@ def main(argv):
             csv_name = output_dir + "/" + elicitation_name + "_samples_EW.csv"
             np.savetxt(
                 csv_name,
-                samples_EW[:,n_SQ:],
+                samples_EW[:, n_SQ:],
                 header=",".join(targets),
                 comments="",
                 delimiter=",",
@@ -1715,27 +1670,30 @@ def main(argv):
         # ---------- Create index figures ---------- #
         # ------------------------------------------ #
 
-        indexMean_EW, indexStd_EW, indexQuantiles_EW = calculate_index(TQ_array, Weqok,TQ_scale)
+        indexMean_EW, indexStd_EW, indexQuantiles_EW = calculate_index(
+            TQ_array, Weqok, TQ_scale)
 
         if Cooke_flag > 0:
-        
-            indexMean_Cooke, indexStd_Cooke, indexQuantiles_Cooke = calculate_index(TQ_array, W_gt0,TQ_scale)
-            
-        else: 
-            
-            indexMean_Cooke = indexMean_EW    
-            indexStd_Cooke = indexStd_EW    
-            indexQuantiles_Cooke = indexQuantiles_EW    
+
+            indexMean_Cooke, indexStd_Cooke, indexQuantiles_Cooke = \
+                calculate_index(TQ_array, W_gt0, TQ_scale)
+
+        else:
+
+            indexMean_Cooke = indexMean_EW
+            indexStd_Cooke = indexStd_EW
+            indexQuantiles_Cooke = indexQuantiles_EW
 
         if ERF_flag > 0:
 
-            indexMean_erf, indexStd_erf, indexQuantiles_erf = calculate_index(TQ_array, Werf_gt0,TQ_scale)
+            indexMean_erf, indexStd_erf, indexQuantiles_erf = calculate_index(
+                TQ_array, Werf_gt0, TQ_scale)
 
-        else: 
-            
-            indexMean_erf = indexMean_EW    
+        else:
+
+            indexMean_erf = indexMean_EW
             indexStd_erf = indexStd_EW
-            indexQuantiles_erf = indexQuantiles_EW    
+            indexQuantiles_erf = indexQuantiles_EW
 
         counter_plot = 0
 
@@ -1752,9 +1710,12 @@ def main(argv):
                 index_group,
                 n_SQ,
                 label_indexes,
-                indexMean_EW,indexStd_EW,
-                indexMean_Cooke,indexStd_Cooke,
-                indexMean_erf,indexStd_erf,
+                indexMean_EW,
+                indexStd_EW,
+                indexMean_Cooke,
+                indexStd_Cooke,
+                indexMean_erf,
+                indexStd_erf,
                 indexQuantiles_EW,
                 indexQuantiles_Cooke,
                 indexQuantiles_erf,
@@ -1766,7 +1727,6 @@ def main(argv):
                 output_dir,
                 elicitation_name,
             )
-
 
         # ------------------------------------------ #
         # --------- Create trend. figures ---------- #
@@ -1845,9 +1805,9 @@ def main(argv):
 
         for count, pie_group in enumerate(pie_groups):
 
-            create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke, q_erf,
-                              Cooke_flag, ERF_flag, EW_flag, output_dir,
-                              elicitation_name)
+            create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW,
+                              q_Cooke, q_erf, Cooke_flag, ERF_flag, EW_flag,
+                              output_dir, elicitation_name)
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
@@ -2081,22 +2041,25 @@ def main(argv):
 
             add_text_box(slide, left, top, text_box, fontsize)
 
-            figname = (output_dir + "/" + elicitation_name + "_" + string +
-                       "_" + str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) +
+            figname = (output_dir + "/" + "Itemwise_PNGPDF" + "/" +
+                       elicitation_name + "_" + string + "_" +
+                       str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) +
                        ".png")
             add_figure(slide, figname, left, top, Inches(10))
 
             if analysis and (string == "Target"):
 
-                figname = (output_dir + "/" + elicitation_name +
-                           "_cum_group0_" + str(j + 1).zfill(2) + ".png")
+                figname = (output_dir + "/" + "Groups_PNGPDF" + "/" +
+                           elicitation_name + "_cum_group0_" +
+                           str(j + 1).zfill(2) + ".png")
 
                 width = Inches(2.5)
                 add_small_figure(slide, figname, left + Inches(1.1),
                                  top + Inches(4.9), width)
 
-                figname = (output_dir + "/" + elicitation_name +
-                           "_PDF_group0_" + str(j + 1).zfill(2) + ".png")
+                figname = (output_dir + "/" + "Groups_PNGPDF" + "/" +
+                           elicitation_name + "_PDF_group0_" +
+                           str(j + 1).zfill(2) + ".png")
 
                 width = Inches(2.5)
                 add_small_figure(slide, figname, left - Inches(1.2),
@@ -2393,8 +2356,9 @@ def main(argv):
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            figname = (output_dir + "/" + elicitation_name + "_index_" +
-                       str(count + 1).zfill(2) + ".png")
+            figname = (output_dir + "/" + "Index_PNGPDF" + "/" +
+                       elicitation_name + "_index_" + str(count + 1).zfill(2) +
+                       ".png")
 
             text_box = ""
             for i in index_group:
@@ -2442,8 +2406,9 @@ def main(argv):
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            figname = (output_dir + "/" + elicitation_name + "_trend_" +
-                       str(count + 1).zfill(2) + ".png")
+            figname = (output_dir + "/" + "Trendp_PNGPDF" + "/" +
+                       elicitation_name + "_trend_" + str(count + 1).zfill(2) +
+                       ".png")
 
             text_box = ""
             for i in trend_group:
@@ -2491,7 +2456,8 @@ def main(argv):
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            figname = (output_dir + "/" + elicitation_name + "_violin_" +
+            figname = (output_dir + "/" + "Violin_PNGPDF" + "/" +
+                       elicitation_name + "_violin_" +
                        str(count + 1).zfill(2) + ".png")
 
             text_box = ""
@@ -2541,8 +2507,9 @@ def main(argv):
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            figname = (output_dir + "/" + elicitation_name + "_pie_" +
-                       str(count + 1).zfill(2) + ".png")
+            figname = (output_dir + "/" + "Piecharts_PNGPDF" + "/" +
+                       elicitation_name + "_pie_" + str(count + 1).zfill(2) +
+                       ".png")
 
             text_box = ""
             for i in pie_group:
@@ -2557,7 +2524,6 @@ def main(argv):
             else:
 
                 fontsize = 18.0 * np.sqrt(6.0 / len(pie_group))
-
 
             add_text_box(slide, left, top, text_box, fontsize)
 
@@ -2596,7 +2562,8 @@ def main(argv):
 
                 slide = prs.slides.add_slide(title_slide_layout)
 
-                figname = (output_dir + "/" + elicitation_name + "_hist_" +
+                figname = (output_dir + "/" + "Barplots_PNGPDF" + "/" +
+                           elicitation_name + "_hist_" +
                            str(j - n_SQ + 1).zfill(2) + ".png")
 
                 text_box = TQ_LongQuestion[j - n_SQ]
@@ -2731,9 +2698,9 @@ def main(argv):
 
                 for count, group in enumerate(group_list):
 
-                    figname = (output_dir + "/" + elicitation_name +
-                               "_PDF_group" + str(group) + "_" +
-                               str(j - n_SQ + 1).zfill(2) + ".png")
+                    figname = (output_dir + "/" + "Groups_PNGPDF" + "/" +
+                               elicitation_name + "_PDF_group" + str(group) +
+                               "_" + str(j - n_SQ + 1).zfill(2) + ".png")
 
                     if group == 0:
 
@@ -2780,7 +2747,8 @@ def main(argv):
 
                     n_rows += 3
 
-                x, y, cx = Inches(1), Inches(5.5), Inches(4.0)
+                # x, y, cx = Inches(1), Inches(5.5), Inches(4.0)
+                x, y, cx = Inches(0.5), Inches(5.5), Inches(5.0)
                 shape = slide.shapes.add_table(n_rows, 5, x, y, cx,
                                                MSO_AUTO_SIZE.SHAPE_TO_FIT_TEXT)
 

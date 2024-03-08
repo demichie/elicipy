@@ -1,7 +1,5 @@
-import datetime
 import numpy as np
 import os
-import sys
 
 import matplotlib
 import matplotlib.pyplot as plt
@@ -110,6 +108,9 @@ def create_fig_hist(
     """
 
     from scipy import stats
+
+    if not os.path.exists(output_dir + "/" + "Barplots_PNGPDF"):
+        os.makedirs(output_dir + "/" + "Barplots_PNGPDF")
 
     fig = plt.figure()
     axs_h = fig.add_subplot(111)
@@ -234,19 +235,22 @@ def create_fig_hist(
     plt.legend(legends)
     plt.title("Target Question " + label_indexes[j])
 
-    figname = (output_dir + "/" + elicitation_name + "_hist_" +
-               str(j - n_SQ + 1).zfill(2) + ".pdf")
+    figname = (output_dir + "/" + "Barplots_PNGPDF" + "/" + elicitation_name +
+               "_hist_" + str(j - n_SQ + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_hist_" +
-               str(j - n_SQ + 1).zfill(2) + ".png")
+    figname = (output_dir + "/" + "Barplots_PNGPDF" + "/" + elicitation_name +
+               "_hist_" + str(j - n_SQ + 1).zfill(2) + ".png")
     # images[0].save(figname, "PNG")
     fig.savefig(figname, dpi=300)
 
     plt.close()
 
     # CUMULATIVE PLOTS
+
+    if not os.path.exists(output_dir + "/" + "Groups_PNGPDF"):
+        os.makedirs(output_dir + "/" + "Groups_PNGPDF")
 
     fig_cum = plt.figure()
     axs_cum = fig_cum.add_subplot(111)
@@ -293,13 +297,15 @@ def create_fig_hist(
                   str(group),
                   fontsize=18)
 
-    figname = (output_dir + "/" + elicitation_name + "_cum_group" +
-               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".pdf")
+    figname = (output_dir + "/" + "Groups_PNGPDF" + "/" + elicitation_name +
+               "_cum_group" + str(group) + "_" + str(j - n_SQ + 1).zfill(2) +
+               ".pdf")
     fig_cum.savefig(figname)
 
     # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_cum_group" +
-               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".png")
+    figname = (output_dir + "/" + "Groups_PNGPDF" + "/" + elicitation_name +
+               "_cum_group" + str(group) + "_" + str(j - n_SQ + 1).zfill(2) +
+               ".png")
     # images[0].save(figname, "PNG")
     fig_cum.savefig(figname, dpi=300)
 
@@ -343,13 +349,15 @@ def create_fig_hist(
                   str(group),
                   fontsize=18)
 
-    figname = (output_dir + "/" + elicitation_name + "_PDF_group" +
-               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".pdf")
+    figname = (output_dir + "/" + "Groups_PNGPDF" + "/" + elicitation_name +
+               "_PDF_group" + str(group) + "_" + str(j - n_SQ + 1).zfill(2) +
+               ".pdf")
     fig2.savefig(figname)
 
     # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_PDF_group" +
-               str(group) + "_" + str(j - n_SQ + 1).zfill(2) + ".png")
+    figname = (output_dir + "/" + "Groups_PNGPDF" + "/" + elicitation_name +
+               "_PDF_group" + str(group) + "_" + str(j - n_SQ + 1).zfill(2) +
+               ".png")
     # images[0].save(figname, "PNG")
     fig2.savefig(figname, dpi=300)
 
@@ -417,6 +425,10 @@ def create_figure_violin(
     none
 
     """
+
+    if not os.path.exists(output_dir + "/" + "Violin_PNGPDF"):
+        os.makedirs(output_dir + "/" + "Violin_PNGPDF")
+
     x = np.arange(len(violin_group)) + 1
     xmin = 0.5
     xmax = len(violin_group) + 0.5
@@ -457,8 +469,8 @@ def create_figure_violin(
         axes[EW_col].set_xticklabels(xtick)
 
         axes[EW_col].set_xlim(xmin, xmax)
-        axes[EW_col].set_ylim(TQ_minVals[violin_group[0]-n_SQ],
-                              TQ_maxVals[violin_group[0]-n_SQ])
+        axes[EW_col].set_ylim(TQ_minVals[violin_group[0] - n_SQ],
+                              TQ_maxVals[violin_group[0] - n_SQ])
 
         # Set the color of the violin patches
         for pc in vp_EW['bodies']:
@@ -476,14 +488,14 @@ def create_figure_violin(
             q_EW[violin_group, 0]
         upper_error = q_EW[violin_group, 2] - \
             q_EW[violin_group, 1]
-        asymmetric_error = [lower_error, upper_error]
+        # asymmetric_error = [lower_error, upper_error]
 
-        line1 = axes[EW_col].errorbar(x,
-                                      y,
-                                      yerr=asymmetric_error,
-                                      fmt="go",
-                                      markersize='4',
-                                      label="EW")
+        # line1 = axes[EW_col].errorbar(x,
+        #                             y,
+        #                             yerr=asymmetric_error,
+        #                             fmt="go",
+        #                             markersize='4',
+        #                             label="EW")
         axes[EW_col].plot(x, y - lower_error, "gx", markersize='4')
         axes[EW_col].plot(x, y + upper_error, "gx", markersize='4')
 
@@ -507,8 +519,8 @@ def create_figure_violin(
         axes[Cooke_col].set_xticklabels(xtick)
 
         axes[Cooke_col].set_xlim(xmin, xmax)
-        axes[Cooke_col].set_ylim(TQ_minVals[violin_group[0]-n_SQ],
-                                 TQ_maxVals[violin_group[0]-n_SQ])
+        axes[Cooke_col].set_ylim(TQ_minVals[violin_group[0] - n_SQ],
+                                 TQ_maxVals[violin_group[0] - n_SQ])
 
         # Set the color of the violin patches
         for pc in vp_Cooke['bodies']:
@@ -526,14 +538,14 @@ def create_figure_violin(
             q_Cooke[violin_group, 0]
         upper_error = q_Cooke[violin_group, 2] - \
             q_Cooke[violin_group, 1]
-        asymmetric_error = [lower_error, upper_error]
+        # asymmetric_error = [lower_error, upper_error]
 
-        line1 = axes[Cooke_col].errorbar(x,
-                                         y,
-                                         yerr=asymmetric_error,
-                                         fmt="ro",
-                                         markersize='4',
-                                         label="EW")
+        # line1 = axes[Cooke_col].errorbar(x,
+        #                                y,
+        #                                yerr=asymmetric_error,
+        #                                fmt="ro",
+        #                                markersize='4',
+        #                                label="EW")
         axes[Cooke_col].plot(x, y - lower_error, "rx", markersize='4')
         axes[Cooke_col].plot(x, y + upper_error, "rx", markersize='4')
 
@@ -543,7 +555,7 @@ def create_figure_violin(
 
         vp_ERF = axes[ERF_col].violinplot(y,
                                           showmeans=False,
-                                          showmedians=True,
+                                          showmedians=False,
                                           widths=0.25)
 
         axes[ERF_col].set_title('ERF')
@@ -557,8 +569,8 @@ def create_figure_violin(
         axes[ERF_col].set_xticklabels(xtick)
 
         axes[ERF_col].set_xlim(xmin, xmax)
-        axes[ERF_col].set_ylim(TQ_minVals[violin_group[0]-n_SQ],
-                               TQ_maxVals[violin_group[0]-n_SQ])
+        axes[ERF_col].set_ylim(TQ_minVals[violin_group[0] - n_SQ],
+                               TQ_maxVals[violin_group[0] - n_SQ])
 
         # Set the color of the violin patches
         for pc in vp_ERF['bodies']:
@@ -576,26 +588,26 @@ def create_figure_violin(
             q_erf[violin_group, 0]
         upper_error = q_erf[violin_group, 2] - \
             q_erf[violin_group, 1]
-        asymmetric_error = [lower_error, upper_error]
+        # asymmetric_error = [lower_error, upper_error]
 
-        line1 = axes[ERF_col].errorbar(x,
-                                       y,
-                                       yerr=asymmetric_error,
-                                       fmt="bo",
-                                       markersize='4',
-                                       label="EW")
+        # line1 = axes[ERF_col].errorbar(x,
+        #                              y,
+        #                              yerr=asymmetric_error,
+        #                              fmt="bo",
+        #                              markersize='4',
+        #                              label="EW")
         axes[ERF_col].plot(x, y - lower_error, "bx", markersize='4')
         axes[ERF_col].plot(x, y + upper_error, "bx", markersize='4')
 
     # axs.grid(linewidth=0.4)
 
-    figname = (output_dir + "/" + elicitation_name + "_violin_" +
-               str(count + 1).zfill(2) + ".pdf")
+    figname = (output_dir + "/" + "Violin_PNGPDF" + "/" + elicitation_name +
+               "_violin_" + str(count + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_violin_" +
-               str(count + 1).zfill(2) + ".png")
+    figname = (output_dir + "/" + "Violin_PNGPDF" + "/" + elicitation_name +
+               "_violin_" + str(count + 1).zfill(2) + ".png")
     # images[0].save(figname, "PNG")
     fig.savefig(figname, dpi=300)
     plt.close()
@@ -608,9 +620,12 @@ def create_figure_index(
     index_group,
     n_SQ,
     label_indexes,
-    indexMean_EW,indexStd_EW,
-    indexMean_Cooke,indexStd_Cooke,
-    indexMean_erf,indexStd_erf,
+    indexMean_EW,
+    indexStd_EW,
+    indexMean_Cooke,
+    indexStd_Cooke,
+    indexMean_erf,
+    indexStd_erf,
     indexQuantiles_EW,
     indexQuantiles_Cooke,
     indexQuantiles_erf,
@@ -660,85 +675,75 @@ def create_figure_index(
     none
 
     """
+
+    if not os.path.exists(output_dir + "/" + "Index_PNGPDF"):
+        os.makedirs(output_dir + "/" + "Index_PNGPDF")
+
     fig = plt.figure()
     axs = fig.add_subplot(111)
 
-    y = - np.arange(len(index_group))
+    y = -np.arange(len(index_group))
 
     handles = []
 
     index_group = np.array(index_group)
 
     if EW_flag:
-
         """
         x = indexMean_EW[index_group-n_SQ]
         lower_error = indexStd_EW[index_group-n_SQ]
         upper_error = indexStd_EW[index_group-n_SQ]
         error = [lower_error, upper_error]
         """
-        x = indexQuantiles_EW[index_group-n_SQ,1]
-        lower_error = x-indexQuantiles_EW[index_group-n_SQ,0]
-        upper_error = indexQuantiles_EW[index_group-n_SQ,2]-x
+        x = indexQuantiles_EW[index_group - n_SQ, 1]
+        lower_error = x - indexQuantiles_EW[index_group - n_SQ, 0]
+        upper_error = indexQuantiles_EW[index_group - n_SQ, 2] - x
         error = [lower_error, upper_error]
-        
 
-        line1 = axs.errorbar(x,
-                             y - 0.1,
-                             xerr=error,
-                             fmt="go",
-                             label="EW")
+        line1 = axs.errorbar(x, y - 0.1, xerr=error, fmt="go", label="EW")
         axs.plot(x - lower_error, y - 0.1, "gx")
         axs.plot(x + upper_error, y - 0.1, "gx")
-        axs.plot(indexMean_EW[index_group-n_SQ], y - 0.1, "g*")
+        axs.plot(indexMean_EW[index_group - n_SQ], y - 0.1, "g*")
         handles.append(line1)
 
     if Cooke_flag > 0:
-
         """"
         x = indexMean_Cooke[index_group-n_SQ]
         lower_error = indexStd_Cooke[index_group-n_SQ]
         upper_error = indexStd_Cooke[index_group-n_SQ]
         error = [lower_error, upper_error]
         """
-        x = indexQuantiles_Cooke[index_group-n_SQ,1]
-        lower_error = x-indexQuantiles_Cooke[index_group-n_SQ,0]
-        upper_error = indexQuantiles_Cooke[index_group-n_SQ,2]-x
+        x = indexQuantiles_Cooke[index_group - n_SQ, 1]
+        lower_error = x - indexQuantiles_Cooke[index_group - n_SQ, 0]
+        upper_error = indexQuantiles_Cooke[index_group - n_SQ, 2] - x
         error = [lower_error, upper_error]
-        
 
         line2 = axs.errorbar(x, y, xerr=error, fmt="ro", label="CM")
         axs.plot(x - lower_error, y, "rx")
         axs.plot(x + upper_error, y, "rx")
-        axs.plot(indexMean_Cooke[index_group-n_SQ], y, "r*")
+        axs.plot(indexMean_Cooke[index_group - n_SQ], y, "r*")
         handles.append(line2)
 
     if ERF_flag > 0:
-
         """
         x = indexMean_erf[index_group-n_SQ]
         lower_error = indexStd_erf[index_group-n_SQ]
         upper_error = indexStd_erf[index_group-n_SQ]
         error = [lower_error, upper_error]
         """
-        x = indexQuantiles_erf[index_group-n_SQ,1]
-        lower_error = x-indexQuantiles_erf[index_group-n_SQ,0]
-        upper_error = indexQuantiles_erf[index_group-n_SQ,2]-x
+        x = indexQuantiles_erf[index_group - n_SQ, 1]
+        lower_error = x - indexQuantiles_erf[index_group - n_SQ, 0]
+        upper_error = indexQuantiles_erf[index_group - n_SQ, 2] - x
         error = [lower_error, upper_error]
-        
 
-        line3 = axs.errorbar(x,
-                             y + 0.1,
-                             xerr=error,
-                             fmt="bo",
-                             label="ERF")
+        line3 = axs.errorbar(x, y + 0.1, xerr=error, fmt="bo", label="ERF")
         axs.plot(x - lower_error, y + 0.1, "bx")
         axs.plot(x + upper_error, y + 0.1, "bx")
-        axs.plot(indexMean_erf[index_group-n_SQ], y + 0.1, "b*")
+        axs.plot(indexMean_erf[index_group - n_SQ], y + 0.1, "b*")
         handles.append(line3)
 
     axs.set_yticks(y)
-    axs.grid(axis = 'x')
+    axs.grid(axis='x')
 
     ytick = []
     for i in index_group:
@@ -746,19 +751,19 @@ def create_figure_index(
 
     axs.set_yticklabels(ytick)
 
-    axs.set_xlim(-1.0,1.0)
+    axs.set_xlim(-1.0, 1.0)
 
     plt.title("Question Group " + str(count + 1))
 
     axs.legend(handles=handles)
 
-    figname = (output_dir + "/" + elicitation_name + "_index_" +
-               str(count + 1).zfill(2) + ".pdf")
+    figname = (output_dir + "/" + "Index_PNGPDF" + "/" + elicitation_name +
+               "_index_" + str(count + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_index_" +
-               str(count + 1).zfill(2) + ".png")
+    figname = (output_dir + "/" + "Index_PNGPDF" + "/" + elicitation_name +
+               "_index_" + str(count + 1).zfill(2) + ".png")
     # images[0].save(figname, "PNG")
     fig.savefig(figname, dpi=300)
     plt.close()
@@ -822,6 +827,10 @@ def create_figure_trend(
     none
 
     """
+
+    if not os.path.exists(output_dir + "/" + "Trend_PNGPDF"):
+        os.makedirs(output_dir + "/" + "Trend_PNGPDF")
+
     fig = plt.figure()
     axs = fig.add_subplot(111)
 
@@ -852,10 +861,8 @@ def create_figure_trend(
     if Cooke_flag > 0:
 
         y = q_Cooke[trend_group, 1]
-        lower_error = (q_Cooke[trend_group, 1] -
-                       q_Cooke[trend_group, 0])
-        upper_error = (q_Cooke[trend_group, 2] -
-                       q_Cooke[trend_group, 1])
+        lower_error = (q_Cooke[trend_group, 1] - q_Cooke[trend_group, 0])
+        upper_error = (q_Cooke[trend_group, 2] - q_Cooke[trend_group, 1])
         asymmetric_error = [lower_error, upper_error]
 
         line2 = axs.errorbar(x, y, yerr=asymmetric_error, fmt="ro", label="CM")
@@ -866,10 +873,8 @@ def create_figure_trend(
     if ERF_flag > 0:
 
         y = q_erf[trend_group, 1]
-        lower_error = (q_erf[trend_group, 1] -
-                       q_erf[trend_group, 0])
-        upper_error = (q_erf[trend_group, 2] -
-                       q_erf[trend_group, 1])
+        lower_error = (q_erf[trend_group, 1] - q_erf[trend_group, 0])
+        upper_error = (q_erf[trend_group, 2] - q_erf[trend_group, 1])
         asymmetric_error = [lower_error, upper_error]
 
         line3 = axs.errorbar(x + 0.1,
@@ -891,7 +896,8 @@ def create_figure_trend(
 
     # ax1.set_yscale('log')
 
-    axs.set_ylim(TQ_minVals[trend_group[0]-n_SQ], TQ_maxVals[trend_group[0]-n_SQ])
+    axs.set_ylim(TQ_minVals[trend_group[0] - n_SQ],
+                 TQ_maxVals[trend_group[0] - n_SQ])
 
     # axs.grid(linewidth=0.4)
 
@@ -899,13 +905,13 @@ def create_figure_trend(
 
     axs.legend(handles=handles)
 
-    figname = (output_dir + "/" + elicitation_name + "_trend_" +
-               str(count + 1).zfill(2) + ".pdf")
+    figname = (output_dir + "/" + "Trend_PNGPDF" + "/" + elicitation_name +
+               "_trend_" + str(count + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_trend_" +
-               str(count + 1).zfill(2) + ".png")
+    figname = (output_dir + "/" + "Trend_PNGPDF" + "/" + elicitation_name +
+               "_trend_" + str(count + 1).zfill(2) + ".png")
     # images[0].save(figname, "PNG")
     fig.savefig(figname, dpi=300)
     plt.close()
@@ -913,8 +919,9 @@ def create_figure_trend(
     return
 
 
-def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke, q_erf, Cooke_flag,
-                      ERF_flag, EW_flag, output_dir, elicitation_name):
+def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke,
+                      q_erf, Cooke_flag, ERF_flag, EW_flag, output_dir,
+                      elicitation_name):
     """Create figure for trend group (subset of target qustions)
 
     Parameters
@@ -944,6 +951,9 @@ def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke, q_er
 
     """
 
+    if not os.path.exists(output_dir + "/" + "Piecharts_PNGPDF"):
+        os.makedirs(output_dir + "/" + "Piecharts_PNGPDF")
+
     ncols = 0
     if EW_flag:
         EW_col = ncols
@@ -963,7 +973,6 @@ def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke, q_er
     labels = []
     for i in pie_group:
         labels.append("TQ" + label_indexes[i])
-
 
     pie_group = np.array(pie_group)
 
@@ -994,13 +1003,13 @@ def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke, q_er
         axes[ERF_col].pie(sizes, labels=labels, autopct='%1.1f%%')
         axes[ERF_col].set_title('ERF')
 
-    figname = (output_dir + "/" + elicitation_name + "_pie_" +
-               str(count + 1).zfill(2) + ".pdf")
+    figname = (output_dir + "/" + "Piecharts_PNGPDF" + "/" + elicitation_name +
+               "_pie_" + str(count + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_pie_" +
-               str(count + 1).zfill(2) + ".png")
+    figname = (output_dir + "/" + "Piecharts_PNGPDF" + "/" + elicitation_name +
+               "_pie_" + str(count + 1).zfill(2) + ".png")
     # images[0].save(figname, "PNG")
     fig.savefig(figname, dpi=300)
     plt.close()
@@ -1014,6 +1023,8 @@ def create_figure_answers(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
                           q_erf, q_EW, elicitation_name, global_log,
                           label_indexes, nolabel_flag):
 
+    if not os.path.exists(output_dir + "/" + "Itemwise_PNGPDF"):
+        os.makedirs(output_dir + "/" + "Itemwise_PNGPDF")
     idx0 = k * max_len_plot
     idx1 = min((k + 1) * max_len_plot, n_experts)
 
@@ -1023,7 +1034,8 @@ def create_figure_answers(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
         Q_array = TQ_array[idx0:idx1, :, j]
         string = "Target"
         string_title = string
-        # string_title = "%.2E, " % indexMean[j] + "%.2E, " % indexStd[j] + "Target"
+        # string_title = "%.2E, " % indexMean[j] + "%.2E, " % indexStd[j] + \
+        # "Target"
 
         xmin = np.amin(TQ_array[:, 0, j])
         xmax = np.amax(TQ_array[:, 2, j])
@@ -1218,13 +1230,15 @@ def create_figure_answers(h, k, n_experts, max_len_plot, n_SQ, SQ_array,
     axs.grid(linewidth=0.4)
 
     plt.title(string_title + " Question " + label_indexes[h])
-    figname = (output_dir + "/" + elicitation_name + "_" + string + "_" +
-               str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) + ".pdf")
+    figname = (output_dir + "/" + "Itemwise_PNGPDF" + "/" + elicitation_name +
+               "_" + string + "_" + str(j + 1).zfill(2) + "_" +
+               str(k + 1).zfill(2) + ".pdf")
     fig.savefig(figname)
 
     # images = convert_from_path(figname)
-    figname = (output_dir + "/" + elicitation_name + "_" + string + "_" +
-               str(j + 1).zfill(2) + "_" + str(k + 1).zfill(2) + ".png")
+    figname = (output_dir + "/" + "Itemwise_PNGPDF" + "/" + elicitation_name +
+               "_" + string + "_" + str(j + 1).zfill(2) + "_" +
+               str(k + 1).zfill(2) + ".png")
     # images[0].save(figname, "PNG")
     fig.savefig(figname, dpi=300)
     plt.close()
@@ -1235,6 +1249,9 @@ def create_barplot(group, n_SQ, n_TQ, n_sample, global_log, global_minVal,
                    minval_all, maxval_all, ERF_flag, Cooke_flag, EW_flag,
                    hist_type, output_dir, elicitation_name, n_bins, q_Cooke,
                    q_erf, q_EW, samples, samples_erf, samples_EW):
+
+    if not os.path.exists(output_dir + "/" + "Barplots_PNGPDF"):
+        os.makedirs(output_dir + "/" + "Barplots_PNGPDF")
 
     del_rows = []
     keep_rows = []
