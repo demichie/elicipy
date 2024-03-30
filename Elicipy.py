@@ -2406,7 +2406,7 @@ def main(argv):
 
             slide = prs.slides.add_slide(title_slide_layout)
 
-            figname = (output_dir + "/" + "Trendp_PNGPDF" + "/" +
+            figname = (output_dir + "/" + "Trend_PNGPDF" + "/" +
                        elicitation_name + "_trend_" + str(count + 1).zfill(2) +
                        ".png")
 
