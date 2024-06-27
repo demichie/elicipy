@@ -1,1 +1,1 @@
-wrk_dir = 'testWebForm'
+wrk_dir = 'testWebform'

@@ -13,7 +13,7 @@ absolute_indexing = True
 # datarepo = 'local'
 
 datarepo = 'github'
-RepositoryData = https://github.com/peterjamesnugent/elicipy
+RepositoryData = https://github.com/peterjamesnugent/eclipy-repo-data
 
 # encrypted = False
 
