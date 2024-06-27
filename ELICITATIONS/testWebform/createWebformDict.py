@@ -10,10 +10,10 @@ group_list = ['Group A', 'Group B', 'Group C']
 absolute_indexing = True
 
 # select 'github' or 'local'
-datarepo = 'local'
+# datarepo = 'local'
 
-# datarepo = 'github'
-# RepositoryData = 'createWebformAnswers'
+datarepo = 'github'
+RepositoryData = https://github.com/peterjamesnugent/elicipy
 
 # encrypted = False
 
