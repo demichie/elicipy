@@ -1,10 +1,10 @@
 # select 'github', 'local' or 'local_github'
-datarepo = 'local'
+#datarepo = 'local'
 
-# datarepo = 'github'
+datarepo = 'github'
 
 # Github repository for answers, used only when datarepo='local' or 'local_github'
-# RepositoryData = ''
+RepositoryData = https://github.com/peterjamesnugent/eclipy-repo-data
 
 # Parameters used only when datarepo='local' or 'local_github'
 # user = ''
