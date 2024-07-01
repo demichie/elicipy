@@ -56,7 +56,7 @@ To create the new repository for the answers, go to the you github main page, cl
 1. Click on "Tokens (classic)".
 1. Click on top on "Generate new token" and select (Generate new token (classic).
 1. Give a name.
-1. Select scope "Repo".
+1. Select scope "repo".
 1. At the end of the page click on "Generate token".
 1. Copy the newly generated token. You will use it as Streamlit Secret.
 
