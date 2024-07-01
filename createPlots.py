@@ -453,24 +453,44 @@ def create_figure_violin(
 
         y = samples_EW[:, violin_group]
 
-        vp_EW = axes[EW_col].violinplot(y,
-                                        showmeans=False,
-                                        showmedians=False,
-                                        widths=0.25)
+        if (ncols > 1):
 
-        axes[EW_col].set_title('EW')
+            vp_EW = axes[EW_col].violinplot(y,
+                                            showmeans=False,
+                                            showmedians=False,
+                                            widths=0.25)
 
-        axes[EW_col].set_xticks(x)
+            axes[EW_col].set_title('EW')
+            axes[EW_col].set_xticks(x)
+
+        else:
+
+            vp_EW = axes.violinplot(y,
+                                    showmeans=False,
+                                    showmedians=False,
+                                    widths=0.25)
+            axes.set_title('EW')
+            axes.set_xticks(x)
 
         xtick = []
         for i in violin_group:
             xtick.append("TQ" + label_indexes[i])
 
-        axes[EW_col].set_xticklabels(xtick)
+        if (ncols > 1):
 
-        axes[EW_col].set_xlim(xmin, xmax)
-        axes[EW_col].set_ylim(TQ_minVals[violin_group[0] - n_SQ],
-                              TQ_maxVals[violin_group[0] - n_SQ])
+            axes[EW_col].set_xticklabels(xtick)
+
+            axes[EW_col].set_xlim(xmin, xmax)
+            axes[EW_col].set_ylim(TQ_minVals[violin_group[0] - n_SQ],
+                                  TQ_maxVals[violin_group[0] - n_SQ])
+
+        else:
+
+            axes.set_xticklabels(xtick)
+
+            axes.set_xlim(xmin, xmax)
+            axes.set_ylim(TQ_minVals[violin_group[0] - n_SQ],
+                          TQ_maxVals[violin_group[0] - n_SQ])
 
         # Set the color of the violin patches
         for pc in vp_EW['bodies']:
@@ -496,8 +516,16 @@ def create_figure_violin(
         #                             fmt="go",
         #                             markersize='4',
         #                             label="EW")
-        axes[EW_col].plot(x, y - lower_error, "gx", markersize='4')
-        axes[EW_col].plot(x, y + upper_error, "gx", markersize='4')
+
+        if (ncols > 1):
+
+            axes[EW_col].plot(x, y - lower_error, "gx", markersize='4')
+            axes[EW_col].plot(x, y + upper_error, "gx", markersize='4')
+
+        else:
+
+            axes.plot(x, y - lower_error, "gx", markersize='4')
+            axes.plot(x, y + upper_error, "gx", markersize='4')
 
     if Cooke_flag > 0:
 
@@ -982,8 +1010,15 @@ def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke,
 
         sizes = y
 
-        axes[EW_col].pie(sizes, labels=labels, autopct='%1.1f%%')
-        axes[EW_col].set_title('EW')
+        if ncols > 1:
+
+            axes[EW_col].pie(sizes, labels=labels, autopct='%1.1f%%')
+            axes[EW_col].set_title('EW')
+
+        else:
+
+            axes.pie(sizes, labels=labels, autopct='%1.1f%%')
+            axes.set_title('EW')
 
     if Cooke_flag > 0:
 
@@ -991,8 +1026,15 @@ def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke,
 
         sizes = y
 
-        axes[Cooke_col].pie(sizes, labels=labels, autopct='%1.1f%%')
-        axes[Cooke_col].set_title('Cooke')
+        if ncols > 1:
+
+            axes[Cooke_col].pie(sizes, labels=labels, autopct='%1.1f%%')
+            axes[Cooke_col].set_title('Cooke')
+
+        else:
+
+            axes.pie(sizes, labels=labels, autopct='%1.1f%%')
+            axes.set_title('Cooke')
 
     if ERF_flag > 0:
 
@@ -1000,8 +1042,15 @@ def create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW, q_Cooke,
 
         sizes = y
 
-        axes[ERF_col].pie(sizes, labels=labels, autopct='%1.1f%%')
-        axes[ERF_col].set_title('ERF')
+        if ncols > 1:
+
+            axes[ERF_col].pie(sizes, labels=labels, autopct='%1.1f%%')
+            axes[ERF_col].set_title('ERF')
+
+        else:
+
+            axes.pie(sizes, labels=labels, autopct='%1.1f%%')
+            axes.set_title('ERF')
 
     figname = (output_dir + "/" + "Piecharts_PNGPDF" + "/" + elicitation_name +
                "_pie_" + str(count + 1).zfill(2) + ".pdf")
