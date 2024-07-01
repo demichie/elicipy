@@ -33,12 +33,12 @@ ___
 Here there are steps to install and run the webapp from streamlit.io.
 
 On Github, you need two repositories, one hosting the webapp streamlit_app.py
-(fork this repository) and the other to collect the answers (create a new
+(copy this repository, see details below) and the other to collect the answers (create a new
 repository).
 
 ### GITHUB STREAMLIT REPOSITORY
 
-1. Fork this repository.
+1. Create a copy of the repository by clicking on the green button "Use this template", on the top-right.
 1. Edit in the input file createWebformDict.py the fields datarepo (set to 'github') and the RepositoryData (with the new github repository
    for the answers).
 1. Set in the input file createWebformDict.py the quest_type variable to
