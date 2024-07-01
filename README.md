@@ -33,8 +33,10 @@ ___
 Here there are steps to install and run the webapp from streamlit.io.
 
 On Github, you need two repositories, one hosting the webapp streamlit_app.py
-(copy this repository, see details below) and the other to collect the answers (create a new
-repository).
+(copy this repository, see details below) and the other to collect the answers.
+
+To create the new repository for the answers, go to the you github main page, click on the tab "Repositories", and then on the green button "New", on the top-right above the list of your repositories. Write the "Reposotory name" for your asnwer repository, set this repository to "Private" if you don't want to show the answers, and finally click on "Create repository" at the bottom.
+
 
 ### GITHUB STREAMLIT REPOSITORY
 
