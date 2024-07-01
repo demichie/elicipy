@@ -63,9 +63,9 @@ To create the new repository for the answers, go to the you github main page, cl
 ### STREAMLIT
 
 1. Login with github account.
-1. Open the drop-down menu next to "New app".
-1. Select "Use existing repo".
-1. Select the github repository for the webapp.
+1. On the top-right, click on "Create app".
+1. Select "Yup, I have an app" to deploy the app from the github repository.
+1. In the "Repository" field, select the github repository for the webapp (i.e. the repository you generated from the template).
 1. Click on "Advanced settings".
 1. Select Python version 3.8, 3.9 or 3.10.
 1. In the Secrets textbox write.
@@ -87,9 +87,7 @@ To create the new repository for the answers, go to the you github main page, cl
 1. Click on "Save".
 1. Click on "Deploy".
 
-You can share this link for the form:
-
-<https://share.streamlit.io/YOUR_GITHUB_PAGE/createwebform/main>
+Now you should see your webform, and on the top-right you can click on "Share" to get the link.
 
 ### Webapp running locally with data saved locally
 
