@@ -171,14 +171,6 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
         if verbose:
             print("NS_SQ", NS_SQ)
 
-        csv_name = output_dir + "/" + elicitation_name + "_experts.csv"
-
-        d = {"index": range(1, len(NS_SQ) + 1), "Expert": NS_SQ}
-
-        df = pd.DataFrame(data=d)
-
-        df.to_csv(csv_name, index=False)
-
         # reshaped numpy array with expert answers
         SQ_array = np.reshape(cols_as_np, (n_experts, n_SQ, n_pctl))
 
@@ -269,6 +261,7 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
         else:
 
             sorted_idx = range(len(NS_TQ))
+            NS_SQ = NS_TQ
 
         # create a 2D numpy array with the answers to the target questions
         cols_as_np = df_TQ[df_TQ.columns[4:]].to_numpy()
@@ -323,7 +316,16 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
 
         SQ_array = np.zeros((n_experts, n_pctl, n_SQ))
 
-    return n_experts, n_SQ, n_TQ, SQ_array, TQ_array
+
+    csv_name = output_dir + "/" + elicitation_name + "_experts.csv"
+
+    d = {"index": range(1, n_experts + 1), "Expert": NS_SQ}
+
+    df = pd.DataFrame(data=d)
+
+    df.to_csv(csv_name, index=False)
+
+    return n_experts, n_SQ, n_TQ, SQ_array, TQ_array , NS_SQ
 
 
 def read_questionnaire(input_dir, csv_file, seed, target):
@@ -697,11 +699,47 @@ def read_questionnaire(input_dir, csv_file, seed, target):
 
 def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
                     TQ_array, realization, global_scale, global_log, alpha,
-                    overshoot, cal_power, ERF_flag, Cooke_flag, seed):
+                    overshoot, cal_power, ERF_flag, Cooke_flag, seed, 
+                    NS_experts, weights_file):
 
     verbose = False
 
-    if Cooke_flag > 0:
+
+    if Cooke_flag < 0:
+
+        # when Cooke_flag is negative, the weights are read from
+        # and external file (weights_file) define in input
+        
+        from merge_csv import similar
+    
+        weights = pd.read_csv(weights_file)
+        print(weights)
+
+        fname = weights["First Name"].to_list()
+        lname = weights["Last Name"].to_list()
+
+        W = np.zeros((n_experts,5))
+
+        for i,(f, l) in enumerate(zip(fname, lname)):
+
+            flname = str(f) + str(l)
+            lfname = str(l) + str(f)
+            
+            for ex,name in enumerate(NS_experts):
+            
+                sim1 = similar(flname, name)
+                sim2 = similar(flname, name)
+                sim = max(sim1, sim2)
+                
+                if sim > 0.8:
+                
+                    W[ex, 0] = weights.C[i]
+                    W[ex, 1] = weights.I_tot[i]
+                    W[ex, 2] = weights.I_real[i]
+                    W[ex, 3] = weights.w[i]
+                    W[ex, 4] = 0.01*weights.normW[i]
+
+    elif Cooke_flag > 0:
 
         W, score, information, M = COOKEweights(SQ_array, TQ_array,
                                                 realization, alpha,
@@ -785,7 +823,7 @@ def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
             print("W_erf")
             print(W_erf[:, -1])
 
-        if Cooke_flag > 0:
+        if Cooke_flag != 0:
 
             print("")
             print("W_cooke")
@@ -908,7 +946,7 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array,
 
         samples_EW[:, j] = C_EW
 
-        if Cooke_flag > 0:
+        if Cooke_flag != 0:
 
             C = createSamples(
                 DAT,
@@ -1006,7 +1044,7 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array,
         q_EW[j, 2] = quan95_EW
         q_EW[j, 3] = qmean_EW
 
-        if Cooke_flag > 0:
+        if Cooke_flag != 0:
 
             if global_log[j]:
 
@@ -1181,6 +1219,30 @@ def main(argv):
     output_dir = path + "/" + output_dir
     input_dir = path + "/" + input_dir
 
+    if Cooke_flag<0:
+
+        try:
+
+            from ElicipyDict import weights_file
+            
+            weights_file = input_dir + "/" + weights_file
+            # Check whether the specified file exists or not
+            isExist = os.path.exists(weights_file)
+
+            if not isExist:
+
+                print("weights_file does not exist in ",input_dir)
+                sys.exit()
+
+        except ImportError:
+
+            print("Please define weights_file")
+            sys.exit()
+            
+    else:
+    
+         weights_file = ''   
+
     # Check whether the specified output path exists or not
     isExist = os.path.exists(output_dir)
 
@@ -1334,7 +1396,7 @@ def main(argv):
     write_flag = True
 
     print("STEP2: Reading all answers to define ranges")
-    n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
+    n_experts, n_SQ, n_TQ, SQ_array, TQ_array, NS_experts = read_answers(
         input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ, seed,
         target, output_dir, elicitation_name, write_flag, label_indexes)
 
@@ -1425,7 +1487,7 @@ def main(argv):
         print("STEP" + str(3 + 2 * count) + ": Reading answers for group ",
               count)
 
-        n_experts, n_SQ, n_TQ, SQ_array, TQ_array = read_answers(
+        n_experts, n_SQ, n_TQ, SQ_array, TQ_array, NS_experts = read_answers(
             input_dir, csv_file, group, n_pctl, df_indexes_SQ, df_indexes_TQ,
             seed, target, output_dir, elicitation_name, write_flag,
             label_indexes)
@@ -1472,7 +1534,8 @@ def main(argv):
             W, W_erf, Weqok, W_gt0, Werf_gt0, expin = answer_analysis(
                 input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array, TQ_array,
                 realization, global_scale, global_log, alpha_analysis,
-                overshoot, cal_power, ERF_flag, Cooke_flag, seed)
+                overshoot, cal_power, ERF_flag, Cooke_flag, seed, NS_experts,
+                weights_file)
 
             # ----------------------------------------- #
             # ------ Create samples and bar plots ----- #
@@ -1483,7 +1546,7 @@ def main(argv):
                                TQ_array, n_sample, W, W_erf, Weqok, W_gt0,
                                Werf_gt0, expin, global_log, global_minVal,
                                global_maxVal, label_indexes, ERF_flag,
-                               Cooke_flag, EW_flag, overshoot, globalSum,
+                               abs(Cooke_flag), EW_flag, overshoot, globalSum,
                                normalizeSum)
 
             try:
@@ -1515,7 +1578,7 @@ def main(argv):
 
                     delta_perc_mean = np.mean(delta_perc, axis=0)
 
-                    if Cooke_flag > 0:
+                    if Cooke_flag != 0:
 
                         if global_log[n_SQ + j]:
 
@@ -1566,7 +1629,7 @@ def main(argv):
             create_barplot(group, n_SQ, n_TQ, n_sample, global_log,
                            global_minVal, global_maxVal, global_units,
                            TQ_units, label_indexes, minval_all, maxval_all,
-                           ERF_flag, Cooke_flag, EW_flag, hist_type,
+                           ERF_flag, abs(Cooke_flag), EW_flag, hist_type,
                            output_dir, elicitation_name, n_bins, q_Cooke,
                            q_erf, q_EW, samples, samples_erf, samples_EW)
 
@@ -1591,7 +1654,7 @@ def main(argv):
         d = {"index": range(1, n_experts + 1), "Weq": Weqok_formatted}
         df = pd.DataFrame(data=d)
 
-        if Cooke_flag > 0:
+        if Cooke_flag != 0:
 
             df.insert(loc=2, column="WCooke", value=W_gt0)
 
@@ -1610,7 +1673,7 @@ def main(argv):
         df_tree["EW_95"] = q_EW[n_SQ:, 2]
         df_tree["EW_MEAN"] = q_EW[n_SQ:, 3]
 
-        if Cooke_flag > 0:
+        if Cooke_flag != 0:
 
             df_tree["COOKE_5"] = q_Cooke[n_SQ:, 0]
             df_tree["COOKE_50"] = q_Cooke[n_SQ:, 1]
@@ -1673,7 +1736,7 @@ def main(argv):
         indexMean_EW, indexStd_EW, indexQuantiles_EW = calculate_index(
             TQ_array, Weqok, TQ_scale)
 
-        if Cooke_flag > 0:
+        if Cooke_flag != 0:
 
             indexMean_Cooke, indexStd_Cooke, indexQuantiles_Cooke = \
                 calculate_index(TQ_array, W_gt0, TQ_scale)
@@ -1720,7 +1783,7 @@ def main(argv):
                 indexQuantiles_Cooke,
                 indexQuantiles_erf,
                 global_units,
-                Cooke_flag,
+                abs(Cooke_flag),
                 ERF_flag,
                 EW_flag,
                 global_log,
@@ -1749,7 +1812,7 @@ def main(argv):
                 q_Cooke,
                 q_erf,
                 global_units,
-                Cooke_flag,
+                abs(Cooke_flag),
                 ERF_flag,
                 EW_flag,
                 global_log,
@@ -1783,7 +1846,7 @@ def main(argv):
                 q_Cooke,
                 q_erf,
                 global_units,
-                Cooke_flag,
+                abs(Cooke_flag),
                 ERF_flag,
                 EW_flag,
                 global_log,
@@ -1806,8 +1869,8 @@ def main(argv):
         for count, pie_group in enumerate(pie_groups):
 
             create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW,
-                              q_Cooke, q_erf, Cooke_flag, ERF_flag, EW_flag,
-                              output_dir, elicitation_name)
+                              q_Cooke, q_erf, abs(Cooke_flag), ERF_flag, 
+                              EW_flag, output_dir, elicitation_name)
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
@@ -1826,10 +1889,10 @@ def main(argv):
 
             create_figure_answers(h, k, n_experts, max_len_plot, n_SQ,
                                   SQ_array, TQ_array, realization, analysis,
-                                  Cooke_flag, ERF_flag, EW_flag, global_units,
-                                  output_dir, q_Cooke, q_erf, q_EW,
-                                  elicitation_name, global_log, label_indexes,
-                                  nolabel_flag)
+                                  abs(Cooke_flag), ERF_flag, EW_flag,
+                                  global_units, output_dir, q_Cooke, q_erf,
+                                  q_EW, elicitation_name, global_log,
+                                  label_indexes, nolabel_flag)
 
     # ----------------------------------------- #
     # ------- Create .pptx presentation ------- #
@@ -2110,7 +2173,7 @@ def main(argv):
 
             n_columns = 1
 
-            if Cooke_flag > 0:
+            if Cooke_flag != 0:
 
                 n_columns += 4
 
@@ -2148,7 +2211,7 @@ def main(argv):
 
             j_column = 4
 
-            if Cooke_flag > 0:
+            if Cooke_flag != 0:
 
                 cell = table.cell(0, j_column + 1)
                 cell.text = "Q05 (Cooke)"
@@ -2196,7 +2259,7 @@ def main(argv):
 
                     j_column = 4
 
-                    if Cooke_flag > 0:
+                    if Cooke_flag != 0:
 
                         cell = table.cell(h_mod + 1, j_column + li + 1)
                         if global_units[j] == "%" and global_log[j] == 0:
@@ -2255,7 +2318,7 @@ def main(argv):
 
             n_columns = 1
 
-            if Cooke_flag > 0:
+            if Cooke_flag != 0:
 
                 n_columns += 1
 
@@ -2284,7 +2347,7 @@ def main(argv):
 
             j_column = 1
 
-            if Cooke_flag > 0:
+            if Cooke_flag != 0:
 
                 cell = table.cell(0, j_column + 1)
                 cell.text = "Delta ratio  (Cooke)"
@@ -2310,7 +2373,7 @@ def main(argv):
 
                 j_column = 1
 
-                if Cooke_flag > 0:
+                if Cooke_flag != 0:
 
                     cell = table.cell(h_mod + 1, j_column + 1)
                     cell.text = "%.2E" % delta_ratio_Cooke[h]
@@ -2589,7 +2652,7 @@ def main(argv):
 
                 n_rows = 1
 
-                if Cooke_flag > 0:
+                if Cooke_flag != 0:
 
                     n_rows += 1
 
@@ -2619,7 +2682,7 @@ def main(argv):
 
                 j_row = 0
 
-                if Cooke_flag > 0:
+                if Cooke_flag != 0:
 
                     cell = table.cell(j_row + 1, 0)
                     cell.text = "Cooke"
@@ -2768,7 +2831,7 @@ def main(argv):
 
                 j_row = 0
 
-                if Cooke_flag > 0:
+                if Cooke_flag != 0:
 
                     for count, group in enumerate(group_list):
 
