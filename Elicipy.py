@@ -316,7 +316,6 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
 
         SQ_array = np.zeros((n_experts, n_pctl, n_SQ))
 
-
     csv_name = output_dir + "/" + elicitation_name + "_experts.csv"
 
     d = {"index": range(1, n_experts + 1), "Expert": NS_SQ}
@@ -325,7 +324,7 @@ def read_answers(input_dir, csv_file, group, n_pctl, df_indexes_SQ,
 
     df.to_csv(csv_name, index=False)
 
-    return n_experts, n_SQ, n_TQ, SQ_array, TQ_array , NS_SQ
+    return n_experts, n_SQ, n_TQ, SQ_array, TQ_array, NS_SQ
 
 
 def read_questionnaire(input_dir, csv_file, seed, target):
@@ -699,45 +698,46 @@ def read_questionnaire(input_dir, csv_file, seed, target):
 
 def answer_analysis(input_dir, csv_file, n_experts, n_SQ, n_TQ, SQ_array,
                     TQ_array, realization, global_scale, global_log, alpha,
-                    overshoot, cal_power, ERF_flag, Cooke_flag, seed, 
+                    overshoot, cal_power, ERF_flag, Cooke_flag, seed,
                     NS_experts, weights_file):
 
     verbose = False
-
 
     if Cooke_flag < 0:
 
         # when Cooke_flag is negative, the weights are read from
         # and external file (weights_file) define in input
-        
+
         from merge_csv import similar
-    
+
         weights = pd.read_csv(weights_file)
         print(weights)
 
         fname = weights["First Name"].to_list()
         lname = weights["Last Name"].to_list()
 
-        W = np.zeros((n_experts,5))
+        W = np.zeros((n_experts, 5))
 
-        for i,(f, l) in enumerate(zip(fname, lname)):
+        for i, (f, l) in enumerate(zip(fname, lname)):
 
             flname = str(f) + str(l)
             lfname = str(l) + str(f)
-            
-            for ex,name in enumerate(NS_experts):
-            
+
+            for ex, name in enumerate(NS_experts):
+
                 sim1 = similar(flname, name)
-                sim2 = similar(flname, name)
+                sim2 = similar(lfname, name)
                 sim = max(sim1, sim2)
-                
+
                 if sim > 0.8:
-                
+
                     W[ex, 0] = weights.C[i]
                     W[ex, 1] = weights.I_tot[i]
                     W[ex, 2] = weights.I_real[i]
                     W[ex, 3] = weights.w[i]
-                    W[ex, 4] = 0.01*weights.normW[i]
+                    W[ex, 4] = weights.normW[i]
+
+        W[:, 4] /= np.sum(W[:, 4])
 
     elif Cooke_flag > 0:
 
@@ -1219,29 +1219,29 @@ def main(argv):
     output_dir = path + "/" + output_dir
     input_dir = path + "/" + input_dir
 
-    if Cooke_flag<0:
+    if Cooke_flag < 0:
 
         try:
 
             from ElicipyDict import weights_file
-            
+
             weights_file = input_dir + "/" + weights_file
             # Check whether the specified file exists or not
             isExist = os.path.exists(weights_file)
 
             if not isExist:
 
-                print("weights_file does not exist in ",input_dir)
+                print("weights_file does not exist in ", input_dir)
                 sys.exit()
 
         except ImportError:
 
             print("Please define weights_file")
             sys.exit()
-            
+
     else:
-    
-         weights_file = ''   
+
+        weights_file = ''
 
     # Check whether the specified output path exists or not
     isExist = os.path.exists(output_dir)
@@ -1628,10 +1628,11 @@ def main(argv):
 
             create_barplot(group, n_SQ, n_TQ, n_sample, global_log,
                            global_minVal, global_maxVal, global_units,
-                           TQ_units, label_indexes, minval_all, maxval_all,
-                           ERF_flag, abs(Cooke_flag), EW_flag, hist_type,
-                           output_dir, elicitation_name, n_bins, q_Cooke,
-                           q_erf, q_EW, samples, samples_erf, samples_EW)
+                           TQ_units,
+                           label_indexes, minval_all, maxval_all, ERF_flag,
+                           abs(Cooke_flag), EW_flag, hist_type, output_dir,
+                           elicitation_name, n_bins, q_Cooke, q_erf, q_EW,
+                           samples, samples_erf, samples_EW)
 
             if len(group_list) > 1:
 
@@ -1868,9 +1869,10 @@ def main(argv):
 
         for count, pie_group in enumerate(pie_groups):
 
-            create_figure_pie(count, pie_group, n_SQ, label_indexes, q_EW,
-                              q_Cooke, q_erf, abs(Cooke_flag), ERF_flag, 
-                              EW_flag, output_dir, elicitation_name)
+            create_figure_pie(count, pie_group, n_SQ,
+                              label_indexes, q_EW, q_Cooke, q_erf,
+                              abs(Cooke_flag), ERF_flag, EW_flag, output_dir,
+                              elicitation_name)
 
     # ----------------------------------------- #
     # --------- Create answ. figures ---------- #
