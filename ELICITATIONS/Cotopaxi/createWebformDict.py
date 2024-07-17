@@ -1,10 +1,10 @@
 # select 'github', 'local' or 'local_github'
-datarepo = 'local'
+# datarepo = 'local'
 
-# datarepo = 'github'
+datarepo = 'github'
 
 # Github repository for answers, used only when datarepo='github' or 'local_github'
-# RepositoryData = ''
+RepositoryData = 'test_answers'
 
 # Parameters used only when datarepo='local' or 'local_github'
 # user = ''
