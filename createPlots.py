@@ -1328,7 +1328,9 @@ def create_barplot(group, n_SQ, n_TQ, n_sample, global_log, global_minVal,
 
     for j in np.arange(n_SQ, n_SQ + n_TQ):
 
-        printProgressBar(j - n_SQ, n_TQ - 1, prefix='      ')
+        if ( n_TQ > 1 ):
+            
+            printProgressBar(j - n_SQ, n_TQ - 1, prefix='      ')
 
         legendsPDF = []
 
