@@ -1,4 +1,3 @@
-from ERFweights import rtrian
 def createSamples(DAT, j, W, N, logSCALE, domain, overshoot, ERF_flag):
 
     """Compute the quantiles and samples for question j from weights and answers
@@ -400,6 +399,7 @@ def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
     """
 
     import numpy as np
+    from ERFweights import rtrian
 
     W = W / np.sum(W)
 
