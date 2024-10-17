@@ -199,8 +199,8 @@ def saveAnswer(df_new, input_dir, csv_file, quest_type):
     return csv_file.replace('.csv', '_') + dt_string + '_Output.csv'
 
 
-def check_form(qst, idxs, labels, ans, units, minVals, maxVals, idx_list,
-               idxMins, idxMaxs, sum50s, questions, label_flag):
+def check_form(qst, idxs, s, ans, units, minVals, maxVals, idx_list,
+               idxMins, idxMaxs, sum50s, questions, label_flag, labels):
 
     print(ans[0:3])
 
@@ -641,7 +641,7 @@ def main():
 
         if (question == quest_type):
 
-            labels.append(label)
+            labels.append(str(label))
             idxs.append(idx)
             
 
@@ -655,6 +655,7 @@ def main():
 
         minVal = float(minVal)
         maxVal = float(maxVal)
+        label = str(label)
 
         if (question == quest_type):
 
@@ -792,7 +793,7 @@ def main():
 
         check_flag = check_form(qst, idxs, labels, ans, units, minVals,
                                 maxVals, idx_list, idxMins, idxMaxs, sum50s,
-                                questions, label_flag)
+                                questions, label_flag, labels)
 
         print('check_flag', check_flag)
 
