@@ -205,6 +205,6 @@ Authors:
 * Alessandro Tadini.
 
 Some of the functions are based on the scripts of the Matlab package Anduril
-(authors:  Georgios Leontaris and Oswaldo Morales-Napoles).
+(authors:  Georgios Leontaris and Oswaldo Morales-Napoles). The development of the code was supported by the project PIANETA DINAMICO, Istituto Italiano di Geofisica e Vulcanologia, Italy.
 
 
