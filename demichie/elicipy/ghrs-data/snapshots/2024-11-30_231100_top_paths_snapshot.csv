@@ -1,0 +1,11 @@
+url_path,views_total,views_unique
+/demichie/elicipy,11,7
+/demichie/elicipy/tree/main,5,4
+/demichie/elicipy/tree/main/ELICITATIONS/Cotopaxi,5,1
+/demichie/elicipy/tree/main/ELICITATIONS,4,2
+/demichie/elicipy/releases/tag/1.1.0,3,3
+/demichie/elicipy/blob/main/ELICITATIONS/Cotopaxi/createWebformDict.py,3,1
+/demichie/elicipy/issues,2,1
+/demichie/elicipy/blob/main/COOKEweights.py,1,1
+/demichie/elicipy/blob/main/ELICITATIONS/Cotopaxi/ElicipyDict.py,1,1
+/demichie/elicipy/blob/main/ERFweights.py,1,1
