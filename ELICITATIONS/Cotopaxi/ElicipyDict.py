@@ -20,6 +20,9 @@ seed = False
 target = True
 postprocessing = True
 
+# flag to use the label column of the questionnaire instead of the index
+label_flag = True
+
 # Do not show the index of the experts in the bar plots
 nolabel_flag = False
 
