@@ -32,7 +32,7 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
     df_SQ = df_read[df_read["QUEST_TYPE"] == "seed"]
 
     if label_flag:
-        label_indexes = df_SQ["LABEL"].tolist()
+        label_indexes = df_SQ["LABEL"].astype(str).tolist()
     else:
         label_indexes = np.asarray(df_SQ["IDX"])
         label_indexes = label_indexes.astype(str).tolist()
@@ -51,7 +51,7 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
     df_TQ = df_read[df_read["QUEST_TYPE"] == "target"]
 
     if label_flag:
-        label_indexes = df_TQ["LABEL"].tolist()
+        label_indexes = df_TQ["LABEL"].astype(str).tolist()
     else:
         label_indexes = np.asarray(df_TQ["IDX"])
         label_indexes = label_indexes.astype(str).tolist()

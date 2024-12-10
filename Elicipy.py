@@ -451,7 +451,7 @@ def read_questionnaire(input_dir, csv_file, seed, target):
         df_quest = df_SQ
 
     if label_flag:
-        label_indexes = df_quest["LABEL"].tolist()
+        label_indexes = df_quest["LABEL"].astype(str).tolist()
     else:
         label_indexes = np.asarray(df_quest["IDX"])
         label_indexes = label_indexes.astype(str).tolist()
@@ -580,14 +580,14 @@ def read_questionnaire(input_dir, csv_file, seed, target):
             if idxMin > 0:
                 df_min = df_quest.loc[(df_quest['IDX'] == idxMin)
                                       & (df_quest['QUEST_TYPE'] == 'seed')]
-                global_idxMin.append(str(df_min['LABEL'].iloc[0]))
+                global_idxMin.append(str(df_min['IDX'].iloc[0]))
             else:
                 global_idxMin.append('')
 
             if idxMax > 0:
                 df_max = df_quest.loc[(df_quest['IDX'] == idxMax)
                                       & (df_quest['QUEST_TYPE'] == 'seed')]
-                global_idxMax.append(str(df_max['LABEL'].iloc[0]))
+                global_idxMax.append(str(df_max['IDX'].iloc[0]))
             else:
                 global_idxMax.append('')
 
@@ -659,17 +659,17 @@ def read_questionnaire(input_dir, csv_file, seed, target):
                 idx_list.append(int(idx))
                 parents.append(int(parent))
 
-                if (idxMin > 0) and (question == "target"):
+                if (idxMin > 0):
                     df_min = df_quest.loc[(df_quest['IDX'] == idxMin) &
                                           (df_quest['QUEST_TYPE'] == 'target')]
-                    global_idxMin.append(str(df_min['LABEL'].iloc[0]))
+                    global_idxMin.append(str(df_min['IDX'].iloc[0]))
                 else:
                     global_idxMin.append('')
 
-                if idxMax > 0 and question == "target":
+                if (idxMax > 0):
                     df_max = df_quest.loc[(df_quest['IDX'] == idxMax) &
                                           (df_quest['QUEST_TYPE'] == 'target')]
-                    global_idxMax.append(str(df_max['LABEL'].iloc[0]))
+                    global_idxMax.append(str(df_max['IDX'].iloc[0]))
                 else:
                     global_idxMax.append('')
 
@@ -1730,6 +1730,8 @@ def main(argv):
         print("Analysis completed!")
         sys.exit()
 
+    counter_plot = 0
+
     if analysis:
 
         # ------------------------------------------ #
@@ -1760,8 +1762,6 @@ def main(argv):
             indexMean_erf = indexMean_EW
             indexStd_erf = indexStd_EW
             indexQuantiles_erf = indexQuantiles_EW
-
-        counter_plot = 0
 
         if len(index_groups) > 0:
 
@@ -2451,6 +2451,11 @@ def main(argv):
 
             text_title = "Target questions Group " + str(count + 1)
             add_title(slide, text_title)
+
+            text_box = "Intervals show mean and standard error of the index."
+            fontsize = 13
+
+            add_text_box(slide, left, top+Inches(6.0), text_box, fontsize)
 
     # ----------- Trend groups slides --------#
 

@@ -717,57 +717,77 @@ def create_figure_index(
     index_group = np.array(index_group)
 
     if EW_flag:
-        """
+
+        
         x = indexMean_EW[index_group-n_SQ]
         lower_error = indexStd_EW[index_group-n_SQ]
         upper_error = indexStd_EW[index_group-n_SQ]
         error = [lower_error, upper_error]
+        
         """
         x = indexQuantiles_EW[index_group - n_SQ, 1]
         lower_error = x - indexQuantiles_EW[index_group - n_SQ, 0]
         upper_error = indexQuantiles_EW[index_group - n_SQ, 2] - x
         error = [lower_error, upper_error]
+        """
 
-        line1 = axs.errorbar(x, y - 0.1, xerr=error, fmt="go", label="EW")
+        # line1 = axs.errorbar(x, y - 0.1, xerr=error, fmt="go", label="EW")
+        line1 = axs.errorbar(x, y - 0.1, xerr=error, fmt="g*", label="EW")
         axs.plot(x - lower_error, y - 0.1, "gx")
         axs.plot(x + upper_error, y - 0.1, "gx")
-        axs.plot(indexMean_EW[index_group - n_SQ], y - 0.1, "g*")
+        # axs.plot(indexMean_EW[index_group - n_SQ], y - 0.1, "g*")
+        # axs.plot(indexQuantiles_EW[index_group - n_SQ, 1], y - 0.1, "go")
+        
         handles.append(line1)
 
+
+
     if Cooke_flag > 0:
-        """"
+    
+        
         x = indexMean_Cooke[index_group-n_SQ]
         lower_error = indexStd_Cooke[index_group-n_SQ]
         upper_error = indexStd_Cooke[index_group-n_SQ]
         error = [lower_error, upper_error]
+        
         """
         x = indexQuantiles_Cooke[index_group - n_SQ, 1]
         lower_error = x - indexQuantiles_Cooke[index_group - n_SQ, 0]
         upper_error = indexQuantiles_Cooke[index_group - n_SQ, 2] - x
         error = [lower_error, upper_error]
-
-        line2 = axs.errorbar(x, y, xerr=error, fmt="ro", label="CM")
+        """
+        
+        # line2 = axs.errorbar(x, y, xerr=error, fmt="go", label="CM")
+        line2 = axs.errorbar(x, y, xerr=error, fmt="r*", label="CM")
         axs.plot(x - lower_error, y, "rx")
         axs.plot(x + upper_error, y, "rx")
-        axs.plot(indexMean_Cooke[index_group - n_SQ], y, "r*")
+        # axs.plot(indexMean_Cooke[index_group - n_SQ], y, "r*")
+        # axs.plot(indexQuantiles_Cooke[index_group - n_SQ, 1], y, "go")
+        
         handles.append(line2)
 
     if ERF_flag > 0:
-        """
+    
+        
         x = indexMean_erf[index_group-n_SQ]
         lower_error = indexStd_erf[index_group-n_SQ]
         upper_error = indexStd_erf[index_group-n_SQ]
         error = [lower_error, upper_error]
+        
         """
         x = indexQuantiles_erf[index_group - n_SQ, 1]
         lower_error = x - indexQuantiles_erf[index_group - n_SQ, 0]
         upper_error = indexQuantiles_erf[index_group - n_SQ, 2] - x
         error = [lower_error, upper_error]
+        """
 
-        line3 = axs.errorbar(x, y + 0.1, xerr=error, fmt="bo", label="ERF")
+        # line3 = axs.errorbar(x, y + 0.1, xerr=error, fmt="bo", label="ERF")
+        line3 = axs.errorbar(x, y + 0.1, xerr=error, fmt="b*", label="ERF")
         axs.plot(x - lower_error, y + 0.1, "bx")
         axs.plot(x + upper_error, y + 0.1, "bx")
-        axs.plot(indexMean_erf[index_group - n_SQ], y + 0.1, "b*")
+        # axs.plot(indexMean_erf[index_group - n_SQ], y + 0.1, "b*")
+        # axs.plot(indexQuantiles_erf[index_group - n_SQ, 1], y + 0.1, "bo")
+        
         handles.append(line3)
 
     axs.set_yticks(y)
