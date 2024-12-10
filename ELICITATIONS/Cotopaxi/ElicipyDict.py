@@ -20,6 +20,9 @@ seed = False
 target = True
 postprocessing = True
 
+# flag to use the label column of the questionnaire instead of the index
+label_flag = True
+
 # Do not show the index of the experts in the bar plots
 nolabel_flag = False
 
@@ -36,8 +39,6 @@ hist_type = 'bar'
 
 normalizeSum = False
 
-delta_ratio_flag = True
-
 # EW_flag (equal weights):
 # 0 - no EW
 # 1 - EW
@@ -51,6 +52,10 @@ ERF_flag = 0
 
 # flag for Cooke (weights are computed when >0, and read from file
 # when <0)
+# 0 - no Cooke
+# 1 - Cooke original
+# 2 - Cooke balanced
+# 3 - Cooke continuous
 Cooke_flag = 1
 
 # remove comment to read from file (only when Cooke_flag<0)
