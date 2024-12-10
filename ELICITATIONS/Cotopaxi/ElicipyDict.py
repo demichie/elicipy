@@ -39,8 +39,6 @@ hist_type = 'bar'
 
 normalizeSum = False
 
-delta_ratio_flag = True
-
 # EW_flag (equal weights):
 # 0 - no EW
 # 1 - EW
