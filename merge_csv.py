@@ -1,5 +1,26 @@
 from tools import printProgressBar
 
+def clean_folder(folder_path):
+
+    import os
+    import shutil
+    
+    if not os.path.exists(folder_path):
+        print(f"The folder '{folder_path}' does not exist.")
+        return
+
+    for item in os.listdir(folder_path):
+        item_path = os.path.join(folder_path, item)
+        try:
+            if os.path.isfile(item_path) or os.path.islink(item_path):
+                os.unlink(item_path)  # Remove file or symbolic link
+                # print(f"Deleted file: {item_path}")
+            elif os.path.isdir(item_path):
+                shutil.rmtree(item_path)  # Remove directory and its contents
+                # print(f"Deleted folder: {item_path}")
+        except Exception as e:
+            print(f"Failed to delete {item_path}. Reason: {e}")
+
 
 def similar(a, b):
 
@@ -308,7 +329,12 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
                 # Create a new directory because it does not exist
                 os.makedirs(seed_new_dir)
-                print("The new directory " + seed_new_dir + " is created!")
+                print("       The new directory " + seed_new_dir + " is created!")
+                
+            else:
+            
+                print("       Cleaning " + seed_new_dir)
+                clean_folder(seed_new_dir)    
 
             n_experts = len(combined_seed_csv.index)
 
@@ -643,7 +669,12 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
                 # Create a new directory because it does not exist
                 os.makedirs(target_new_dir)
-                print("The new directory " + target_new_dir + " is created!")
+                print("       The new directory " + target_new_dir + " is created!")
+                
+            else:
+            
+                print("       Cleaning " + target_new_dir)
+                clean_folder(target_new_dir) 
 
             n_experts = len(combined_target_csv.index)
 
