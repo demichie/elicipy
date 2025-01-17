@@ -1,7 +1,10 @@
+# Add login page requesting password
+password_protected = False
+
+
 # select 'github', 'local' or 'local_github'
 # datarepo = 'local'
-
-datarepo = 'github'
+datarepo = 'local'
 
 # Github repository for answers, used only when datarepo='github' or 'local_github'
 RepositoryData = 'test_answers'
