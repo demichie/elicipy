@@ -4,3 +4,7 @@ pygithub
 click
 altair
 cryptography
+python-dotenv
+bcrypt
+streamlit-authenticator
+

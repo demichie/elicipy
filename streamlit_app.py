@@ -3,6 +3,11 @@ import streamlit as st
 import os.path
 import sys
 
+
+import streamlit_authenticator as stauth
+import bcrypt
+from dotenv import load_dotenv
+
 from github import Github
 from github import Auth
 
@@ -364,7 +369,49 @@ def check_form(qst, idxs, s, ans, units, minVals, maxVals, idx_list,
     return check_flag
 
 
+# Load environment variables from .env file
+load_dotenv()
+PASSWORD_HASH = os.getenv("PASSWORD_HASH")  # Read the stored password hash
+
+def check_password():
+    """Verify the entered password against the stored hash."""
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+
+    if not st.session_state.authenticated:
+        password = st.text_input("Enter password:", type="password")
+        if st.button("Login"):
+            if bcrypt.checkpw(password.encode(), PASSWORD_HASH.encode()):
+                st.session_state.authenticated = True
+                st.rerun()  # Reload the page to hide the password input
+            else:
+                st.error("Incorrect password! Please try again.")
+        return False
+    return True
+
 def main():
+ 
+    st.set_page_config(page_title="Elicipy", page_icon="logo.png")
+ 
+    try:
+
+        from createWebformDict import password_protected
+
+    except ImportError:
+
+        password_protected = False
+    
+    if password_protected:
+    
+        if check_password():
+            show_form()
+        
+    else:    
+
+        show_form()
+    
+
+def show_form():
 
     hide_streamlit_style = """
             <style>
