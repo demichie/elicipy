@@ -13,7 +13,7 @@ plt.rcParams.update({"font.size": 8})
 rcParams["font.family"] = "sans-serif"
 rcParams["font.sans-serif"] = ["Arial"]
 
-matplotlib.use("TkAgg")
+# matplotlib.use("TkAgg")
 
 
 def create_fig_hist(
@@ -187,6 +187,9 @@ def create_fig_hist(
     else:
 
         pdf_min = global_minVal[j]
+        if pdf_min == float("-inf"):
+            pdf_min = minval_all[j]
+
         pdf_max = global_maxVal[j]
         if pdf_max == float("inf"):
             pdf_max = maxval_all[j]

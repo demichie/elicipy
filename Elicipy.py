@@ -2741,7 +2741,7 @@ def main(argv):
                 for cell in iter_cells(table):
                     for paragraph in cell.text_frame.paragraphs:
                         for run in paragraph.runs:
-                            run.font.size = Pt(10)
+                            run.font.size = Pt(8)
 
     # ------------ Group slides ------------#
 
@@ -2917,7 +2917,7 @@ def main(argv):
                 for cell in iter_cells(table):
                     for paragraph in cell.text_frame.paragraphs:
                         for run in paragraph.runs:
-                            run.font.size = Pt(10)
+                            run.font.size = Pt(8)
 
     prs.save(output_dir + "/" + elicitation_name + ".pptx")  # saving file
     save_dtt_rll(input_dir, n_experts, n_SQ, n_TQ, df_quest, target,
