@@ -31,6 +31,9 @@ nolabel_flag = False
 
 # group_list = [5,6]
 
+# calculate and produce ELICIPY index plots
+index_groups = [[1,2,3,4],[5,6,7,8]]
+
 n_sample = 10000
 n_bins = 10
 
