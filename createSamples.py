@@ -1,6 +1,7 @@
 def createSamples(DAT, j, W, N, logSCALE, domain, overshoot, ERF_flag):
 
-    """Compute the quantiles and samples for question j from weights and answers
+    """Compute the quantiles and samples for question j from weights
+    and answers
 
     Parameters
     ----------
@@ -162,7 +163,8 @@ def sampleDISCR(P, N):
 
 def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
 
-    """Produces an array of random samples from weights and answers by using max. entropy distributions and linear pooling
+    """Produces an array of random samples from weights and answers by using
+    max. entropy distributions and linear pooling
 
     Parameters
     ----------
@@ -200,7 +202,7 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
 
     import numpy as np
 
-    W = W / np.sum(W)    
+    W = W / np.sum(W)
     DDD = domain
 
     if logSCALE:
@@ -228,7 +230,7 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
     R = rB - rA
     rA = rA - overshoot * R
     rB = rB + overshoot * R
-    
+
     sV = sampleDISCR(W, N)
 
     for j in np.arange(N):
@@ -240,21 +242,22 @@ def createSamplesUCA2(incm, mid, incM, W, N, logSCALE, domain, overshoot):
         while (C[j] < DDD[0]) or (C[j] > DDD[1]):
 
             C[j] = max_entropy(incm[s], mid[s], incM[s], rA, rB)
-    
+
     if logSCALE:
 
         C1 = 10.0**C
-        
+
     else:
 
         C1 = C
-        
+
     return C1
 
 
 def createSamplesERF_original(incm, mid, incM, W, N, logSCALE, domain):
 
-    """Produces an array of random samples from weights and answers by using triangular distributions and quantile pooling
+    """Produces an array of random samples from weights and answers by using
+    triangular distributions and quantile pooling
 
     Parameters
     ----------
@@ -345,24 +348,26 @@ def createSamplesERF_original(incm, mid, incM, W, N, logSCALE, domain):
 
             else:
 
-                P[i] = c[i] - np.sqrt((1.0 - u[j]) * (c[i] - a[i]) * (c[i] - b[i]))
+                P[i] = c[i] - np.sqrt((1.0 - u[j]) * (c[i] - a[i]) *
+                                      (c[i] - b[i]))
 
         C[j] = np.dot(P, W)
 
     if logSCALE:
 
         C1 = 10.0**C
-        
+
     else:
 
         C1 = C
-        
+
     return C1
 
 
 def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
 
-    """Produces an array of random samples from weights and answers by using triangular distributions and linear pooling
+    """Produces an array of random samples from weights and answers by using
+    triangular distributions and linear pooling
 
     Parameters
     ----------
@@ -440,7 +445,7 @@ def createSamplesERF(incm, mid, incM, W, N, logSCALE, domain):
     if logSCALE:
 
         C1 = 10.0**C
-    
+
     else:
 
         C1 = C

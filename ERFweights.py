@@ -18,7 +18,6 @@ def ERFweights(true_seed, SQ_array):
     """
 
     import numpy as np
-    import itertools
 
     Ne = SQ_array.shape[0]
     Nq = SQ_array.shape[2]
@@ -31,7 +30,8 @@ def ERFweights(true_seed, SQ_array):
         for j in range(Nq):
 
             p_single[j] = ERFcompute(
-                true_seed[j], SQ_array[i, 0, j], SQ_array[i, 1, j], SQ_array[i, 2, j]
+                true_seed[j], SQ_array[i, 0, j], SQ_array[i, 1, j],
+                SQ_array[i, 2, j]
             )
 
         pERF[i] = np.mean(p_single)
@@ -235,8 +235,6 @@ def rtrian(a, b, c):
     This function is based on the R scripts
     written by A.Bevilacqua
     """
-
-    import numpy as np
 
     if a == c:
 

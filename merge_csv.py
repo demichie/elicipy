@@ -1,10 +1,11 @@
 from tools import printProgressBar
 
+
 def clean_folder(folder_path):
 
     import os
     import shutil
-    
+
     if not os.path.exists(folder_path):
         print(f"The folder '{folder_path}' does not exist.")
         return
@@ -113,7 +114,7 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
             seed_df = pd.read_csv(f)
             fgroup = seed_df["Group(s)"].to_list()[0]
 
-            if type(fgroup) == str:
+            if type(fgroup) is str:
 
                 fgroup = fgroup.split(";")
                 fgroup = [eval(i) for i in fgroup]
@@ -329,12 +330,13 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
                 # Create a new directory because it does not exist
                 os.makedirs(seed_new_dir)
-                print("       The new directory " + seed_new_dir + " is created!")
-                
+                print("       The new directory " + seed_new_dir +
+                      " is created!")
+
             else:
-            
+
                 print("       Cleaning " + seed_new_dir)
-                clean_folder(seed_new_dir)    
+                clean_folder(seed_new_dir)
 
             n_experts = len(combined_seed_csv.index)
 
@@ -347,7 +349,8 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
                 df_test = combined_seed_csv.iloc[[i]]
                 now = datetime.now()
                 dt_string = now.strftime("%Y_%m_%d_%H_%M_%S")
-                file_test = '../SEED_NEW/questionnaire_' + dt_string + '_Output.csv'
+                file_test = '../SEED_NEW/questionnaire_' + dt_string + \
+                            '_Output.csv'
                 df_test.to_csv(file_test, index=False, encoding="utf-8-sig")
                 time.sleep(1)
 
@@ -378,7 +381,7 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
             fgroup = target_df["Group(s)"].to_list()[0]
 
-            if type(fgroup) == str:
+            if type(fgroup) is str:
 
                 fgroup = fgroup.split(";")
                 fgroup = [eval(i) for i in fgroup]
@@ -439,7 +442,8 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
         timestamp_series = pd.Series(timestamp, name='timestamp')
 
-        # Reset the index of combined_target_csv to avoid the "Reindexing" error
+        # Reset the index of combined_target_csv to avoid the
+        # "Reindexing" error
         combined_target_csv = combined_target_csv.reset_index(drop=True)
 
         combined_target_csv = pd.concat(
@@ -542,10 +546,6 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
                     if len(df2[col].dropna()) > 0:
 
-                        # print('BEFORE')
-                        # print('Value 1', combined_target_csv[col].iloc[previous])
-                        # print('Value 2', combined_target_csv[col].iloc[current])
-
                         combined_target_csv.iloc[
                             previous,
                             combined_target_csv.columns.get_loc(col)] = (
@@ -554,11 +554,6 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
                             current,
                             combined_target_csv.columns.get_loc(col)] = (
                                 df2[col].dropna().iloc[-1])
-
-                        # print('AFTER')
-                        # print('Value 1', combined_target_csv[col].iloc[previous])
-                        # print('Value 2', combined_target_csv[col].iloc[current])
-                # a = input('PAUSE')
 
                 combined_target_csv = combined_target_csv.reset_index(
                     drop=True)
@@ -575,7 +570,8 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
         if seedExists:
 
             print(
-                "       Checking correspondance between seed and target experts"
+                "       Checking correspondance between seed and target " +
+                "experts"
             )
 
             check_matrix = np.zeros((len(flname_target), len(flname_seed)))
@@ -669,12 +665,13 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
 
                 # Create a new directory because it does not exist
                 os.makedirs(target_new_dir)
-                print("       The new directory " + target_new_dir + " is created!")
-                
+                print("       The new directory " + target_new_dir +
+                      " is created!")
+
             else:
-            
+
                 print("       Cleaning " + target_new_dir)
-                clean_folder(target_new_dir) 
+                clean_folder(target_new_dir)
 
             n_experts = len(combined_target_csv.index)
 
@@ -687,7 +684,8 @@ def merge_csv(input_dir, seed, target, group, csv_file, label_flag,
                 df_test = combined_target_csv.iloc[[i]]
                 now = datetime.now()
                 dt_string = now.strftime("%Y_%m_%d_%H_%M_%S")
-                file_test = '../TARGET_NEW/questionnaire_' + dt_string + '_Output.csv'
+                file_test = '../TARGET_NEW/questionnaire_' + dt_string + \
+                            '_Output.csv'
                 df_test.to_csv(file_test, index=False, encoding="utf-8-sig")
                 time.sleep(1)
 

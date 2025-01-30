@@ -4,11 +4,7 @@ import urllib
 import shutil
 import base64
 
-from github import Github
-from github import InputGitTreeElement
-from datetime import datetime
 from github import Github, GithubException
-from github.ContentFile import ContentFile
 
 
 def github_file_to_bytes(Repository, repo, filename, branch="main"):
@@ -77,7 +73,6 @@ def saveDataFromGithub(Repository, user, github_token):
 
     sys.path.insert(0, os.getcwd())
     from createWebformDict import input_dir
-    from createWebformDict import csv_file
 
     download_directory(repo, "main", input_dir)
     os.chdir(current_path)

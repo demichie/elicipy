@@ -3,8 +3,6 @@ import streamlit as st
 import os.path
 import sys
 
-
-import streamlit_authenticator as stauth
 import bcrypt
 from dotenv import load_dotenv
 
@@ -135,7 +133,6 @@ def pushToGithub(RepositoryData, df_new, csv_file, quest_type, datarepo):
 
     elif datarepo == 'local_github':
 
-        from createWebformDict import user
         from createWebformDict import github_token
         auth = Auth.Token(github_token)
 
@@ -225,7 +222,7 @@ def check_form(qst, idxs, s, ans, units, minVals, maxVals, idx_list,
                     st.markdown('**Error in question ' + labels[i] + '**')
                 else:
                     st.markdown('**Error in question ' + str(idxs[i]) + '**')
-                
+
                 st.write('Please remove comma')
                 st.write(qst[idx], ans[idx])
                 check_flag = False
@@ -238,7 +235,7 @@ def check_form(qst, idxs, s, ans, units, minVals, maxVals, idx_list,
                     st.markdown('**Error in question ' + labels[i] + '**')
                 else:
                     st.markdown('**Error in question ' + str(idxs[i]) + '**')
-                
+
                 st.write('Non numeric answer')
                 st.write(qst[idx], ans[idx])
                 check_flag = False
@@ -251,7 +248,7 @@ def check_form(qst, idxs, s, ans, units, minVals, maxVals, idx_list,
                     st.markdown('**Error in question ' + labels[i] + '**')
                 else:
                     st.markdown('**Error in question ' + str(idxs[i]) + '**')
-                
+
                 st.write('Non numeric answer')
                 st.write(qst[idx + 1], ans[idx + 1])
                 check_flag = False
@@ -264,7 +261,7 @@ def check_form(qst, idxs, s, ans, units, minVals, maxVals, idx_list,
                     st.markdown('**Error in question ' + labels[i] + '**')
                 else:
                     st.markdown('**Error in question ' + str(idxs[i]) + '**')
-                
+
                 st.write('Non numeric answer')
                 st.write(qst[idx + 2], ans[idx + 2])
                 check_flag = False
@@ -346,10 +343,10 @@ def check_form(qst, idxs, s, ans, units, minVals, maxVals, idx_list,
                     if float(sum50s[i] != sum50check):
 
                         if label_flag:
-                        
+
                             labelIdxMin = idxs.index(idxMins[i])
                             labelIdxMax = idxs.index(idxMaxs[i])
-                        
+
                             st.markdown('**Error in question ' + labels[i] +
                                         '**')
                             st.write(
@@ -373,6 +370,7 @@ def check_form(qst, idxs, s, ans, units, minVals, maxVals, idx_list,
 load_dotenv()
 PASSWORD_HASH = os.getenv("PASSWORD_HASH")  # Read the stored password hash
 
+
 def check_password():
     """Verify the entered password against the stored hash."""
     if "authenticated" not in st.session_state:
@@ -389,10 +387,11 @@ def check_password():
         return False
     return True
 
+
 def main():
- 
+
     st.set_page_config(page_title="Elicipy", page_icon="logo.png")
- 
+
     try:
 
         from createWebformDict import password_protected
@@ -400,16 +399,16 @@ def main():
     except ImportError:
 
         password_protected = False
-    
+
     if password_protected:
-    
+
         if check_password():
             show_form()
-        
-    else:    
+
+    else:
 
         show_form()
-    
+
 
 def show_form():
 
@@ -667,7 +666,6 @@ def show_form():
 
         label_flag = False
 
-
     idxs = []
     labels = []
     units = []
@@ -682,7 +680,7 @@ def show_form():
 
     for i in df.itertuples():
 
-        idx, label, shortQ, longQ, unit, scale, minVal, maxVal, realization,\
+        idx, label, shortQ, longQ, unit, scale, minVal, maxVal, realization, \
             question, idxMin, idxMax, sum50, parent, image =\
             [i[j] for j in index_list]
 
@@ -690,13 +688,12 @@ def show_form():
 
             labels.append(str(label))
             idxs.append(idx)
-            
 
     for i in df.itertuples():
 
         print([i[j] for j in index_list])
 
-        idx, label, shortQ, longQ, unit, scale, minVal, maxVal, realization,\
+        idx, label, shortQ, longQ, unit, scale, minVal, maxVal, realization, \
             question, idxMin, idxMax, sum50, parent, image =\
             [i[j] for j in index_list]
 
@@ -707,7 +704,7 @@ def show_form():
         if (question == quest_type):
 
             units.append(unit)
-            
+
             if minVal.is_integer():
 
                 minVal = int(minVal)
@@ -758,7 +755,7 @@ def show_form():
 
                         labelIdxMin = idxs.index(idxMin)
                         labelIdxMax = idxs.index(idxMax)
-                        
+
                         longQ_NB = "**N.B.** *The sum of 50%iles for " + \
                             "questions " + \
                             labels[labelIdxMin] + "-" + labels[labelIdxMax] + \

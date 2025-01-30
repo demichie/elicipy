@@ -1,7 +1,6 @@
 import numpy as np
 import os
 
-import matplotlib
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
 from matplotlib.ticker import PercentFormatter
@@ -721,12 +720,11 @@ def create_figure_index(
 
     if EW_flag:
 
-        
         x = indexMean_EW[index_group-n_SQ]
         lower_error = indexStd_EW[index_group-n_SQ]
         upper_error = indexStd_EW[index_group-n_SQ]
         error = [lower_error, upper_error]
-        
+
         """
         x = indexQuantiles_EW[index_group - n_SQ, 1]
         lower_error = x - indexQuantiles_EW[index_group - n_SQ, 0]
@@ -740,43 +738,39 @@ def create_figure_index(
         axs.plot(x + upper_error, y - 0.1, "gx")
         # axs.plot(indexMean_EW[index_group - n_SQ], y - 0.1, "g*")
         # axs.plot(indexQuantiles_EW[index_group - n_SQ, 1], y - 0.1, "go")
-        
+
         handles.append(line1)
 
-
-
     if Cooke_flag > 0:
-    
-        
+
         x = indexMean_Cooke[index_group-n_SQ]
         lower_error = indexStd_Cooke[index_group-n_SQ]
         upper_error = indexStd_Cooke[index_group-n_SQ]
         error = [lower_error, upper_error]
-        
+
         """
         x = indexQuantiles_Cooke[index_group - n_SQ, 1]
         lower_error = x - indexQuantiles_Cooke[index_group - n_SQ, 0]
         upper_error = indexQuantiles_Cooke[index_group - n_SQ, 2] - x
         error = [lower_error, upper_error]
         """
-        
+
         # line2 = axs.errorbar(x, y, xerr=error, fmt="go", label="CM")
         line2 = axs.errorbar(x, y, xerr=error, fmt="r*", label="CM")
         axs.plot(x - lower_error, y, "rx")
         axs.plot(x + upper_error, y, "rx")
         # axs.plot(indexMean_Cooke[index_group - n_SQ], y, "r*")
         # axs.plot(indexQuantiles_Cooke[index_group - n_SQ, 1], y, "go")
-        
+
         handles.append(line2)
 
     if ERF_flag > 0:
-    
-        
+
         x = indexMean_erf[index_group-n_SQ]
         lower_error = indexStd_erf[index_group-n_SQ]
         upper_error = indexStd_erf[index_group-n_SQ]
         error = [lower_error, upper_error]
-        
+
         """
         x = indexQuantiles_erf[index_group - n_SQ, 1]
         lower_error = x - indexQuantiles_erf[index_group - n_SQ, 0]
@@ -790,7 +784,7 @@ def create_figure_index(
         axs.plot(x + upper_error, y + 0.1, "bx")
         # axs.plot(indexMean_erf[index_group - n_SQ], y + 0.1, "b*")
         # axs.plot(indexQuantiles_erf[index_group - n_SQ, 1], y + 0.1, "bo")
-        
+
         handles.append(line3)
 
     axs.set_yticks(y)
@@ -1351,8 +1345,8 @@ def create_barplot(group, n_SQ, n_TQ, n_sample, global_log, global_minVal,
 
     for j in np.arange(n_SQ, n_SQ + n_TQ):
 
-        if ( n_TQ > 1 ):
-            
+        if (n_TQ > 1):
+
             printProgressBar(j - n_SQ, n_TQ - 1, prefix='      ')
 
         legendsPDF = []

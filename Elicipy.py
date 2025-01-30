@@ -931,8 +931,8 @@ def create_samples(group, n_experts, n_SQ, n_TQ, n_pctl, SQ_array, TQ_array,
 
     for j in np.arange(n_SQ + n_TQ):
 
-        if ( n_SQ + n_TQ > 1 ):
-            
+        if (n_SQ + n_TQ > 1):
+
             printProgressBar(j, n_SQ + n_TQ - 1, prefix='      ')
 
         C_EW = createSamples(
@@ -1887,8 +1887,8 @@ def main(argv):
 
     for h in np.arange(n_SQ + n_TQ):
 
-        if ( n_SQ + n_TQ > 1 ):
-            
+        if (n_SQ + n_TQ > 1):
+
             printProgressBar(h, n_SQ + n_TQ - 1, prefix='      ')
 
         for k in np.arange(n_panels):

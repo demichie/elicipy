@@ -6,10 +6,10 @@ def COOKEweights(SQ_array, TQ_array, realization, alpha, background_measure,
     ----------
     SQ_array : numpy array
         Array with answers to seed questions
-        Size: n_exp * n_pctl * n_seed 
+        Size: n_exp * n_pctl * n_seed
     TQ_array : numpy array
         Array with answers to target questions
-        Size: n_exp * n_pctl * n_target 
+        Size: n_exp * n_pctl * n_target
     realization : list
         Python list with realization of the seed questions
     alpha : float

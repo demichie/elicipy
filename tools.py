@@ -1,4 +1,3 @@
-import os
 import sys
 
 
@@ -31,4 +30,3 @@ def printProgressBar(iteration,
     if iteration == total:
         sys.stdout.write('\n')
     sys.stdout.flush()
-

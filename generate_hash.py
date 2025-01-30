@@ -1,6 +1,7 @@
 import bcrypt
 import getpass
 
+
 def get_password():
     """Ask the user for a password twice and ensure they match."""
     while True:
@@ -11,6 +12,7 @@ def get_password():
             return password1  # Return the valid password
         else:
             print("Error: Passwords do not match. Please try again.\n")
+
 
 # Get the password from the user
 password = get_password()

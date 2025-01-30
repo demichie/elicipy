@@ -1,8 +1,6 @@
 import pandas as pd
-import numpy as np
 import os
 import shutil as st
-from ElicipyDict import *
 
 
 def replace_strings(working_dir, df, header, i_row):
@@ -50,11 +48,12 @@ def replace_strings(working_dir, df, header, i_row):
 
 def main():
 
+    from ElicipyDict import elicitation_name
+    from ElicipyDict import output_dir
+
     csv_file = output_dir + "/" + elicitation_name + "_samples.csv"
 
     df = pd.read_csv(csv_file)
-
-    templatedir = "templatedir"
 
     print(df)
 
