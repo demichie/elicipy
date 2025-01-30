@@ -194,7 +194,7 @@ ___
 > python elicipy.py
 
 
-The analysis results are saved in the folder output_dir (set in ElicipyDeict.py)
+The analysis results are saved in the folder output_dir (set in ElicipyDict.py)
 
 ___
 
@@ -203,8 +203,9 @@ Authors:
 * Mattia de' Michieli Vitturi.
 * Andrea Bevilacqua.
 * Alessandro Tadini.
+* Augusto Neri.
 
 Some of the functions are based on the scripts of the Matlab package Anduril
-(authors:  Georgios Leontaris and Oswaldo Morales-Napoles). The development of the code was supported by the project PIANETA DINAMICO, Istituto Italiano di Geofisica e Vulcanologia, Italy.
+(authors:  Georgios Leontaris and Oswaldo Morales-Napoles). The development of the code was supported by the project PIANETA DINAMICO, Istituto Nazionale di Geofisica e Vulcanologia, Italy.
 
 
