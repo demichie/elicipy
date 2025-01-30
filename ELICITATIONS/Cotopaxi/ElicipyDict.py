@@ -26,12 +26,25 @@ label_flag = True
 # Do not show the index of the experts in the bar plots
 nolabel_flag = False
 
+# target questions to be analyzed (comment if use all target questions)
 # target_list = [3,4,5,11,12]
+
+# seed questions to be analyzed (comment if use all seed questions)
 # seed_list = [1,2,3,4,5,6,7,8]
 
+# sub-groups of experts to be analyzed (comment if not used)
 # group_list = [5,6]
 
-# calculate and produce ELICIPY index plots
+# groups of target questions for trend plots
+trend_groups = [ [6,7,8,9,10] ]
+
+# groups of target questions for violin plots
+violin_groups = [ [6,7,8,9,10] ]
+
+# groups of target questions for pie charts
+pie_groups = [ [3,4,5],[6,7,8,9,10] ]
+
+# groups of target questions for ELICIPY index plots
 index_groups = [[1,2,3,4],[5,6,7,8]]
 
 n_sample = 10000
@@ -40,6 +53,7 @@ n_bins = 10
 # hist_type: 'bar' or 'step'
 hist_type = 'bar'
 
+# flag for normalization of group of target questions which has to sum to 1
 normalizeSum = False
 
 # EW_flag (equal weights):
@@ -81,7 +95,5 @@ cal_power = 1
 first_node_list = [1]
 first_node_str_list = ['']
 
-# groups for trend plots
-trend_groups = [ [6,7,8,9,10] ]
 
 
